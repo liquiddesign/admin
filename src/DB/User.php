@@ -13,7 +13,7 @@ class User extends \StORM\Entity implements IIdentity
 	 * Celé jméno
 	 * @column
 	 */
-	public ?string $name = null;
+	public ?string $fullname = null;
 	
 	/**
 	 * Login
