@@ -1,0 +1,36 @@
+{
+	"name": "liquiddesign/admin",
+	"description": "Ⓐ Admin je routa a sada tříd pro možnost mít u každého modulu část pro administraci",
+	"license": "MIT",
+	"autoload": {
+		"psr-4": {"Admin\\": "src/"}
+	},
+	"require" :
+	{
+		"php":">=7.4",
+		"nette/application":"~3.0",
+		"nette/routing":"~3.0",
+		"nette/forms":"~3.0",
+		"nette/utils":"~3.0",
+		"nette/di":"~3.0",
+		"nette/security":"~3.0",
+		"nette/component-model":"~3.0",
+		"tracy/tracy":"*",
+		"liquiddesign/storm": "@dev",
+		"ext-pdo": "*"
+	},
+	"require-dev": 
+	{
+		"nette/tester":"*",
+		"tracy/tracy":"*",
+		"composer/composer": "*",
+		"liquiddesign/codestyle": "@dev",
+		"phpstan/phpstan": "*"
+	},
+	"scripts": {
+		"phpstan": "phpstan analyse --memory-limit 1G -c phpstan.neon",
+		"phpcs": "phpcs --standard=ruleset.xml --ignore=assets src",
+		"phpcsfix": "phpcbf --standard=ruleset.xml --ignore=assets src",
+		"tester": "tester tests/Tests/*.phpt  -c tests/php.ini --setup tests/setup.php"
+	}
+}

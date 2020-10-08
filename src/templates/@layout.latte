@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Liquid Design s.r.o.">
+    <meta name="developer" content="Liquid Design s.r.o."/>
+    <meta property="og:type" content="website"/>
+    <meta name=”robots” content=”noindex,nofollow” />
+
+    <meta name="viewport" content="width=device-width, maximum-scale=1, initial-scale=1, user-scalable=0"/>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+    <title>Liquid Admin | Ramissio.com</title>
+
+    <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="{$pubUrl}/admin/favicon/favicon.ico"> <!-- IE -->
+    <link rel="apple-touch-icon" type="image/png" href="{$pubUrl}/admin/favicon/favicon-32x32.png"> <!-- iPhone -->
+    <link rel="apple-touch-icon" type="image/png" sizes="16x16" href="{$pubUrl}/admin/favicon/favicon-16x16.png"> <!-- iPad -->
+    <link rel="apple-touch-icon" type="image/png" sizes="32x32" href="{$pubUrl}/admin/favicon/favicon-32x32.png"> <!-- iPhone4 -->
+    <link rel="icon" type="image/png" href="{$pubUrl}/admin/favicon/favicon-32x32.png"> <!-- Opera Speed Dial, at least 144×114 px -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"/>
+    <link href="{$nodeUrl}/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="{$nodeUrl}/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet" type="text/css"/>
+    <link href="{$nodeUrl}/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css"/>
+    <link href="{$nodeUrl}/tail.select/css/bootstrap4/tail.select-default.min.css" rel="stylesheet" type="text/css"/>
+    <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+    <link href="{$pubUrl}/admin/css/admin.min.css?{$ts}" rel="stylesheet" type="text/css"/>
+    <link href="{$nodeUrl}/lightbox2/dist/css/lightbox.min.css" rel="stylesheet"/>
+
+
+    {var $openSans = 'open-sans-v17-latin-ext_latin-'}
+    {var $lora = 'lora-v14-latin-ext_latin-'}
+    <link rel="preload" as="font" type="font/woff2"  href="{$pubUrl}/fonts/{$openSans}300.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2"  href="{$pubUrl}/fonts/{$openSans}regular.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2"  href="{$pubUrl}/fonts/{$openSans}600.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2"  href="{$pubUrl}/fonts/{$openSans}700.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2"  href="{$pubUrl}/fonts/{$lora}regular.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2"  href="{$pubUrl}/fonts/{$lora}700.woff2" crossorigin>
+
+    {block #header}{/block}
+</head>
+
+<body>
+
+<!-- ADMIN MENU -->
+<div class="admin-menu d-flex">
+    <!-- MENU ITEMS -->
+    <div class="d-flex">
+        <div class="admin-menu-item">
+            <a class="admin-menu-link {ifCurrent :Web:Admin:Page:*}origin active{/ifCurrent}" href="{plink :Web:Admin:Page:default}" role="tab" aria-controls="item-menu-a-obsah" aria-selected="{ifCurrent :Web:Admin:Page:*}true{/ifCurrent}">Menu a obsah</a>
+        </div>
+        <div class="admin-menu-item">
+            <a class="admin-menu-link {ifCurrent :Web:Admin:Slider:*}origin active{/ifCurrent}" href="{plink :Web:Admin:Slider:default}" role="tab" aria-controls="item-slider" aria-selected="{ifCurrent :Web:Admin:Slider:*}true{/ifCurrent}">Slidery</a>
+        </div>
+        <div class="admin-menu-item">
+            <a class="admin-menu-link {ifCurrent :Web:Admin:Faq:*}origin active{/ifCurrent}" href="{plink :Web:Admin:Faq:default}" role="tab" aria-controls="item-faq" aria-selected="{ifCurrent :Web:Admin:Faq:*}true{/ifCurrent}">FAQs</a>
+        </div>
+        <div class="admin-menu-item">
+            <a class="admin-menu-link {ifCurrent :Eshop:Admin:Product:*}origin active{/ifCurrent}" href="{plink :Eshop:Admin:Product:default}" role="tab" aria-controls="item-faq" aria-selected="{ifCurrent :Eshop:Admin:Product:*}true{/ifCurrent}">Eshop</a>
+        </div>
+        <div n:if="0" class="admin-menu-item">
+            <a class="admin-menu-link {ifCurrent :Web:Admin:Form:*}origin active{/ifCurrent}" href="{plink :Web:Admin:Form:default}" role="tab" aria-controls="item-form" aria-selected="{ifCurrent :Web:Admin:Form:*}true{/ifCurrent}">Formuláře</a>
+        </div>
+    </div>
+
+    <!-- USER PANEL -->
+    <div class="admin-user-wrapper d-flex align-items-center ml-auto">
+
+        <!-- USER AVATAR -->
+        <span class="admin-user-avatar rounded-circle mr-4" style="background-image: url('http://cms3.juno01.vas-server.cz/public/img/admin/dinosaur.svg');"></span>
+
+        <div class="admin-user-info">
+            <div class="admin-user-name">{$admin->name}</div>
+            <div class="admin-user-role">{$admin->email}</div>
+        </div>
+    </div>
+
+    <!-- LOGOUT BUTTON -->
+    <a href="{plink logout!}" class="admin-user-logout d-flex align-items-center justify-content-center">
+        <i class="fas fa-sign-out-alt"></i>
+    </a>
+</div>
+
+<div class="admin-secondary-menu tab-content d-flex" id="secondaryMenu">
+    <!-- SUBMENU ITEMS -->
+    <div class="tab-pane  {ifCurrent :Web:Admin:Page:*}active{/ifCurrent}" id="item-menu-a-obsah" aria-labelledby="item-menu-a-obsah-tab" role="tabpanel">
+        <div class="d-flex">
+
+            <div class="admin-menu-item">
+                <a href="{plink :Web:Admin:Page:default}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Page:default}active{/ifCurrent}">Hlavní menu</a>
+            </div>
+            <div class="admin-menu-item">
+                <a href="{plink :Web:Admin:Page:bottom}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Page:bottom}active{/ifCurrent}">Menu v patičce</a>
+            </div>
+
+            <div class="admin-menu-item">
+                <a href="{plink :Web:Admin:Page:pages}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Page:pages}active{/ifCurrent}">Volné stránky</a>
+            </div>
+
+            <div class="admin-menu-item">
+                <a href="{plink :Web:Admin:Page:translates}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Page:translates}active{/ifCurrent}">Krátké texty</a>
+            </div>
+
+            <div class="admin-menu-item">
+                <a href="{plink :Web:Admin:Page:homeslide}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Page:homeslide}active{/ifCurrent}">Úvodní slider</a>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane  {ifCurrent :Web:Admin:Slider:*}active{/ifCurrent}" id="item-slider" aria-labelledby="item-slider-tab" role="tabpanel">
+        <div class="d-flex">
+
+            <div class="admin-menu-item">
+                <a href="{plink :Web:Admin:Slider:default}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Slider:*}active{/ifCurrent}">Seznam sliderů</a>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane  {ifCurrent :Eshop:Admin:Product:*}active{/ifCurrent}" id="item-fag" aria-labelledby="item-fag-tab" role="tabpanel">
+        <div class="d-flex">
+
+            <div class="admin-menu-item">
+                <a href="{plink :Eshop:Admin:Product:default}" class="admin-secondary-menu-link {ifCurrent :Eshop:Admin:Product:default}active{/ifCurrent}">Produkty</a>
+            </div>
+
+            <div class="admin-menu-item">
+                <a href="{plink :Eshop:Admin:Product:categories}" class="admin-secondary-menu-link {ifCurrent :Eshop:Admin:Product:categories}active{/ifCurrent}">Kategorie</a>
+            </div>
+
+            <div class="admin-menu-item">
+                <a href="{plink :Eshop:Admin:Product:tags}" class="admin-secondary-menu-link {ifCurrent :Eshop:Admin:Product:tags}active{/ifCurrent}">Tagy</a>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane  {ifCurrent :Web:Admin:Faq:*}active{/ifCurrent}" id="item-fag" aria-labelledby="item-fag-tab" role="tabpanel">
+        <div class="d-flex">
+
+            <div class="admin-menu-item">
+                <a href="{plink :Web:Admin:Faq:default}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Faq:*}active{/ifCurrent}">Seznam FAQs</a>
+            </div>
+        </div>
+    </div>
+    {*<div class="tab-pane " id="item-form" aria-labelledby="item-form-tab" role="tabpanel">
+        <div class="d-flex">
+
+            <div class="admin-menu-item">
+                <a href="{plink :Web:Admin:Form:default}" class="admin-secondary-menu-link active">Seznam formulářů</a>
+            </div>
+        </div>
+    </div>*}
+
+    <div class="tab-pane  " id="item-profil" aria-labelledby="item-profil-tab" role="tabpanel">
+        <div class="d-flex">
+
+            <div class="admin-menu-item">
+                <a href="/admin/admin/profile/default" class="admin-secondary-menu-link ">Profil</a>
+            </div>
+            <div class="admin-menu-item">
+                <a href="/admin/admin/profile/change-password" class="admin-secondary-menu-link ">Změna hesla</a>
+            </div>
+        </div>
+    </div>
+
+    <a class="admin-project-wrapper d-flex flex-column justify-content-center ml-auto" href="https://www.ramissio.com" target="_blank">
+        <div class="admin-project-name">Ramissio</div>
+        <div class="admin-project-link">https://www.ramissio.com</div>
+    </a>
+
+    <a href="https://insys.ramissio.com" target="_blank" class="admin-user-setting d-flex align-items-center justify-content-center">
+        <i class="fas fa-cog"></i>
+    </a>
+</div>
+
+<div class="admin-menu d-flex">
+    <!-- ADMIN MENU -->
+</div>
+
+{block afterbody}{/block}
+
+{foreach $flashes as $flash}
+    <div class="alert alert--{$flash->type} position-fixed text-uppercase d-flex align-items-center alert-dissmisable">
+        <i n:if="$flash->type === 'success'" class="fa fa-check"></i>
+        <i n:if="$flash->type === 'danger'" class="fas fa-times"></i>
+        <i n:if="$flash->type === 'info'" class="fas fa-info"></i>
+        <i n:if="$flash->type === 'warning'" class="fas fa-exclamation"></i>
+        {$flash->message}
+    </div>
+{/foreach}
+<main>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <br>
+                {block content}{/block}
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="support-wrapper position-fixed d-flex">
+    <div class="support-text">
+        <i class="fas fa-shield-alt"></i> &nbsp; LQD Podpora
+    </div>
+
+    <a href="mailto:servis@lqd.cz" class="support-link d-flex align-items-center justify-content-center">
+        <i class="far fa-envelope"></i>
+    </a>
+</div>
+
+<script type="text/javascript">
+    var absolute_url = '{$basePath|noescape}';
+    var plugin_path = '{$pubUrl|noescape}/plugins/';
+    var base_url = '{$baseUrl|noescape}';
+    var pub_url = '{$pubUrl|noescape}';
+    var node_url = '{$nodeUrl|noescape}';
+    var user_url = '{$userUrl|noescape}';
+    var lqd_url = '{$pubUrl|noescape}';
+    var lqd_admin_url = lqd_url + '/admin';
+    var locale = 'cs';
+    var locale_format = 'dd.mm.yyyy';
+    var cssTimestamp = {@$ts};
+    var tinyTemplates = [];
+    var defaultLang = {$defaultLang};
+    var allLanguages = {$languages};
+
+    var isEditArticle = {$presenter->isEditArticle()};
+    var saveContentAsyncLink = {plink saveContentAsync!};
+    var isMultiLang = {$presenter->isMultiLang()};
+
+    {block #jsfoot}{/block}
+</script>
+<script type="text/javascript" src="{$nodeUrl}/jquery/dist/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script type="text/javascript" src="{$nodeUrl}/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="{$nodeUrl}/toastr/toastr.js"></script>
+<script type="text/javascript" src="{$nodeUrl}/nette.ajax.js/nette.ajax.js"></script>
+<script type="text/javascript" src="{$nodeUrl}/nette-forms/src/assets/netteForms.min.js"></script>
+<script type="text/javascript" src="{$nodeUrl}/live-form-validation/live-form-validation.js"></script>
+<script type="text/javascript" src="{$pubUrl}/admin/js/bootstrap-editable.js"></script>
+<script type="text/javascript" src="{$pubUrl}/admin/js/tinymce/tinymce.js?{@$ts}"></script>
+<script type="text/javascript" src="{$pubUrl}/admin/js/stickyRows.js"></script>
+<script type="text/javascript" src="{$pubUrl}/admin/js/select2/js/select2.full.js"></script>
+<script type="text/javascript" src="{$pubUrl}/admin/js/sparkline/jquery.sparkline.js"></script>
+<script type="text/javascript" src="{$nodeUrl}/lightbox2/dist/js/lightbox.min.js"></script>
+<script type="text/javascript" src="{$nodeUrl}/flatpickr/dist/flatpickr.min.js"></script>
+<script type="text/javascript" src="{$nodeUrl}/flatpickr/dist/l10n/cs.js"></script>
+<script type="text/javascript" src="{$nodeUrl}/jscolor-picker/jscolor.min.js"></script>
+
+
+<script>
+    // Load tiny templates
+    $.ajax({
+        url: {plink getTinyTemplates!},
+        success: function (payload) {
+            result = payload.result;
+
+            result.forEach(function (value, i) {
+                tinyTemplates.push(value);
+            });
+        },
+    });
+
+    Nette.validators.LqdAdminControlForm_validateUrl = function(elem, args, val) {
+        $.nette.ajax({
+            type: "GET",
+            url: {plink validateUrl!},
+            data: {
+                value: val,
+                template: args[1],
+                lang: args[2],
+                pk: args[3],
+                urlPrefix: args[4],
+            },
+            async: false,
+            success: function (payload) {
+                result = payload.result;
+            }
+        });
+
+        return result;
+    };
+</script>
+<script type="text/javascript" src="{$nodeUrl}/tail.select/js/tail.select.min.js"></script>
+<script type="text/javascript" src="{$pubUrl}/js/tail.select-cs.js"></script>
+<script type="text/javascript" src="{$pubUrl}/admin/js/admin.js?{@$ts}"></script>
+<script type="text/javascript" src="{$pubUrl}/admin/js/elements.js?{@$ts}"></script>
+<script type="text/javascript" src="{$pubUrl}/admin/js/scripts.js?{@$ts}"></script>
+<script type="text/javascript">
+    disableFirstSectionUpButton();
+
+    var sectionWrappers = $('.section-wrapper');
+
+    if (!!sectionWrappers.length) {
+        sectionWrappers.each(function () {
+            var sectionTr = $(this).closest('tr');
+
+            var originalTd = sectionTr.find('td');
+            originalTd.slideUp(0);
+            sectionTr.append('<td></td>');
+        });
+    }
+
+
+    $('.section-toggler').on('click', function () {
+        var sectionTr = $(this).closest('tr');
+        var originalTd = sectionTr.find('td').first();
+        var fakeTd = sectionTr.find('td').last();
+
+        if (originalTd.is(':visible')) {
+            originalTd.hide();
+            fakeTd.show();
+        } else {
+            fakeTd.hide();
+            originalTd.show();
+        }
+    });
+
+    $('.section-delete').click(function (e) {
+        e.preventDefault();
+        var confirmed = confirm('Skutečně chcete smazat tuto sekci?');
+
+        if (confirmed) {
+            $(this).closest('tr').remove();
+        }
+    });
+
+    $('.section-toggler').click(function (e) {
+        e.preventDefault();
+        $($(this).attr('href')).toggleClass('d-none');
+    });
+
+    $('.section-up, .section-down').click(function (e) {
+        e.preventDefault();
+        var sectionTr = $(this).parents('tr');
+        var language = sectionTr.attr('data-lang');
+
+
+        if ($(this).is('.section-up')) {
+            var previousTr = $('tr[data-lang="' + language +'"]').eq($('tr[data-lang="' + language +'"]').index(sectionTr) - 1);
+            if (!!previousTr.length) {
+                sectionTr.insertBefore(previousTr);
+            }
+        } else {
+            var nextTr = $('tr[data-lang="' + language +'"]').eq($('tr[data-lang="' + language +'"]').index(sectionTr) + 1);
+            if (!!nextTr.length) {
+                sectionTr.insertAfter(nextTr);
+            }
+        }
+
+        disableFirstSectionUpButton();
+    });
+
+    $.fn.editableform.buttons  = '<button type="submit" class="btn btn-primary btn-sm editable-submit" style="margin-top: 3px;"><i class="fas fa-check"></i></button>' +
+        '<button type="button" class="btn btn-secondary btn-sm editable-cancel" style="margin-top: 3px; margin-left: 2px; margin-right: 7px;"><i class="fas fa-times"></i></button>';
+
+
+    $('.section-edit').click(function (e) {
+        e.preventDefault();
+        var sectionName = $(this).closest('.section-wrapper').find('.section-name');
+        sectionName.editable({
+            mode: 'inline',
+            toggle: 'manual',
+            onblur: 'ignore'
+        }).editable('show');
+    });
+
+    $.each(allLanguages, function (i, val) {
+        $('.section-wrapper[data-lang="'+ val +'"]').first().find('.section-toggler').trigger('click');
+    });
+
+
+    function disableFirstSectionUpButton() {
+        $('form').find('tr:visible .section-up').removeClass('disabled');
+        var sectionUpButton =$('form').find('tr:visible .section-up').first();
+        sectionUpButton.addClass('disabled');
+        $('form').find('tr:visible .section-down').removeClass('disabled');
+        var sectionDownButton = $('form').find('tr:visible .section-down').last();
+        sectionDownButton.addClass('disabled');
+    }
+</script>
+
+{block scripts}
+{/block}
+</body>
+
+</html>

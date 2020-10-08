@@ -1,0 +1,58 @@
+{block content}
+    <div n:if="@$text">
+        {$text|noescape}
+    </div>
+
+    {if isset($presenter['form'])}
+        <div class="row">
+            <div class="col-12">
+                {@$formHeaderText|noescape}
+                {control form}
+                {@$formFooterText|noescape}
+            </div>
+        </div>
+    {/if}
+
+    {if isset($presenter['table'])}
+        {@$tableHeaderText|noescape}
+
+        <div  class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-md-4">
+            <div class="order-1 order-md-1">
+                <div n:if="@$buttons">
+                    {@$buttons|noescape}
+                </div>
+            </div>
+
+            <div class="table-filter order-2 order-md-2">
+                {control table-filter}
+            </div>
+        </div>
+
+        <!-- TABLES -->
+        <div class="table-responsive">
+            {control table}
+        </div>
+
+        <!-- PAGING -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-md-4">
+            <nav class="ml-md-auto mt-2" aria-label="Table paginator">
+                {control table-paging}
+            </nav>
+            <div class="d-flex">
+                {*{var $polozek = 'položka'}*}
+                {*{var $polozek_count = $presenter['table']['paging']->paginator->getItemCount()}*}
+                {*<div class="table-info">&sum; {$polozek_count|number:0} {$polozek} | strana {$presenter['table']['paging']->paginator->page}*}
+                {*z {$presenter['table']['paging']->paginator->getPageCount()}*}
+                {*</div>*}
+                {@$tableFooterText}
+            </div>
+        </div>
+
+    {/if}
+{/block}
+
+{block scripts}
+    {foreach $jsIncludes as $jsInclude}
+        <script type="text/javascript" src="{$pubUrl}/admin/js/{$jsInclude}"></script>
+    {/foreach}
+{/block}
