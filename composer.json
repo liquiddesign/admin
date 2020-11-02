@@ -5,32 +5,39 @@
 	"autoload": {
 		"psr-4": {"Admin\\": "src/"}
 	},
+	"autoload-dev": {
+		"psr-4": { "Admin\\Tests\\": "tests/" }
+	},
 	"require" :
 	{
 		"php":">=7.4",
 		"nette/application":"~3.0",
-		"nette/routing":"~3.0",
+		"nette/security":"~3.0",
 		"nette/forms":"~3.0",
 		"nette/utils":"~3.0",
 		"nette/di":"~3.0",
-		"nette/security":"~3.0",
 		"nette/component-model":"~3.0",
 		"tracy/tracy":"*",
 		"liquiddesign/storm": "@dev",
+		"liquiddesign/forms": "@dev",
+		"liquiddesign/security": "@dev",
 		"ext-pdo": "*"
 	},
-	"require-dev": 
+	"require-dev":
 	{
 		"nette/tester":"*",
 		"tracy/tracy":"*",
 		"composer/composer": "*",
 		"liquiddesign/codestyle": "@dev",
+		"liquiddesign/migrator": "@dev",
 		"phpstan/phpstan": "*"
 	},
 	"scripts": {
 		"phpstan": "phpstan analyse --memory-limit 1G -c phpstan.neon",
 		"phpcs": "phpcs --standard=ruleset.xml --ignore=assets src",
 		"phpcsfix": "phpcbf --standard=ruleset.xml --ignore=assets src",
-		"tester": "tester tests/Tests/*.phpt  -c tests/php.ini --setup tests/setup.php"
+		"tester": "tester tests/Cases/*.phpt  -c tests/php.ini --setup tests/setup.php",
+		"aux-sync-database": "Migrator\\Scripts::syncDatabase",
+		"sync-database": "@aux-sync-database Security\\Tests\\Bootstrap"
 	}
 }

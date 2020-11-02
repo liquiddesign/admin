@@ -12,7 +12,7 @@ final class LoginPresenter extends Nette\Application\UI\Presenter
 {
 	private const DEFAULT_PLINK = ':Web:Admin:Page:default';
 
-	public \App\Admin\User $admin;
+	public \App\Admin\Administrator $admin;
 	
 	/**
 	 * @persistent

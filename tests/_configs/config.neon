@@ -1,0 +1,23 @@
+parameters:
+	langs:
+		'cz': ''
+		'en': '_en'
+
+services:
+	- Tracy\Debugger::getBar
+	- Nette\Caching\Storages\DevNullStorage
+	- Security\Tests\DB\UserRepository
+
+admin:
+
+storm:
+	debug: true
+	connections:
+		default:
+			host: 127.0.0.1
+			dbname: _test_security
+			user: root
+			password: ""
+			driver: mysql
+			charset: utf8
+			collate: utf8_czech_ci
