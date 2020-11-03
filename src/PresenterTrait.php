@@ -26,7 +26,11 @@ trait PresenterTrait
 	public function checkRequirements($element): void
 	{
 		if (!$this->admin->isLoggedIn()) {
-			$this->redirect(':Admin:Login:default');
+			if ($this->admin->logoutReason === \Nette\Security\IUserStorage::INACTIVITY) {
+				$this->flashMessage('You have been signed out due to inactivity. Please sign in again.');
+			}
+			
+			$this->redirect(':Admin:Login:default', ['backlink' => $this->storeRequest()]);
 		}
 	}
 	
@@ -35,6 +39,13 @@ trait PresenterTrait
 		$menu = $this->menuFactory->create();
 		
 		return $menu;
+	}
+	
+	public function handleLogout()
+	{
+		$this->admin->logout(true);
+		
+		$this->redirect(':Admin:Login:default');
 	}
 	
 	public function formatLayoutTemplateFiles(): array

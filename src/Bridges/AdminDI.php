@@ -38,9 +38,10 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		
 		$builder->addDefinition($this->prefix('administrators'))->setType(AdministratorRepository::class);
 		
-		$builder->addFactoryDefinition($this->prefix('menuFactory'))->setImplement(IMenuFactory::class);
-		$builder->addFactoryDefinition($this->prefix('loginFormFactory'))->setImplement(ILoginFormFactory::class);
+		$factory = $builder->addFactoryDefinition($this->prefix('menuFactory'))->setImplement(IMenuFactory::class)->getResultDefinition();
+		$factory->addSetup('addMenuItem', ['Produkty', ':Eshop:Admin:Product:default']);
 		
+		$builder->addFactoryDefinition($this->prefix('loginFormFactory'))->setImplement(ILoginFormFactory::class);
 		
 		$adminDef = $builder->addDefinition($this->prefix('administrator'))->setType(Administrator::class)->setAutowired(false);
 		$adminDef->addSetup('setDefaultLink', [$config->defaultLink]);
@@ -50,8 +51,6 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			$routerListDef = $builder->getDefinition('routing.router');
 			$routerListDef->addSetup('add', [new \Nette\DI\Definitions\Statement(Route::class)]);
 		}
-		
-		
 		
 		return;
 	}

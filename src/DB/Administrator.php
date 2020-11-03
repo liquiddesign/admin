@@ -18,17 +18,13 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	 */
 	public ?string $fullName = null;
 	
-	/**
-	 * @relation
-	 * @constraint
-	 */
-	public ?Role $role;
+	public ?string $role = null;
 	
 	/**
 	 * @relation
 	 * @constraint
 	 */
-	public Account $account;
+	public ?Account $account;
 	
 	function getId()
 	{
@@ -37,11 +33,12 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	
 	function getRoles(): array
 	{
-		return [$this->getAccount()->role];
+		return $this->getAccount() ? [$this->getAccount()->role] : [];
 	}
 	
 	public function getAccount(): ?Account
 	{
+		dump($this);
 		return $this->account;
 	}
 }

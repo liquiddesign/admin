@@ -9,6 +9,9 @@ class AdministratorRepository extends \StORM\Repository implements IUserReposito
 {
 	public function getByAccountLogin(string $login): ?IUser
 	{
-		return $this->many()->where('account.login', $login)->first();
+		$test = $this->many()->where('account.login', $login)->first();
+		$test->roles = ['xxx'];
+		
+		return $test;
 	}
 }

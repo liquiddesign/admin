@@ -6,6 +6,7 @@ namespace Admin;
 
 use Nette\Security\IAuthenticator;
 use Nette\Security\IAuthorizator;
+use Nette\Security\IIdentity;
 use Nette\Security\IUserStorage;
 
 class Administrator extends \Nette\Security\User
