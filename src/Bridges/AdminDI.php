@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Admin\Bridges;
 
 use Admin\Administrator;
+use Admin\Controls\ILoginFormFactory;
+use Admin\Controls\IMenuFactory;
 use Admin\DB\AdministratorRepository;
 use Admin\Route;
 use Nette\DI\Definitions\ServiceDefinition;
@@ -35,6 +37,10 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		$builder = $this->getContainerBuilder();
 		
 		$builder->addDefinition($this->prefix('administrators'))->setType(AdministratorRepository::class);
+		
+		$builder->addFactoryDefinition($this->prefix('menuFactory'))->setImplement(IMenuFactory::class);
+		$builder->addFactoryDefinition($this->prefix('loginFormFactory'))->setImplement(ILoginFormFactory::class);
+		
 		
 		$adminDef = $builder->addDefinition($this->prefix('administrator'))->setType(Administrator::class)->setAutowired(false);
 		$adminDef->addSetup('setDefaultLink', [$config->defaultLink]);
