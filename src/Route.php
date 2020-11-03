@@ -9,7 +9,7 @@ class Route extends Routers\Route
 {
 	public function __construct()
 	{
-		parent::__construct('admin[/<module>/<presenter>/<action>[/<id>]]', [
+		parent::__construct('admin[/<module>/<presenter>[/<action=default>][/<id>]][<lang=cs cs|en>/]', [
 			'module' => [
 				\Nette\Routing\Route::VALUE => 'Admin',
 				\Nette\Routing\Route::FILTER_IN => static function ($str) {
@@ -33,7 +33,7 @@ class Route extends Routers\Route
 					return \substr($str, 0, 6) === 'Admin:' ? \strtolower(\substr($str, 6)) : \strtolower($str);
 				},
 			],
-			'action' => 'default',
+			'action' => [\Nette\Routing\Route::VALUE => 'default'],
 			null => [
 				\Nette\Routing\Route::FILTER_OUT => static function (array $params) {
 					foreach ($params as $k => $v) {
