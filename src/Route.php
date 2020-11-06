@@ -4,7 +4,6 @@ namespace Admin;
 
 use Nette\Application\Routers;
 use Pages\Pages;
-use StORM\Entity;
 
 class Route extends Routers\Route
 {
