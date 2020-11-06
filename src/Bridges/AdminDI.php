@@ -26,6 +26,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		return Expect::structure([
 			'defaultLink' => Expect::string()->required(true),
 			'menu' => Expect::array([]),
+			'mutations' => Expect::list([]),
 		]);
 	}
 	
@@ -39,17 +40,22 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		$builder->addDefinition($this->prefix('administrators'))->setType(AdministratorRepository::class);
 		
 		$factory = $builder->addFactoryDefinition($this->prefix('menuFactory'))->setImplement(IMenuFactory::class)->getResultDefinition();
-		$factory->addSetup('addMenuItem', ['Produkty', ':Eshop:Admin:Product:default']);
+		foreach ($config->menu as $name => $value) {
+			$link = \is_array($value) && $value['link'] ? $value['link'] : (\is_string($value) ? $value : null);
+			$items = \is_array($value) && $value['items'] ? $value['items'] : [];
+			
+			$factory->addSetup('addMenuItem', [$name, $link, $items]);
+		}
 		
 		$builder->addFactoryDefinition($this->prefix('loginFormFactory'))->setImplement(ILoginFormFactory::class);
 		
 		$adminDef = $builder->addDefinition($this->prefix('administrator'))->setType(Administrator::class)->setAutowired(false);
 		$adminDef->addSetup('setDefaultLink', [$config->defaultLink]);
-	
+		
 		if ($builder->hasDefinition('routing.router')) {
 			/** @var \Nette\DI\Definitions\ServiceDefinition $routerListDef */
 			$routerListDef = $builder->getDefinition('routing.router');
-			$routerListDef->addSetup('add', [new \Nette\DI\Definitions\Statement(Route::class)]);
+			$routerListDef->addSetup('add', [new \Nette\DI\Definitions\Statement(Route::class, [$config->mutations])]);
 		}
 		
 		return;

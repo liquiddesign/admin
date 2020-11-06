@@ -3,13 +3,16 @@
 namespace Admin;
 
 use Nette\Application\Routers;
+use Pages\Pages;
 use StORM\Entity;
 
 class Route extends Routers\Route
 {
-	public function __construct()
+	public function __construct(array $mutations = [], Pages $pages)
 	{
-		parent::__construct('admin[/<module>/<presenter>[/<action=default>][/<id>]][<lang=cs cs|en>/]', [
+		$lang = isset($mutations[0]) ? '[<lang=' . $mutations[0] . ' ' . \implode('|', $mutations) . '>/]' : '';
+		
+		parent::__construct('admin[/<module>/<presenter>[/<action=default>][/<id>]]' . $lang, [
 			'module' => [
 				\Nette\Routing\Route::VALUE => 'Admin',
 				\Nette\Routing\Route::FILTER_IN => static function ($str) {
@@ -35,15 +38,8 @@ class Route extends Routers\Route
 			],
 			'action' => [\Nette\Routing\Route::VALUE => 'default'],
 			null => [
-				\Nette\Routing\Route::FILTER_OUT => static function (array $params) {
-					foreach ($params as $k => $v) {
-						if ($v instanceof Entity) {
-							$params[$k] = (string)$v;
-						}
-					}
-					
-					return $params;
-				},
+				\Nette\Routing\Route::FILTER_OUT => [$pages, 'unmapParameters'],
+				\Nette\Routing\Route::FILTER_IN => [$pages, 'mapParameters'],
 			],
 		]);
 	}

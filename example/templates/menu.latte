@@ -1,0 +1,12 @@
+<ul>
+{foreach $menu as $item}
+	<li><a href="{plink $item->link}">{$item->label}</a>
+	<ul>
+	{foreach $item->items as $subItem}
+		<li><a href="{plink $subItem->link}">{$subItem->label}</a></li>
+	{/foreach}
+	</ul>
+	</li>
+{/foreach}
+</ul>
+

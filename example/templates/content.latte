@@ -1,0 +1,13 @@
+{block content}
+	{if @$displayButtons}
+		{foreach $displayButtons as $button}
+			{$button|noescape}
+		{/foreach}
+	{/if}
+	<br><br>
+	{if @$displayControls}
+		{foreach $displayControls as $ctr}
+			{$ctr->render()}
+		{/foreach}
+	{/if}
+{/block}

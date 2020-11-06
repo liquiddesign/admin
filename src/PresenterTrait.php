@@ -7,6 +7,8 @@ namespace Admin;
 use Admin\Controls\IMenuFactory;
 use Admin\Controls\Menu;
 use Forms\Form;
+use Nette\Application\BadRequestException;
+use StORM\DIConnection;
 
 /**
  * Trait PresenterTrait
@@ -21,7 +23,19 @@ trait PresenterTrait
 	/**
 	 * @inject
 	 */
+	public DIConnection $stm;
+	
+	/**
+	 * @inject
+	 */
 	public IMenuFactory $menuFactory;
+	
+	public function startUp(): void
+	{
+		parent::startUp();
+		
+		$this->stm->setMutation($this->lang);
+	}
 	
 	public function checkRequirements($element): void
 	{
@@ -32,13 +46,15 @@ trait PresenterTrait
 			
 			$this->redirect(':Admin:Login:default', ['backlink' => $this->storeRequest()]);
 		}
+		
+		if (!$this->admin->isAllowed($this->getAction(true))) {
+			throw new BadRequestException('Not allowed action');
+		}
 	}
 	
 	public function createComponentMenu(): Menu
 	{
-		$menu = $this->menuFactory->create();
-		
-		return $menu;
+		return $this->menuFactory->create();
 	}
 	
 	public function handleLogout()

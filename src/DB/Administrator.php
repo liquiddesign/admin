@@ -33,12 +33,11 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	
 	function getRoles(): array
 	{
-		return $this->getAccount() ? [$this->getAccount()->role] : [];
+		return $this->role ? [$this->role] : [];
 	}
 	
 	public function getAccount(): ?Account
 	{
-		dump($this);
 		return $this->account;
 	}
 }

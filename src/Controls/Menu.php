@@ -22,11 +22,18 @@ class Menu extends Control
 		$this->admin = $context->getService('admin.administrator');
 	}
 	
-	public function addMenuItem($label, $link): MenuItem
+	public function addMenuItem($label, $link, $subitems = []): MenuItem
 	{
 		$menuItem = new MenuItem();
 		$menuItem->label = $label;
 		$menuItem->link = $link;
+		
+		foreach ($subitems as $label => $link) {
+			$subItem = new MenuItem();
+			$subItem->label = $label;
+			$subItem->link = $link;
+			$menuItem->items[] = $subItem;
+		}
 		
 		$this->items[] = $menuItem;
 		
@@ -40,10 +47,10 @@ class Menu extends Control
 		$items = $this->items;
 		
 		foreach ($items as $item) {
-			if ($this->admin->isAllowed($item->link)) {
+			if ($item->link && $this->admin->isAllowed($item->link)) {
 				foreach ($item->items as $key => $subItem) {
-					if (!$this->admin->isAllowed($item->link)) {
-						unset($this->items[$key]);
+					if (!$subItem->link || !$this->admin->isAllowed($subItem->link)) {
+						unset($item->items[$key]);
 					}
 				}
 				
