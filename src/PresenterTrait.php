@@ -6,7 +6,6 @@ namespace Admin;
 
 use Admin\Controls\IMenuFactory;
 use Admin\Controls\Menu;
-use Forms\Form;
 use Nette\Application\BadRequestException;
 use StORM\DIConnection;
 
