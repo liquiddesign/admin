@@ -2,11 +2,8 @@
 
 declare(strict_types=1);
 
-namespace App\Admin;
-
-use App\PresenterTrait;
+namespace App\Example;
 
 final class LoginPresenter extends \Admin\LoginPresenter
 {
-	use PresenterTrait;
 }
