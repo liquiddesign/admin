@@ -76,7 +76,7 @@ trait PresenterTrait
 		}
 	}
 	
-	private function getAdminRootPath(): string
+	protected function getAdminRootPath(): string
 	{
 		return $this->context->parameters['appDir'] .  \DIRECTORY_SEPARATOR . 'Admin' .   \DIRECTORY_SEPARATOR;
 	}
