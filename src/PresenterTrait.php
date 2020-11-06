@@ -71,7 +71,9 @@ trait PresenterTrait
 	
 	public function beforeRender()
 	{
-		$this->template->setFile($this->getAdminRootPath() . 'templates' . \DIRECTORY_SEPARATOR . 'content.latte');
+		if (!$this->template->getFile()) {
+			$this->template->setFile($this->getAdminRootPath() . 'templates' . \DIRECTORY_SEPARATOR . 'content.latte');
+		}
 	}
 	
 	private function getAdminRootPath(): string
