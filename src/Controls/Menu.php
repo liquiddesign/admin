@@ -22,11 +22,12 @@ class Menu extends Control
 		$this->admin = $context->getService('admin.administrator');
 	}
 	
-	public function addMenuItem($label, $link, $subitems = []): MenuItem
+	public function addMenuItem($label, $link, $subitems = [], $icon = null): MenuItem
 	{
 		$menuItem = new MenuItem();
 		$menuItem->label = $label;
 		$menuItem->link = $link;
+		$menuItem->icon = $icon;
 		
 		foreach ($subitems as $label => $link) {
 			$subItem = new MenuItem();
@@ -63,6 +64,6 @@ class Menu extends Control
 	
 	private function getAdminRootPath(): string
 	{
-		return $this->context->parameters['appDir'] .  \DIRECTORY_SEPARATOR . 'Admin' .   \DIRECTORY_SEPARATOR;
+		return $this->context->parameters['appDir'] . \DIRECTORY_SEPARATOR . 'Admin' . \DIRECTORY_SEPARATOR;
 	}
 }
