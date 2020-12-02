@@ -11,4 +11,6 @@ class MenuItem
 	public ?string $link = null;
 	
 	public array $items = [];
+	
+	public ?string $icon = null;
 }

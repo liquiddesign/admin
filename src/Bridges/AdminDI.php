@@ -43,8 +43,9 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		foreach ($config->menu as $name => $value) {
 			$link = \is_array($value) && $value['link'] ? $value['link'] : (\is_string($value) ? $value : null);
 			$items = \is_array($value) && $value['items'] ? $value['items'] : [];
+			$icon = \is_array($value) && isset($value['icon']) ? $value['icon'] : null;
 			
-			$factory->addSetup('addMenuItem', [$name, $link, $items]);
+			$factory->addSetup('addMenuItem', [$name, $link, $items, $icon]);
 		}
 		
 		$builder->addFactoryDefinition($this->prefix('loginFormFactory'))->setImplement(ILoginFormFactory::class);
