@@ -32,8 +32,6 @@ trait PresenterTrait
 	public function startUp(): void
 	{
 		parent::startUp();
-		
-		$this->stm->setMutation($this->lang);
 	}
 	
 	public function checkRequirements($element): void
@@ -73,6 +71,8 @@ trait PresenterTrait
 		if (!$this->template->getFile()) {
 			$this->template->setFile($this->getAdminRootPath() . 'templates' . \DIRECTORY_SEPARATOR . 'content.latte');
 		}
+		
+		$this->template->admin = $this->admin;
 	}
 	
 	protected function getAdminRootPath(): string
