@@ -13,4 +13,6 @@ class MenuItem
 	public array $items = [];
 	
 	public ?string $icon = null;
+	
+	public bool $active = false;
 }

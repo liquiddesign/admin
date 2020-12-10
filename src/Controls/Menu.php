@@ -49,12 +49,19 @@ class Menu extends Control
 		
 		foreach ($items as $item) {
 			if ($item->link && $this->admin->isAllowed($item->link)) {
+				$active = false;
+				
 				foreach ($item->items as $key => $subItem) {
 					if (!$subItem->link || !$this->admin->isAllowed($subItem->link)) {
 						unset($item->items[$key]);
 					}
+					
+					if ($this->getPresenter()->isLinkCurrent($subItem->link)) {
+						$subItem->active = $active = true;
+					}
 				}
 				
+				$item->active = $active;
 				$this->template->menu[] = $item;
 			}
 		}
