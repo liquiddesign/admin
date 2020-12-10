@@ -40,10 +40,6 @@ abstract class LoginPresenter extends Nette\Application\UI\Presenter
 			$form->getPresenter()->redirect($this->admin->getDefaultLink());
 		};
 		
-		$form->onLoginFail[] = function (LoginForm $form, int $errorCode) {
-			$form->getPresenter()->flashMessage('.loginForm.flashes.loginFailed' . $errorCode);
-		};
-		
 		return $form;
 	}
 }
