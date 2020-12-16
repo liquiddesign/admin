@@ -73,4 +73,12 @@ class Menu extends Control
 	{
 		return $this->context->parameters['appDir'] . \DIRECTORY_SEPARATOR . 'Admin' . \DIRECTORY_SEPARATOR;
 	}
+	
+	/**
+	 * @return array
+	 */
+	public function getItems(): array
+	{
+		return $this->items;
+	}
 }
