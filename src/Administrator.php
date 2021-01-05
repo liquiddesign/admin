@@ -17,7 +17,7 @@ class Administrator extends \Nette\Security\User
 
 	public function __construct(IAuthenticator $authenticator = null, Authorizator $authorizator = null, IUserStorage $legacyStorage = null)
 	{
-		parent::__construct(null, $authenticator, $authorizator, clone $legacyStorage);
+		parent::__construct(clone $legacyStorage, $authenticator, $authorizator);
 
 		/** @var \Nette\Http\UserStorage $legacyStorage */
 		$legacyStorage = $this->getStorage();
