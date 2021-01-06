@@ -56,8 +56,14 @@ class Menu extends Control
 						unset($item->items[$key]);
 					}
 					
-					if ($this->getPresenter()->isLinkCurrent($subItem->link)) {
+					if ($this->getPresenter()->isLinkCurrent(\substr($subItem->link, 0, \strrpos($subItem->link, ':')). ":*")) {
 						$subItem->active = $active = true;
+						
+						if ($this->getPresenter()->getActiveMenuLink()) {
+							if ($this->getPresenter()->getActiveMenuLink() !== $subItem->link) {
+								$subItem->active = false;
+							}
+						}
 					}
 				}
 				
