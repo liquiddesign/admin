@@ -19,6 +19,8 @@ trait PresenterTrait
 	
 	public Administrator $admin;
 	
+	private ?string $activeMenuLink = null;
+	
 	/**
 	 * @inject
 	 */
@@ -78,5 +80,15 @@ trait PresenterTrait
 	protected function getAdminRootPath(): string
 	{
 		return $this->context->parameters['appDir'] .  \DIRECTORY_SEPARATOR . 'Admin' .   \DIRECTORY_SEPARATOR;
+	}
+	
+	public function getActiveMenuLink(): ?string
+	{
+		return $this->activeMenuLink;
+	}
+	
+	protected function setActiveMenuLink(string $link): void
+	{
+		$this->activeMenuLink = $link;
 	}
 }
