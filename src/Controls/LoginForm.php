@@ -25,11 +25,10 @@ class LoginForm extends \Nette\Application\UI\Form
 	
 	private Administrator $admin;
 	
-	public function __construct(Nette\DI\Container $context, Nette\Localization\ITranslator $translator)
+	public function __construct(Nette\DI\Container $context)
 	{
 		parent::__construct();
 		
-		$this->setTranslator($translator);
 		$this->addText('login')->setRequired(true);
 		$this->addPassword('password')->setRequired(true);
 		$this->addSubmit('submit');
