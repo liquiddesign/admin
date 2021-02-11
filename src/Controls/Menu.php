@@ -48,11 +48,11 @@ class Menu extends Control
 		$items = $this->items;
 		
 		foreach ($items as $item) {
-			if ($item->link && $this->admin->isAllowed($item->link)) {
+			if ($this->admin->isAllowed($item->link)) {
 				$active = false;
 				
 				foreach ($item->items as $key => $subItem) {
-					if (!$subItem->link || !$this->admin->isAllowed($subItem->link)) {
+					if (!$this->admin->isAllowed($subItem->link)) {
 						unset($item->items[$key]);
 					}
 					
