@@ -21,6 +21,7 @@
 		"liquiddesign/storm": "@dev",
 		"liquiddesign/forms": "@dev",
 		"liquiddesign/security": "@dev",
+		"liquiddesign/pages": "@dev",
 		"ext-pdo": "*"
 	},
 	"require-dev":

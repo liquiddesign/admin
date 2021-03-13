@@ -7,7 +7,7 @@ use Pages\Pages;
 
 class Route extends Routers\Route
 {
-	public function __construct(array $mutations = [], Pages $pages)
+	public function __construct(?array $mutations, Pages $pages)
 	{
 		$lang = isset($mutations[0]) ? '[<lang=' . $mutations[0] . ' ' . \implode('|', $mutations) . '>/]' : '';
 		
@@ -18,12 +18,13 @@ class Route extends Routers\Route
 					return \ucfirst($str) . ':Admin';
 				},
 				\Nette\Routing\Route::FILTER_OUT => static function ($str) {
+					
 					if (\substr($str, -6) === ':Admin') {
-						return \strtolower(\substr($str, 0, -6));
+						return \lcfirst(\substr($str, 0, -6));
 					}
 					
 					if ($str === 'Admin') {
-						return \strtolower($str);
+						return \lcfirst($str);
 					}
 					
 					return null;
@@ -32,7 +33,7 @@ class Route extends Routers\Route
 			'presenter' => [
 				\Nette\Routing\Route::VALUE => 'Login',
 				\Nette\Routing\Route::FILTER_OUT => static function ($str) {
-					return \substr($str, 0, 6) === 'Admin:' ? \strtolower(\substr($str, 6)) : \strtolower($str);
+					return self::action2path(\substr($str, 0, 6) === 'Admin:' ? \substr($str, 6) : $str);
 				},
 			],
 			'action' => [\Nette\Routing\Route::VALUE => 'default'],
