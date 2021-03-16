@@ -6,8 +6,13 @@ namespace Admin;
 
 use Admin\Controls\IMenuFactory;
 use Admin\Controls\Menu;
+use App\Admin\Controls\AdminFormFactory;
+use App\Admin\Controls\AdminGridFactory;
 use Nette\Application\BadRequestException;
 use Nette\Application\UI\Presenter;
+use Nette\DI\Container;
+use Nette\Utils\FileSystem;
+use StORM\Entity;
 
 abstract class BackendPresenter extends Presenter
 {
@@ -15,6 +20,20 @@ abstract class BackendPresenter extends Presenter
 	
 	/** @inject */
 	public IMenuFactory $menuFactory;
+	
+	public ?string $backLink = null;
+	
+	/** @inject */
+	public AdminGridFactory $gridFactory;
+	
+	public AdminFormFactory $formFactory;
+	
+	public function __construct(Container $container)
+	{
+		$this->formFactory = $container->getService('admin.formFactory');
+		
+		parent::__construct();
+	}
 	
 	public function checkRequirements($element): void
 	{
@@ -59,5 +78,85 @@ abstract class BackendPresenter extends Presenter
 		$dirname = \dirname((new \ReflectionClass(static::class))->getFileName());
 		
 		return [$dirname . '/../../Admin/@layout.latte'];
+	}
+	
+	
+	protected function createBackButton(string $link, ...$arguments): string
+	{
+		if ($this->backLink) {
+			$link = 'restoreBackLink!';
+			$arguments = ['backLink' => $this->backLink];
+		}
+		
+		return $this->createButtonWithClass($link, '<i class="fa fa-sm fa-undo-alt"></i>&nbsp;Zpět', 'btn btn-sm btn-secondary', ...$arguments);
+	}
+	
+	public function handleRestoreBackLink(string $backLink)
+	{
+		$this->restoreRequest($backLink);
+	}
+	
+	protected function createNewItemButton(string $link, array $args = [], string $label = null): string
+	{
+		return "<a href=\"" . $this->link($link, $args) . "\"><button class='btn btn-success btn-sm'><i class='fa fa-sm fa-plus m-1'></i>" . ($label ?: 'Nová položka') . "</button></a>";
+	}
+	
+	protected function createButtonWithClass(string $link, string $label, string $class, ...$arguments): string
+	{
+		return "<a href=\"" . $this->link($link, ...$arguments) . "\"><button class=\"$class\">$label</button></a>";
+	}
+	
+	protected function createButton(string $link, string $label, ...$arguments): string
+	{
+		return "<a href=\"" . $this->link($link, ...$arguments) . "\"><button class='btn btn-sm btn-primary'>$label</button></a>";
+	}
+	
+	protected function createFlag(string $mutation): string
+	{
+		[$flagsPath, $flagsExt, $flagsMap] = $this->formFactory->getDefaultFlagsConfiguration();
+		$baseUrl = $this->getHttpRequest()->getUrl()->getBaseUrl();
+		
+		return "<img class='mutation-flag' src='$baseUrl$flagsPath/$flagsMap[$mutation].$flagsExt' alt='$mutation' title='$mutation'>";
+	}
+	
+	
+	
+	protected function createImageDirs(string $dir)
+	{
+		$subDirs = ['origin', 'detail', 'thumb'];
+		$rootDir = $this->context->parameters['wwwDir'] . \DIRECTORY_SEPARATOR . 'userfiles' . \DIRECTORY_SEPARATOR . $dir;
+		FileSystem::createDir($rootDir);
+		
+		foreach ($subDirs as $subDir) {
+			FileSystem::createDir($rootDir . \DIRECTORY_SEPARATOR . $subDir);
+		}
+	}
+	
+	protected function onDeleteImage(Entity $object)
+	{
+		if ($object->imageFileName) {
+			$subDirs = ['origin', 'detail', 'thumb'];
+			$dir = $object::IMAGE_DIR;
+			
+			foreach ($subDirs as $subDir) {
+				$rootDir = $this->context->parameters['wwwDir'] . \DIRECTORY_SEPARATOR . 'userfiles' . \DIRECTORY_SEPARATOR . $dir;
+				FileSystem::delete($rootDir . \DIRECTORY_SEPARATOR . $subDir . \DIRECTORY_SEPARATOR . $object->imageFileName);
+			}
+			
+			$object->update(['imageFileName' => null]);
+		}
+	}
+	
+	protected function onDeletePage(Entity $object)
+	{
+		//@TODO
+		if ($page = $this->pageRepository->getPageByTypeAndParams('product_list', null, ['producer' => $object])) {
+			$page->delete();
+		}
+	}
+	
+	protected function onDelete(Entity $object)
+	{
+		$this->onDeleteImage($object);
 	}
 }
