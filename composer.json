@@ -8,15 +8,15 @@
 	"autoload-dev": {
 		"psr-4": { "Admin\\Tests\\": "tests/" }
 	},
-	"require" :
+	"require":
 	{
 		"php":">=7.4",
-		"nette/application":"~3.0",
-		"nette/security":"~3.0",
-		"nette/forms":"~3.0",
-		"nette/utils":"~3.0",
-		"nette/di":"~3.0",
-		"nette/component-model":"~3.0",
+		"nette/application":"^3.0",
+		"nette/security":"^3.0",
+		"nette/forms":"^3.0",
+		"nette/utils":"^3.0",
+		"nette/di":"^3.0",
+		"nette/component-model":"^3.0",
 		"tracy/tracy":"*",
 		"liquiddesign/storm": "@dev",
 		"liquiddesign/forms": "@dev",
