@@ -7,7 +7,7 @@ namespace Admin;
 use Admin\Controls\IMenuFactory;
 use Admin\Controls\Menu;
 use App\Admin\Controls\AdminFormFactory;
-use App\Admin\Controls\AdminGridFactory;
+use Admin\Controls\AdminGridFactory;
 use Nette\Application\BadRequestException;
 use Nette\Application\UI\Presenter;
 use Nette\DI\Container;
@@ -25,6 +25,9 @@ abstract class BackendPresenter extends Presenter
 	
 	/** @inject */
 	public AdminGridFactory $gridFactory;
+
+	/** @inject */
+	public Container $container;
 	
 	public AdminFormFactory $formFactory;
 	
@@ -124,7 +127,7 @@ abstract class BackendPresenter extends Presenter
 	protected function createImageDirs(string $dir)
 	{
 		$subDirs = ['origin', 'detail', 'thumb'];
-		$rootDir = $this->context->parameters['wwwDir'] . \DIRECTORY_SEPARATOR . 'userfiles' . \DIRECTORY_SEPARATOR . $dir;
+		$rootDir = $this->container->parameters['wwwDir'] . \DIRECTORY_SEPARATOR . 'userfiles' . \DIRECTORY_SEPARATOR . $dir;
 		FileSystem::createDir($rootDir);
 		
 		foreach ($subDirs as $subDir) {
@@ -139,7 +142,7 @@ abstract class BackendPresenter extends Presenter
 			$dir = $object::IMAGE_DIR;
 			
 			foreach ($subDirs as $subDir) {
-				$rootDir = $this->context->parameters['wwwDir'] . \DIRECTORY_SEPARATOR . 'userfiles' . \DIRECTORY_SEPARATOR . $dir;
+				$rootDir = $this->container->parameters['wwwDir'] . \DIRECTORY_SEPARATOR . 'userfiles' . \DIRECTORY_SEPARATOR . $dir;
 				FileSystem::delete($rootDir . \DIRECTORY_SEPARATOR . $subDir . \DIRECTORY_SEPARATOR . $object->imageFileName);
 			}
 			
