@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Admin\Controls;
 
-use App\Admin\Controls\AdminForm;
-use App\Admin\Controls\FormRenderer;
-use Nette\Application\UI\Presenter;
 use Web\DB\PageRepository;
 use Forms\FormFactory;
 
