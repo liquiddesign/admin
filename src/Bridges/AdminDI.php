@@ -9,15 +9,8 @@ use Admin\Controls\ILoginFormFactory;
 use Admin\Controls\IMenuFactory;
 use Admin\DB\AdministratorRepository;
 use Admin\Route;
-use Nette\DI\Definitions\ServiceDefinition;
 use Nette\Schema\Expect;
 use Nette\Schema\Schema;
-use Pages\Bridges\PagesTracy;
-use Pages\Router;
-use Security\Authenticator;
-use Security\DB\AccountRepository;
-use Security\DB\PermissionRepository;
-use Security\DB\RoleRepository;
 
 class AdminDI extends \Nette\DI\CompilerExtension
 {
