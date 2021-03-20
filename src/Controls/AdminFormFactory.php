@@ -14,7 +14,7 @@ class AdminFormFactory
 {
 	private PageRepository $pageRepository;
 	
-	private FormFactory $formFactory;
+	public FormFactory $formFactory;
 	
 	public function __construct(FormFactory $formFactory, PageRepository $pageRepository)
 	{
@@ -38,5 +38,4 @@ class AdminFormFactory
 		
 		return $form;
 	}
-	
 }

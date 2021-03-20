@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Admin;
 
+use Admin\Controls\AdminFormFactory;
 use Admin\Controls\IMenuFactory;
 use Admin\Controls\Menu;
-use App\Admin\Controls\AdminFormFactory;
 use Admin\Controls\AdminGridFactory;
 use Nette\Application\BadRequestException;
 use Nette\Application\UI\Presenter;
@@ -28,15 +28,9 @@ abstract class BackendPresenter extends Presenter
 
 	/** @inject */
 	public Container $container;
-
+	
+	/** @inject */
 	public AdminFormFactory $formFactory;
-
-	public function __construct(Container $container)
-	{
-		$this->formFactory = $container->getService('admin.formFactory');
-
-		parent::__construct();
-	}
 
 	public function checkRequirements($element): void
 	{
@@ -116,7 +110,7 @@ abstract class BackendPresenter extends Presenter
 
 	protected function createFlag(string $mutation): string
 	{
-		[$flagsPath, $flagsExt, $flagsMap] = $this->formFactory->getDefaultFlagsConfiguration();
+		[$flagsPath, $flagsExt, $flagsMap] = $this->formFactory->formFactory->getDefaultFlagsConfiguration();
 		$baseUrl = $this->getHttpRequest()->getUrl()->getBaseUrl();
 
 		return "<img class='mutation-flag' src='$baseUrl$flagsPath/$flagsMap[$mutation].$flagsExt' alt='$mutation' title='$mutation'>";
