@@ -6,8 +6,7 @@ namespace Admin\Admin;
 
 use Admin\BackendPresenter;
 use Admin\Controls\Menu;
-use App\Admin\Controls\AdminForm;
-use App\Admin\PresenterTrait;
+use Admin\Controls\AdminForm;
 use Forms\Form;
 use Nette\Utils\Html;
 use Security\Authorizator;
