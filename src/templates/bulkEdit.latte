@@ -1,0 +1,130 @@
+{define content}
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-1">
+                <div class="col-sm-6">
+                    <h1>{@$headerLabel}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{plink :Eshop:Admin:Dashboard:default}">Domů</a></li>
+                        {ifset $headerTree}
+                            {foreach $headerTree as $item}
+                                <li class="breadcrumb-item {if $iterator->isLast()}active{/if}">
+                                    {ifset $item[1]}
+                                        {ifset $item[2]}
+                                            <a href="{plink $item[1], $item[2]}">{$item[0]}</a>
+                                        {else}
+                                            <a href="{plink $item[1]}">{$item[0]}</a>
+                                        {/ifset}
+                                    {else}
+                                        {$item[0]}
+                                    {/ifset}
+                                </li>
+                            {/foreach}
+                        {/ifset}
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="card">
+            <div class="card-header p-3">
+                {if @$displayButtons}
+                    {foreach $displayButtons as $button}
+                        {$button|noescape}
+                    {/foreach}
+                {/if}
+            </div>
+            <div class="card-body p-3">
+                {form $formName}
+
+                    <fieldset>
+                        <legend>HLAVNÍ ÚDAJE</legend>
+
+                        <table class="mt-1 mb-1 w-100">
+                            <tbody>
+                            {input uuid}
+
+
+                            <tr class="m-0 mt-1" id="{$form['bulkType']->getHtmlId()}">
+                                <th class="col-label col-form-label col">
+                                    {label bulkType}
+                                </th>
+
+                                <td class="align-middle">
+                                    {foreach $form['bulkType']->items as $key => $label}
+                                        <div class="form-check">
+                                            <input n:name="bulkType:$key" class="form-check-input">
+                                            <label n:name="bulkType:$key" class="form-check-label">{$label}</label>
+                                        </div>
+                                    {/foreach}
+                                </td>
+                            </tr>
+
+                             {foreach $form['values']->getComponents() as $key => $component}
+                                <tr class="m-0 mt-1 bg-light" id="tr-{$component->getHtmlId()}">
+                                    <th class="col-label col-form-label col">
+                                        <label n:name="values-$key" />
+                                    </th>
+
+                                    <td class="align-middle d-inline-flex align-items-center">
+                                        {input values-$key class: 'form-control form-control-sm'}
+                                        <div class="form-check ml-4">
+                                            <input n:name="keep-$key" class="form-check-input">
+                                            <label n:name="keep-$key" class="form-check-label"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {/foreach}
+
+                            <tr class="m-0 mt-1">
+                                <th class="col-label col-form-label col">
+                                </th>
+
+                                <td class="align-middle">
+                                    <input n:name="submitAndBack" class="btn btn-outline-primary btn-sm">
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </fieldset>
+                {/form}
+            </div>
+        </div>
+
+    </section>
+{/define}
+
+{block scripts}
+    <script n:if="$flashes" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    {foreach $flashes as $flash}
+        <script>
+            toastr.{$flash->type|noescape}({$flash->message});
+        </script>
+    {/foreach}
+    <script>
+        {foreach $presenter[$formName]['values']->getComponents() as $key => $component}
+        // On value change
+        document.getElementById({$component->getHtmlId()}).onchange = function () {
+            document.getElementById({$presenter[$formName]['keep'][$key]->getHtmlId()}).checked = false;
+            document.getElementById("tr-{$component->getHtmlId()|noescape}").classList.remove("bg-light");
+        };
+
+        // On keep checkbox change
+        document.getElementById({$presenter[$formName]['keep'][$key]->getHtmlId()}).onchange = function () {
+            var element = document.getElementById("tr-{$component->getHtmlId()|noescape}");
+            if(this.checked){
+                element.classList.add("bg-light");
+            }else{
+                element.classList.remove("bg-light");
+            }
+
+        };
+        {/foreach}
+
+
+    </script>
+{/block}
