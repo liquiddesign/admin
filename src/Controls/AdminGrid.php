@@ -94,7 +94,7 @@ class AdminGrid extends \Grid\Datagrid
 
 	public function addColumnImage(string $expression, string $dir, string $subDir = 'thumb', string $th = '')
 	{
-		$baseUrl = $this->formFactory->getBaseUrl();
+		$baseUrl = $this->getPresenter()->getHttpRequest()->getUrl()->getBaseUrl();
 
 		return $this->addColumn($th, function (Entity $entity) use ($baseUrl, $dir, $expression, $subDir) {
 
