@@ -16,6 +16,10 @@ use StORM\Entity;
 
 abstract class BackendPresenter extends Presenter
 {
+	public string $wwwDir;
+	
+	public string $tempDir;
+	
 	public Administrator $admin;
 
 	/** @inject */
