@@ -132,18 +132,18 @@ abstract class BackendPresenter extends Presenter
 		}
 	}
 
-	protected function onDeleteImage(Entity $object)
+	protected function onDeleteImage(Entity $object, string $propertyName = 'imageFileName')
 	{
-		if ($object->imageFileName) {
+		if ($object->$propertyName) {
 			$subDirs = ['origin', 'detail', 'thumb'];
 			$dir = $object::IMAGE_DIR;
 
 			foreach ($subDirs as $subDir) {
 				$rootDir = $this->container->parameters['wwwDir'] . \DIRECTORY_SEPARATOR . 'userfiles' . \DIRECTORY_SEPARATOR . $dir;
-				FileSystem::delete($rootDir . \DIRECTORY_SEPARATOR . $subDir . \DIRECTORY_SEPARATOR . $object->imageFileName);
+				FileSystem::delete($rootDir . \DIRECTORY_SEPARATOR . $subDir . \DIRECTORY_SEPARATOR . $object->$propertyName);
 			}
 
-			$object->update(['imageFileName' => null]);
+			$object->update([$propertyName => null]);
 		}
 	}
 
