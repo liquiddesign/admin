@@ -219,7 +219,7 @@ class AdminGrid extends \Grid\Datagrid
 			$img = [];
 			$baseUrl = $this->getPresenter()->getHttpRequest()->getUrl()->getBaseUrl();
 
-			foreach ($this->formFactory->getDefaultMutations() as $mutation) {
+			foreach ($this->formFactory->formFactory->getDefaultMutations() as $mutation) {
 				[$flagsPath, $flagsExt, $flagsMap] = $this->formFactory->getDefaultFlagsConfiguration();
 				$style = $object->getValue($property, $mutation) === null ? 'filter: grayscale(100%);' : '';
 				$img[] = "<img class='mutation-flag' style='$style' src='$baseUrl$flagsPath/$flagsMap[$mutation].$flagsExt' alt='$mutation' title='$mutation'>";
