@@ -283,45 +283,46 @@ class AdminGrid extends \Grid\Datagrid
 
 		return $column;
 	}
-
+	
 	/**
 	 * @param array $processNullColumns Simple array with names of columns to be nulled if empty.
 	 * @param array $processTypes Asociative array where key is name of column and value desired type.
 	 * @param string|null $sourceIdName Name of source primary key
+	 * @param bool $ignore add ignore to update expression
 	 */
-	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null)
+	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null, bool $ignore = false)
 	{
 		$grid = $this;
 		$submit = $this->getForm()->addSubmit('submit', 'Uložit');
 		$submit->setHtmlAttribute('class', 'btn btn-sm btn-primary');
-		$submit->onClick[] = function ($button) use ($grid, $processNullColumns, $processTypes, $sourceIdName) {
+		$submit->onClick[] = function ($button) use ($grid, $processNullColumns, $processTypes, $sourceIdName, $ignore) {
 			foreach ($grid->getInputData() as $id => $data) {
 				if (empty($data)) {
 					continue;
 				}
-
+				
 				foreach ($processNullColumns as $column) {
 					$data[$column] = $data[$column] ?? null;
 				}
-
+				
 				foreach ($processTypes as $key => $value) {
 					if (\array_search($key, $processNullColumns) !== false && $data[$key] === null) {
 						continue;
 					}
-
+					
 					$newValue = $data[$key];
-
+					
 					if ($value == 'float') {
 						$data[$key] = \floatval(\str_replace(',', '.', \str_replace('.', '', $newValue)));
 						continue;
 					}
-
+					
 					$data[$key] = \settype($newValue, $value) ? $newValue : null;
 				}
-
-				$grid->getSource()->where($sourceIdName ?? $grid->getSourceIdName(), $id)->update($data);
+				
+				$grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
 			}
-
+			
 			$grid->getPresenter()->flashMessage('Uloženo', 'success');
 			$grid->getPresenter()->redirect('this');
 		};
