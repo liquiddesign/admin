@@ -127,4 +127,36 @@ class AdminForm extends \Forms\Form
 		
 		return $this[$name] = $element;
 	}
+	
+	public function bind(?Structure $mainStructure, array $containerStructures = [], bool $setDefaultValues = true): void
+	{
+		foreach ($this->getComponents(true, BaseControl::class) as $control) {
+			$structure = $mainStructure;
+			$name = $control->getName();
+			
+			if ($control->getParent() instanceof LocaleContainer) {
+				$name = $control->getParent()->getName();
+			} elseif ($control->getParent() instanceof Container) {
+				
+				if (!isset($containerStructures[$control->getParent()->getName()])) {
+					continue;
+				}
+				
+				$structure = $containerStructures[$control->getParent()->getName()];
+			}
+			
+			if (!$structure || !$structure->getColumn($name)) {
+				continue;
+			}
+			
+			if ($control instanceof TextBase) {
+				$control->setNullable($structure->getColumn($name)->isNullable());
+			}
+			
+			if ($setDefaultValues) {
+				$defaultValue = (new \ReflectionClass($structure->getColumn($name)->getEntityClass()))->getDefaultProperties()[$structure->getColumn($name)->getPropertyName()] ?? null;
+				$control->setDefaultValue($structure->getColumn($name)->getDefault() ?? $defaultValue);
+			}
+		}
+	}
 }
