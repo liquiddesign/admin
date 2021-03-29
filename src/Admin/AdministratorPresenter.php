@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Admin\Admin;
 
+use Admin\Admin\Controls\AccountFormFactory;
 use Admin\BackendPresenter;
 use Admin\DB\Administrator;
 use Admin\DB\AdministratorRepository;
 use Admin\Controls\AdminForm;
-use Eshop\Admin\Controls\AccountFormFactory;
 use Forms\Form;
 use Messages\DB\TemplateRepository;
 use Nette\Mail\Mailer;
