@@ -6,10 +6,12 @@ namespace Admin\Controls;
 
 use Forms\Form;
 use Grid\Column;
+use Grid\Datalist;
 use Nette\Application\ApplicationException;
 use Nette\Forms\Controls\Checkbox;
 use Nette\Forms\Controls\SelectBox;
 use Nette\Forms\Controls\TextInput;
+use Nette\Http\Session;
 use Nette\Utils\Html;
 use StORM\Entity;
 use StORM\ICollection;
@@ -32,7 +34,9 @@ class AdminGrid extends \Grid\Datagrid
 
 	private AdminFormFactory $formFactory;
 
-	public function __construct(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false)
+	private ?Session $session;
+
+	public function __construct(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false, ?Session $session = null)
 	{
 		parent::__construct($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId);
 
@@ -42,7 +46,7 @@ class AdminGrid extends \Grid\Datagrid
 			}
 		};
 
-		$this->onAnchor[] = function (AdminGrid $grid) {
+		$this->onAnchor[] = function (AdminGrid $grid) use ($session) {
 			$grid->template->setFile(__DIR__ . '/adminGrid.latte');
 			$grid->template->paginator = $grid->getPaginator(true);
 			$grid->template->onpage = $grid->getName() . '-onpage';
@@ -63,7 +67,12 @@ class AdminGrid extends \Grid\Datagrid
 					}
 				};
 			}
+
+			$grid->onLoadState[] = Datalist::loadSession($session->getSection($grid->getName()));
+			$grid->onSaveState[] = Datalist::saveSession($session->getSection($grid->getName()));
 		};
+
+		$this->session = $session;
 	}
 
 	protected function createComponentFilterForm(): \Nette\Application\UI\Form
@@ -96,7 +105,7 @@ class AdminGrid extends \Grid\Datagrid
 	{
 		return $this->addColumn($th, function (Entity $entity) use ($dir, $expression, $subDir) {
 			$baseUrl = $this->getPresenter()->getHttpRequest()->getUrl()->getBaseUrl();
-			
+
 			foreach (\explode('.', $expression) as $property) {
 				$entity = $entity->$property;
 			}
@@ -283,7 +292,7 @@ class AdminGrid extends \Grid\Datagrid
 
 		return $column;
 	}
-	
+
 	/**
 	 * @param array $processNullColumns Simple array with names of columns to be nulled if empty.
 	 * @param array $processTypes Asociative array where key is name of column and value desired type.
@@ -300,29 +309,29 @@ class AdminGrid extends \Grid\Datagrid
 				if (empty($data)) {
 					continue;
 				}
-				
+
 				foreach ($processNullColumns as $column) {
 					$data[$column] = $data[$column] ?? null;
 				}
-				
+
 				foreach ($processTypes as $key => $value) {
 					if (\array_search($key, $processNullColumns) !== false && $data[$key] === null) {
 						continue;
 					}
-					
+
 					$newValue = $data[$key];
-					
+
 					if ($value == 'float') {
 						$data[$key] = \floatval(\str_replace(',', '.', \str_replace('.', '', $newValue)));
 						continue;
 					}
-					
+
 					$data[$key] = \settype($newValue, $value) ? $newValue : null;
 				}
-				
+
 				$grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
 			}
-			
+
 			$grid->getPresenter()->flashMessage('Uloženo', 'success');
 			$grid->getPresenter()->redirect('this');
 		};
@@ -408,6 +417,8 @@ class AdminGrid extends \Grid\Datagrid
 
 		$reset = $grid->getFilterForm()->addSubmit('reset', 'Zrušit')->setHtmlAttribute('class', 'btn btn-sm btn-secondary');
 		$reset->onClick[] = function () use ($grid, $resetLink) {
+			$this->clearSession($this->session->getSection($grid->getName()));
+
 			if (isset($resetLink[1])) {
 				$grid->getPresenter()->redirect($resetLink[0], $resetLink[1]);
 			} else {
