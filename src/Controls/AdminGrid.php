@@ -46,7 +46,10 @@ class AdminGrid extends \Grid\Datagrid
 			}
 		};
 
-		$this->onAnchor[] = function (AdminGrid $grid) use ($session) {
+		$this->onLoadState[] = Datalist::loadSession($session->getSection('gridState'));
+		$this->onSaveState[] = Datalist::saveSession($session->getSection('gridState'));
+
+		$this->onAnchor[] = function (AdminGrid $grid) {
 			$grid->template->setFile(__DIR__ . '/adminGrid.latte');
 			$grid->template->paginator = $grid->getPaginator(true);
 			$grid->template->onpage = $grid->getName() . '-onpage';
@@ -67,9 +70,6 @@ class AdminGrid extends \Grid\Datagrid
 					}
 				};
 			}
-
-			$grid->onLoadState[] = Datalist::loadSession($session->getSection($grid->getName()));
-			$grid->onSaveState[] = Datalist::saveSession($session->getSection($grid->getName()));
 		};
 
 		$this->session = $session;
