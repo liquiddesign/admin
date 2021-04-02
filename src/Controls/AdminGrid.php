@@ -45,9 +45,14 @@ class AdminGrid extends \Grid\Datagrid
 				$tbody->addHtml((\Nette\Utils\Html::el('tr')->addHtml(\Nette\Utils\Html::el('td', ['colspan' => \count($columns)])->setHtml('<i>Žádný výsledek. Zkuste změnit nebo vymazat filtry.</i>')->class('text-center p-2'))));
 			}
 		};
-
-		$this->onLoadState[] = Datalist::loadSession($session->getSection('gridState'));
-		$this->onSaveState[] = Datalist::saveSession($session->getSection('gridState'));
+		
+		$this->onLoadState[] = function (Datalist $datalist, $params) use ($session) {
+			Datalist::loadSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getName()));
+		};
+		
+		$this->onSaveState[] = function (Datalist $datalist, $params) use ($session) {
+			Datalist::saveSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getName()));
+		};
 
 		$this->onAnchor[] = function (AdminGrid $grid) {
 			$grid->template->setFile(__DIR__ . '/adminGrid.latte');
@@ -417,7 +422,9 @@ class AdminGrid extends \Grid\Datagrid
 
 		$reset = $grid->getFilterForm()->addSubmit('reset', 'Zrušit')->setHtmlAttribute('class', 'btn btn-sm btn-secondary');
 		$reset->onClick[] = function () use ($grid, $resetLink) {
-			$this->clearSession($this->session->getSection($grid->getName()));
+			// for persistance session storage
+			$grid->setFilters(null);
+			$grid->setPage(1);
 
 			if (isset($resetLink[1])) {
 				$grid->getPresenter()->redirect($resetLink[0], $resetLink[1]);
