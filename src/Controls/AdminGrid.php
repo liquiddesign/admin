@@ -47,11 +47,11 @@ class AdminGrid extends \Grid\Datagrid
 		};
 		
 		$this->onLoadState[] = function (Datalist $datalist, $params) use ($session) {
-			Datalist::loadSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getName()));
+			Datalist::loadSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getPresenter()->getName() . $datalist->getName()));
 		};
 		
 		$this->onSaveState[] = function (Datalist $datalist, $params) use ($session) {
-			Datalist::saveSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getName()));
+			Datalist::saveSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getPresenter()->getName() . $datalist->getName()));
 		};
 
 		$this->onAnchor[] = function (AdminGrid $grid) {

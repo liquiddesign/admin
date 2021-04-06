@@ -57,11 +57,14 @@ class BootstrapRenderer extends DefaultRenderer
 				
 				if ($controlMutation) {
 					$activeMutation = $form->getActiveMutation();
-					
 					$pair->setAttribute('data-mutation', $controlMutation);
 					
+					if (strpos($control->getHtmlId(), Form::MUTATION_TRANSLATOR_NAME) !== false) {
+						$pair->setAttribute('class', $pair->getAttribute('class') . ' translated');
+					}
+					
 					if ($controlMutation !== $activeMutation && $activeMutation !== null) {
-						$pair->hidden(true);
+						$pair->setAttribute('class', $pair->getAttribute('class') . ' inactive');
 					}
 				}
 			}
@@ -139,7 +142,7 @@ class BootstrapRenderer extends DefaultRenderer
 		$el = Html::el();
 		if ($control instanceof Nette\Forms\Controls\RadioList) {
 			foreach ($control->getItems() as $key => $item) {
-				$el->addHtml('<div class="form-check">');
+				$el->addHtml('<div class="form-check" style="display: inline-block; margin-right: 10px;">');
 				$el->addHtml($control->getControlPart($key)->class('form-check-input'));
 				$el->addHtml($control->getLabelPart($key)->class('form-check-label'));
 				$el->addHtml('</div>');
@@ -348,5 +351,4 @@ class BootstrapRenderer extends DefaultRenderer
 		
 		return $s;
 	}
-	
 }
