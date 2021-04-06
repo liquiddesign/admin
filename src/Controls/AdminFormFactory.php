@@ -29,7 +29,7 @@ class AdminFormFactory
 		$form->addHidden('uuid')->setNullable();
 		$form->addGroup('HLAVNÍ ÚDAJE');
 		
-		if ($mutationSelector) {
+		if ($mutationSelector && \count($form->getMutations()) > 1) {
 			$form->addMutationSelector('Zvolte mutaci');
 			if ($translatedCheckbox) {
 				$form->addTranslatedCheckbox('Mutace je aktivní');
