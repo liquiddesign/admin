@@ -34,6 +34,8 @@ class AdminForm extends \Forms\Form
 	
 	public function addSubmits(bool $continue = false, bool $stayPut = true)
 	{
+		$this->addGroup();
+		
 		if ($stayPut) {
 			$this->addSubmit('submit', 'Uložit');
 		}

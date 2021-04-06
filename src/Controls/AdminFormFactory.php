@@ -19,7 +19,7 @@ class AdminFormFactory
 		$this->pageRepository = $pageRepository;
 	}
 	
-	public function create(): AdminForm
+	public function create(bool $mutationSelector = false, bool $translatedCheckbox = true): AdminForm
 	{
 		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->formFactory->create(AdminForm::class);
@@ -28,6 +28,14 @@ class AdminFormFactory
 		$form->setRenderer(new BootstrapRenderer());
 		$form->addHidden('uuid')->setNullable();
 		$form->addGroup('HLAVNÍ ÚDAJE');
+		
+		if ($mutationSelector) {
+			$form->addMutationSelector('Zvolte mutaci');
+			if ($translatedCheckbox) {
+				$form->addTranslatedCheckbox('Mutace je aktivní');
+			}
+			$form->addGroup();
+		}
 		
 		$form->onError[] = function (AdminForm $form){
 			$form->getPresenter()->flashMessage('Chybně vyplněný formulář!','error');
