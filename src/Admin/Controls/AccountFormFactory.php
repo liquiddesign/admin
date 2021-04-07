@@ -101,8 +101,11 @@ class AccountFormFactory
 		return $form;
 	}
 
-	public function success(AdminForm $form, string $emailTemplate = 'lostPassword.changed', array $emailParams = []): void
+	public function success(AdminForm $form): void
 	{
+		$emailTemplate = 'lostPassword.changed';
+		$emailParams = [];
+		
 		$values = $form->getValues('array')['account'];
 
 		if ($values['password']) {
