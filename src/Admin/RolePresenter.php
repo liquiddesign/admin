@@ -26,6 +26,9 @@ class RolePresenter extends BackendPresenter
 
 	/** @inject */
 	public PermissionRepository $permissionRepository;
+	
+	/** @inject */
+	public DIConnection $stm;
 
 	public function createComponentGrid()
 	{

@@ -48,7 +48,8 @@ class Menu extends Control
 		$items = $this->items;
 		
 		foreach ($items as $item) {
-			if ($this->admin->isAllowed($item->link)) {
+			
+			if ($item->link === null || $this->admin->isAllowed($item->link)) {
 				$active = false;
 				
 				foreach ($item->items as $key => $subItem) {
@@ -58,13 +59,11 @@ class Menu extends Control
 					
 					if ($this->getPresenter()->isLinkCurrent(\substr($subItem->link, 0, \strrpos($subItem->link, ':')). ":*")) {
 						$subItem->active = $active = true;
-						
-						/*if ($this->getPresenter()->getActiveMenuLink()) {
-							if ($this->getPresenter()->getActiveMenuLink() !== $subItem->link) {
-								$subItem->active = false;
-							}
-						}*/
 					}
+				}
+				
+				if (!$item->items && $item->link === null) {
+					continue;
 				}
 				
 				$item->active = $active;
