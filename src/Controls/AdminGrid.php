@@ -550,16 +550,16 @@ class AdminGrid extends \Grid\Datagrid
 
 				$keep->addCheckbox($nameParsed, 'Původní')->setDefaultValue(true);
 
-				$rules = clone $component->getRules();
+				//$rules = clone $component->getRules();
 				$component->getRules()->reset();
-				$newRules = $component->addConditionOn($keep[$nameParsed], $form::EQUAL, false);
+				/*$newRules = $component->addConditionOn($keep[$nameParsed], $form::EQUAL, false);
 
 				foreach ($rules->getIterator() as $rule) {
 					try {
 						$newRules->addRule($rule->validator, $rule->message, $rule->arg);
 					} catch (\Exception $e) {
 					}
-				}
+				}*/
 
 				$values->addComponent($component, $nameParsed);
 			}
