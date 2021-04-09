@@ -36,6 +36,11 @@ class Administrator extends \Nette\Security\User
 	{
 		$this->fallbackLink = $fallbackLink;
 	}
+
+	public function getFallbackLink(): ?string
+	{
+		return $this->fallbackLink;
+	}
 	
 	public function getDefaultLink(): string
 	{
