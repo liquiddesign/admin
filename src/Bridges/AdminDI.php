@@ -18,6 +18,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 	{
 		return Expect::structure([
 			'defaultLink' => Expect::string()->required(true),
+			'fallbackLink' => Expect::string()->required(true),
 			'menu' => Expect::array([]),
 			'mutations' => Expect::list([]),
 		]);
@@ -45,6 +46,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		
 		$adminDef = $builder->addDefinition($this->prefix('administrator'))->setType(Administrator::class)->setAutowired(false);
 		$adminDef->addSetup('setDefaultLink', [$config->defaultLink]);
+		$adminDef->addSetup('setFallbackLink', [$config->fallbackLink]);
 		
 		if ($builder->hasDefinition('routing.router')) {
 			/** @var \Nette\DI\Definitions\ServiceDefinition $routerListDef */
