@@ -11,6 +11,7 @@ use Admin\Controls\AdminGridFactory;
 use Nette\Application\BadRequestException;
 use Nette\Application\UI\Presenter;
 use Nette\DI\Container;
+use Nette\Localization\Translator;
 use Nette\Utils\FileSystem;
 use StORM\Entity;
 
@@ -35,6 +36,9 @@ abstract class BackendPresenter extends Presenter
 	
 	/** @inject */
 	public AdminFormFactory $formFactory;
+
+	/** @inject */
+	public Translator $translator;
 
 	public function checkRequirements($element): void
 	{
