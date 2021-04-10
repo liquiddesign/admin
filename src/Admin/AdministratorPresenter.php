@@ -38,7 +38,7 @@ class AdministratorPresenter extends BackendPresenter
 	public function createComponentGrid()
 	{
 		$source = $this->adminRepo->many()->where('fk_role != "servis" OR fk_role IS NULL');
-
+		
 		$grid = $this->gridFactory->create($source, 20, 'fullName', 'ASC', true);
 		$grid->addColumnSelector();
 		
@@ -60,6 +60,10 @@ class AdministratorPresenter extends BackendPresenter
 		$form = $this->formFactory->create();
 		
 		$form->addText('fullName', 'Jméno')->setRequired();
+		
+		$form->addSelect('role', 'Role', $this->roleRepo->many()->whereNot('uuid', 'servis')->toArrayOf('name'))->setPrompt('Žádná');
+		
+		
 		$this->accountFormFactory->addContainer($form, true, !$this->getParameter('administrator'));
 		$form->addSubmits(!$this->getParameter('administrator'));
 		
