@@ -5,7 +5,6 @@ namespace Admin\DB;
 use Nette\Security\IIdentity;
 use Security\DB\Account;
 use Security\DB\IUser;
-use Security\DB\Role;
 use StORM\RelationCollection;
 
 /**
@@ -25,7 +24,11 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	 */
 	public RelationCollection $accounts;
 	
-	protected ?string $role = null;
+	/**
+	 * @constraint{"onUpdate":"SET NULL","onDelete":"SET NULL"}
+	 * @relation
+	 */
+	public ?Role $role = null;
 	
 	protected ?Account $account;
 	
@@ -36,7 +39,7 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	
 	function getRoles(): array
 	{
-		return $this->role ? [$this->role] : [];
+		return $this->getValue('role') ? [$this->getValue('role')] : [];
 	}
 	
 	public function getAccount(): ?Account

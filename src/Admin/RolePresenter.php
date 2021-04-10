@@ -10,9 +10,9 @@ use Admin\Controls\AdminForm;
 use Forms\Form;
 use Nette\Utils\Html;
 use Security\Authorizator;
-use Security\DB\PermissionRepository;
-use Security\DB\Role;
-use Security\DB\RoleRepository;
+use Admin\DB\PermissionRepository;
+use Admin\DB\Role;
+use Admin\DB\RoleRepository;
 use StORM\DIConnection;
 use StORM\ICollection;
 
@@ -120,7 +120,7 @@ class RolePresenter extends BackendPresenter
 	{
 		/** @var Menu $menu */
 		$menu = $this->getComponent('menu');
-		/** @var \Security\DB\Role $role */
+		/** @var \Admin\DB\Role $role */
 		$role = $this->getParameter('role');
 		
 		$resources = [];

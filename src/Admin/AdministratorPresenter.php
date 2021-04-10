@@ -13,7 +13,7 @@ use Forms\Form;
 use Messages\DB\TemplateRepository;
 use Nette\Mail\Mailer;
 use Security\DB\AccountRepository;
-use Security\DB\RoleRepository;
+use Admin\DB\RoleRepository;
 
 class AdministratorPresenter extends BackendPresenter
 {
@@ -37,13 +37,13 @@ class AdministratorPresenter extends BackendPresenter
 	
 	public function createComponentGrid()
 	{
-		$source = $this->adminRepo->many()->where('account.fk_role != "servis" OR account.fk_role IS NULL');
+		$source = $this->adminRepo->many()->where('fk_role != "servis" OR fk_role IS NULL');
 
 		$grid = $this->gridFactory->create($source, 20, 'fullName', 'ASC', true);
 		$grid->addColumnSelector();
 		
 		$grid->addColumnText('Jméno', 'fullName', '%s', 'fullName');
-		$grid->addColumnText('Role', 'account.role.name', '%s');
+		$grid->addColumnText('Role', 'role.name', '%s');
 		$grid->addColumnLinkDetail('Detail');
 		
 		$grid->addColumnActionDelete([$this->accountFormFactory, 'deleteAccountHolder'], true);
@@ -70,7 +70,7 @@ class AdministratorPresenter extends BackendPresenter
 			
 			$administrator = $this->adminRepo->syncOne($values, null, true);
 			$this->accountFormFactory->onCreateAccount[] = function ($account) use ($administrator) {
-				$administrator->update(['account' => $account]);
+				$administrator->update(['accounts' => [$account]]);
 			};
 			$this->accountFormFactory->success($form);
 			
