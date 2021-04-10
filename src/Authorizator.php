@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Admin;
 
 use Nette\Security\IAuthorizator;
-use Security\DB\PermissionRepository;
+use Admin\DB\PermissionRepository;
 
 class Authorizator implements IAuthorizator
 {
