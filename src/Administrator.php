@@ -6,16 +6,14 @@ namespace Admin;
 
 use Nette\Security\Authorizator;
 use Nette\Security\IAuthenticator;
-use Nette\Security\IAuthorizator;
-use Nette\Security\IIdentity;
 use Nette\Security\IUserStorage;
-use Nette\Security\UserStorage;
 use Security\DB\PermissionRepository;
-use StORM\Collection;
 
 class Administrator extends \Nette\Security\User
 {
 	private ?string $defaultLink = null;
+
+	private ?string $fallbackLink = null;
 	
 	private PermissionRepository $permissionRepository;
 	
@@ -33,6 +31,16 @@ class Administrator extends \Nette\Security\User
 	{
 		$this->defaultLink = $defaultLink;
 	}
+
+	public function setFallbackLink(string $fallbackLink): void
+	{
+		$this->fallbackLink = $fallbackLink;
+	}
+
+	public function getFallbackLink(): ?string
+	{
+		return $this->fallbackLink;
+	}
 	
 	public function getDefaultLink(): string
 	{
@@ -41,13 +49,14 @@ class Administrator extends \Nette\Security\User
 		}
 		
 		if (!$this->isAllowed($this->defaultLink)) {
-			$resource = isset($this->getRoles()[0]) ? $this->permissionRepository->many()->where('fk_role', $this->getRoles()[0])->firstValue('resource') : null;
-			
-			if ($resource === null) {
-				throw new \DomainException('Empty permission table');
-			}
-			
-			return \substr($resource, -1) === '*' ? \substr_replace($resource, 'default', -1) : $resource;
+			return $this->fallbackLink;
+//			$resource = isset($this->getRoles()[0]) ? $this->permissionRepository->many()->where('fk_role', $this->getRoles()[0])->firstValue('resource') : null;
+//
+//			if ($resource === null) {
+//				throw new \DomainException('Empty permission table');
+//			}
+//
+//			return \substr($resource, -1) === '*' ? \substr_replace($resource, 'default', -1) : $resource;
 		}
 		
 		return $this->defaultLink;

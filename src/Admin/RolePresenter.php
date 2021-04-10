@@ -60,8 +60,9 @@ class RolePresenter extends BackendPresenter
 
 			$role = $this->roleRepository->syncOne($values);
 
+			$this->permissionRepository->syncOne(['resource' => $this->admin->getFallbackLink(), 'privilege' => 777, 'role' => $role->getPK()]);
+
 			$this->flashMessage('Uloženo', 'success');
-			
 			$form->processRedirect('detail', 'default', [$role]);
 		};
 
