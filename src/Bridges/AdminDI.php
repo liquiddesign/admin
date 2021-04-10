@@ -54,6 +54,10 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			$routerListDef->addSetup('add', [new \Nette\DI\Definitions\Statement(Route::class, [$config->mutations])]);
 		}
 		
+		// add authorizator
+		$authorizator = $builder->addDefinition('authorizator')->setType(Authorizator::class);
+		$authorizator->addSetup('setSuperRole', [$config['superRole']]);
+		
 		return;
 	}
 }
