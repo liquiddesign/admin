@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Admin\Bridges;
 
 use Admin\Administrator;
+use Admin\Authorizator;
 use Admin\Controls\ILoginFormFactory;
 use Admin\Controls\IMenuFactory;
 use Admin\DB\AdministratorRepository;
@@ -21,6 +22,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			'fallbackLink' => Expect::string()->required(true),
 			'menu' => Expect::array([]),
 			'mutations' => Expect::list([]),
+			'superRole' => Expect::string(null),
 		]);
 	}
 	
