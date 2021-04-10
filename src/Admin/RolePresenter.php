@@ -9,7 +9,7 @@ use Admin\Controls\Menu;
 use Admin\Controls\AdminForm;
 use Forms\Form;
 use Nette\Utils\Html;
-use Security\Authorizator;
+use Admin\Authorizator;
 use Admin\DB\PermissionRepository;
 use Admin\DB\Role;
 use Admin\DB\RoleRepository;

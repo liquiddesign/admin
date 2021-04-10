@@ -58,7 +58,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		
 		// add authorizator
 		$authorizator = $builder->addDefinition('authorizator')->setType(Authorizator::class);
-		$authorizator->addSetup('setSuperRole', [$config['superRole']]);
+		$authorizator->addSetup('setSuperRole', [$config->superRole]);
 		
 		return;
 	}
