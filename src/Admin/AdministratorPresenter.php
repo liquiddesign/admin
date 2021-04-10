@@ -74,7 +74,7 @@ class AdministratorPresenter extends BackendPresenter
 			
 			$administrator = $this->adminRepo->syncOne($values, null, true);
 			$this->accountFormFactory->onCreateAccount[] = function ($account) use ($administrator) {
-				$administrator->update(['accounts' => [$account]]);
+				$administrator->accounts->relate([$account]);
 			};
 			$this->accountFormFactory->success($form);
 			
@@ -129,6 +129,10 @@ class AdministratorPresenter extends BackendPresenter
 	{
 		/** @var Form $form */
 		$form = $this->getComponent('newForm');
-		$form->setDefaults($administrator->toArray(['account']));
+		$form->setDefaults($administrator->toArray());
+		
+		if ($account = $administrator->accounts->first()) {
+			$form['account']->setDefaults($account);
+		}
 	}
 }

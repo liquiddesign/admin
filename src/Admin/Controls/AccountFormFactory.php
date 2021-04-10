@@ -146,14 +146,14 @@ class AccountFormFactory
 	
 	public function deleteAccountHolder(IUser $holder)
 	{
-		if ($holder->getAccount()) {
+		/*if ($holder->getAccount()) {
 			$account = $holder->getAccount();
 		}
-		
+
 		$holder->delete();
-		
+
 		if (isset($account)) {
 			$account->delete();
-		}
+		}*/
 	}
 }
