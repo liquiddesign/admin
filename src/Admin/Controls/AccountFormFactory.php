@@ -55,8 +55,6 @@ class AccountFormFactory
 	
 	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true)
 	{
-		$roles = $this->roleRepository->many()->where('this.uuid != :role', ['role' => 'servis'])->toArrayOf('name');
-		
 		$accountContainer = $form->addContainer('account');
 		$accountContainer->addHidden('uuid')->setNullable();
 		$accountContainer->addText('login', 'Login')
