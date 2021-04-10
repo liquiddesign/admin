@@ -132,7 +132,7 @@ class AdministratorPresenter extends BackendPresenter
 		$form->setDefaults($administrator->toArray());
 		
 		if ($account = $administrator->accounts->first()) {
-			$form['account']->setDefaults($account);
+			$form['account']->setDefaults($account->toArray());
 		}
 	}
 }
