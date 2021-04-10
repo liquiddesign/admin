@@ -6,6 +6,7 @@ use Nette\Security\IIdentity;
 use Security\DB\Account;
 use Security\DB\IUser;
 use Security\DB\Role;
+use StORM\RelationCollection;
 
 /**
  * @table
@@ -18,17 +19,19 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	 */
 	public ?string $fullName = null;
 	
-	public ?string $role = null;
-	
 	/**
-	 * @relation
-	 * @constraint
+	 * @relationNxN
+	 * @var \StORM\RelationCollection<\Security\DB\Account>|\Security\DB\Account[]
 	 */
-	public ?Account $account;
+	public RelationCollection $accounts;
+	
+	protected ?string $role = null;
+	
+	protected ?Account $account;
 	
 	function getId()
 	{
-		return $this->getValue('account');
+		return $this->getPK();
 	}
 	
 	function getRoles(): array
@@ -39,5 +42,10 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	public function getAccount(): ?Account
 	{
 		return $this->account;
+	}
+	
+	public function setAccount(Account $account): void
+	{
+		$this->account = $account;
 	}
 }
