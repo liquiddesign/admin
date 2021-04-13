@@ -40,56 +40,59 @@
             <div class="card-body p-3">
                 {form $formName}
 
+                    {var $renderer = $form->getRenderer()}
                     <fieldset>
-                        <legend>HLAVNÍ ÚDAJE</legend>
+                    <legend>HLAVNÍ ÚDAJE</legend>
 
-                        <table class="mt-1 mb-1 w-100">
-                            <tbody>
-                            {input uuid}
+                    <table class="mt-1 mb-1" style="width:auto !important;">
+                    <tbody>
+                {input uuid}
 
 
-                            <tr class="m-0 mt-1" id="{$form['bulkType']->getHtmlId()}">
-                                <th class="col-label col-form-label col">
-                                    {label bulkType}
-                                </th>
+                <tr class="m-0 mt-1" id="{$form['bulkType']->getHtmlId()}">
+                    <th class="col-label col-form-label col">
+                    {label bulkType}
+                    </th>
 
-                                <td class="align-middle">
-                                    {foreach $form['bulkType']->items as $key => $label}
-                                        <div class="form-check" style="display: inline-block; margin-right: 15px;">
-                                            <input n:name="bulkType:$key" class="form-check-input">
-                                            <label n:name="bulkType:$key" class="form-check-label">{$label}</label>
-                                        </div>
-                                    {/foreach}
-                                </td>
-                            </tr>
+                    <td class="align-middle" colspan="2">
+                        {foreach $form['bulkType']->items as $key => $label}
+                            <div class="form-check" style="display: inline-block; margin-right: 15px;">
+                                <input n:name="bulkType:$key" class="form-check-input">
+                                <label n:name="bulkType:$key" class="form-check-label">{$label}</label>
+                            </div>
+                        {/foreach}
+                    </td>
+                    </tr>
 
-                             {foreach $form['values']->getComponents() as $key => $component}
-                                <tr class="m-0 mt-1 bg-light" id="tr-{$component->getHtmlId()}">
-                                    <th class="col-label col-form-label col">
-                                        <label n:name="values-$key" />
-                                    </th>
+                    {foreach $form['values']->getComponents() as $key => $component}
+                        <tr class="m-0 mt-1 bg-light" id="tr-{$component->getHtmlId()}">
+                            <th class="col-label col-form-label col">
+                                <label n:name="values-$key" />
+                            </th>
+                            {$renderer->renderControl($component)|noescape}
+                            <td class="align-middle d-inline-flex align-items-center pr-4">
 
-                                    <td class="align-middle d-inline-flex align-items-center">
-                                        {input values-$key class: 'form-control form-control-sm'}
-                                        <div class="form-check ml-4">
-                                            <input n:name="keep-$key" class="form-check-input">
-                                            <label n:name="keep-$key" class="form-check-label"/>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {/foreach}
+                                <div class="form-check ml-4">
+                                    <input n:name="keep-$key" class="form-check-input">
+                                    <label n:name="keep-$key" class="form-check-label"/>
+                                </div>
+                            </td>
+                        </tr>
 
-                            <tr class="m-0 mt-1">
-                                <th class="col-label col-form-label col">
-                                </th>
 
-                                <td class="align-middle">
-                                    <input n:name="submitAndBack" class="btn btn-outline-primary btn-sm">
-                                </td>
-                            </tr>
+                    {/foreach}
 
-                            </tbody>
-                        </table>
+                    <tr class="m-0 mt-1">
+                        <th class="col-label col-form-label col">
+                        </th>
+
+                        <td class="align-middle">
+                            <input n:name="submitAndBack" class="btn btn-outline-primary btn-sm">
+                        </td>
+                    </tr>
+
+                    </tbody>
+                    </table>
                     </fieldset>
                 {/form}
             </div>
