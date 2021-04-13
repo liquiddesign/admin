@@ -18,7 +18,7 @@ use Security\DB\IUser;
 use Security\DB\RoleRepository;
 
 /**
- * @method onCreateAccount(\Security\DB\Account $account)
+ * @method onCreateAccount(\Security\DB\Account $account, array $values)
  * @method onUpdateAccount(\Security\DB\Account $account, array $values)
  * @method onDeleteAccount()
  */
@@ -27,7 +27,7 @@ class AccountFormFactory
 	use SmartObject;
 
 	/**
-	 * @var callable[]&callable(\Security\DB\Account): void
+	 * @var callable[]&callable(\Security\DB\Account, array): void
 	 */
 	public $onCreateAccount;
 
@@ -133,7 +133,7 @@ class AccountFormFactory
 		if (!$values['uuid']) {
 			/** @var Account $account */
 			$account = $this->accountRepository->createOne($values, true);
-			$this->onCreateAccount($account);
+			$this->onCreateAccount($account, $form->getValues('array'));
 		} else {
 			$account = $this->accountRepository->one($values['uuid'], true);
 			$account->update($values);
