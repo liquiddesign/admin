@@ -18,6 +18,7 @@ use Security\DB\RoleRepository;
 
 /**
  * @method onCreateAccount(\Security\DB\Account $account)
+ * @method onUpdateAccount(\Security\DB\Account $account, array $values)
  * @method onDeleteAccount()
  */
 class AccountFormFactory
@@ -33,6 +34,11 @@ class AccountFormFactory
 	 * @var callable[]&callable(): void
 	 */
 	public $onDeleteAccount;
+
+	/**
+	 * @var callable[]&callable(\Security\DB\Account, array $values): void
+	 */
+	public $onUpdateAccount;
 	
 	private AccountRepository $accountRepository;
 	
@@ -72,22 +78,24 @@ class AccountFormFactory
 		}
 	}
 	
-	public function create()
+	public function create(bool $delete = true)
 	{
 		$form = $this->adminFormFactory->create();
 		
 		$this->addContainer($form);
 		
 		$form->addSubmits();
-		
-		$submit = $form->addSubmit('delete');
-		$class = 'btn btn-outline-danger btn-sm ml-0 mt-1 mb-1 mr-1';
-		$submit->setHtmlAttribute('class', $class)->getControlPrototype()->setName('button')->setHtml('<i class="far fa-trash-alt"></i>');
-		$submit->onClick[] = function (Button $button) {
-			$values = $button->getForm()->getValues('array')['account'];
-			$this->accountRepository->many()->where('uuid', $values['uuid'])->delete();
-			$this->onDeleteAccount();
-		};
+
+		if($delete){
+			$submit = $form->addSubmit('delete');
+			$class = 'btn btn-outline-danger btn-sm ml-0 mt-1 mb-1 mr-1';
+			$submit->setHtmlAttribute('class', $class)->getControlPrototype()->setName('button')->setHtml('<i class="far fa-trash-alt"></i>');
+			$submit->onClick[] = function (Button $button) {
+				$values = $button->getForm()->getValues('array')['account'];
+				$this->accountRepository->many()->where('uuid', $values['uuid'])->delete();
+				$this->onDeleteAccount();
+			};
+		}
 		
 		$form->onSuccess[] = [$this, 'success'];
 		
@@ -125,6 +133,7 @@ class AccountFormFactory
 		} else {
 			$account = $this->accountRepository->one($values['uuid'], true);
 			$account->update($values);
+			$this->onUpdateAccount($account, $form->getValues('array'));
 		}
 	}
 	
