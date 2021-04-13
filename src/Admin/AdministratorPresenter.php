@@ -74,7 +74,7 @@ class AdministratorPresenter extends BackendPresenter
 			
 			$administrator = $this->adminRepo->syncOne($values, null, true);
 			$this->accountFormFactory->onCreateAccount[] = function ($account) use ($administrator) {
-				$administrator->accounts->relate([$account->getPK()]);
+				$administrator->accounts->relate([$account]);
 			};
 			$this->accountFormFactory->success($form);
 			
