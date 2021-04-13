@@ -6,6 +6,7 @@ namespace Admin\Admin\Controls;
 
 use Admin\Controls\AdminForm;
 use Admin\Controls\AdminFormFactory;
+use Forms\Container;
 use Messages\DB\TemplateRepository;
 use Nette\Forms\Controls\Button;
 use Nette\Mail\Mailer;
@@ -24,32 +25,32 @@ use Security\DB\RoleRepository;
 class AccountFormFactory
 {
 	use SmartObject;
-	
+
 	/**
 	 * @var callable[]&callable(\Security\DB\Account): void
 	 */
 	public $onCreateAccount;
-	
+
 	/**
 	 * @var callable[]&callable(): void
 	 */
 	public $onDeleteAccount;
 
 	/**
-	 * @var callable[]&callable(\Security\DB\Account, array $values): void
+	 * @var callable[]&callable(\Security\DB\Account, array): void
 	 */
 	public $onUpdateAccount;
-	
+
 	private AccountRepository $accountRepository;
-	
+
 	private Mailer $mailer;
-	
+
 	private TemplateRepository $templateRepository;
-	
+
 	private AdminFormFactory $adminFormFactory;
-	
+
 	private RoleRepository $roleRepository;
-	
+
 	public function __construct(AdminFormFactory $adminFormFactory, AccountRepository $accountRepository, TemplateRepository $templateRepository, RoleRepository $roleRepository, Mailer $mailer)
 	{
 		$this->adminFormFactory = $adminFormFactory;
@@ -58,7 +59,7 @@ class AccountFormFactory
 		$this->roleRepository = $roleRepository;
 		$this->mailer = $mailer;
 	}
-	
+
 	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true)
 	{
 		$accountContainer = $form->addContainer('account');
@@ -66,27 +67,31 @@ class AccountFormFactory
 		$accountContainer->addText('login', 'Login')
 			->setRequired()
 			->addRule([$this, 'validateLogin'], 'Login již existuje', [$this->accountRepository, $form['account']['uuid']]);
-		
+
 		$accountContainer->addPassword('password', 'Heslo');
 		$accountContainer->addPassword('passwordCheck', 'Kontrola hesla')
 			->addRule($form::EQUAL, 'Hesla nejsou shodná!', $form['account']['password']);
 		$accountContainer->addCheckbox('active', 'Aktivní')->setDefaultValue(true);
 		$accountContainer->addHidden('email');
-		
+
 		if ($sendEmail) {
 			$accountContainer->addCheckbox('sendEmail', 'Odeslat e-mail o vytvoření');
 		}
 	}
-	
-	public function create(bool $delete = true)
+
+	public function create(bool $delete = true, ?array $beforeSubmitsContainer = null)
 	{
 		$form = $this->adminFormFactory->create();
-		
+
 		$this->addContainer($form);
-		
+
+		if ($beforeSubmitsContainer) {
+			$form->addComponent($beforeSubmitsContainer[1], $beforeSubmitsContainer[0]);
+		}
+
 		$form->addSubmits();
 
-		if($delete){
+		if ($delete) {
 			$submit = $form->addSubmit('delete');
 			$class = 'btn btn-outline-danger btn-sm ml-0 mt-1 mb-1 mr-1';
 			$submit->setHtmlAttribute('class', $class)->getControlPrototype()->setName('button')->setHtml('<i class="far fa-trash-alt"></i>');
@@ -96,27 +101,26 @@ class AccountFormFactory
 				$this->onDeleteAccount();
 			};
 		}
-		
+
 		$form->onSuccess[] = [$this, 'success'];
-		
-		
+
 		return $form;
 	}
-	
+
 	public function success(AdminForm $form): void
 	{
 		$emailTemplate = 'lostPassword.changed';
 		$emailParams = [];
-		
+
 		$values = $form->getValues('array')['account'];
-		
+
 		if ($values['password']) {
 			$password = $values['password'];
-			$values['password'] =  Authenticator::setCredentialTreatment($values['password']);
+			$values['password'] = Authenticator::setCredentialTreatment($values['password']);
 		} else {
 			unset($values['password']);
 		}
-		
+
 		if ($values['sendEmail'] ?? null) {
 			try {
 				$message = $this->templateRepository->createMessage($emailTemplate, ['password' => $password, 'email' => $values['email']] + $emailParams, $values['email']);
@@ -125,7 +129,7 @@ class AccountFormFactory
 				$form->getPresenter()->flashMessage('Varování: Nelze odeslat email! Účet byl přesto upraven.', 'warning');
 			}
 		}
-		
+
 		if (!$values['uuid']) {
 			/** @var Account $account */
 			$account = $this->accountRepository->createOne($values, true);
@@ -136,31 +140,41 @@ class AccountFormFactory
 			$this->onUpdateAccount($account, $form->getValues('array'));
 		}
 	}
-	
+
 	public static function validateLogin(\Nette\Forms\Controls\TextInput $input, array $args): bool
 	{
 		/** @var \Security\DB\AccountRepository $repository */
 		$repository = $args[0];
 		$collection = $repository->many()->where('login', (string)$input->getValue());
-		
-		
+
+
 		if (isset($args[1]) && $args[1]) {
 			$collection->whereNot('this.uuid', $args[1]);
 		}
-		
+
 		return $collection->isEmpty();
 	}
-	
+
 	public function deleteAccountHolder(IUser $holder)
 	{
-		/*if ($holder->getAccount()) {
-			$account = $holder->getAccount();
+		try {
+			$holder->accounts->delete();
+		} catch (\Exception $e) {
+
 		}
 
-		$holder->delete();
+		try {
+			if ($holder->getAccount()) {
+				$account = $holder->getAccount();
+			}
 
-		if (isset($account)) {
-			$account->delete();
-		}*/
+			$holder->delete();
+
+			if (isset($account)) {
+				$account->delete();
+			}
+		} catch (\Exception $e) {
+
+		}
 	}
 }
