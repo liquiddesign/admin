@@ -78,15 +78,15 @@ class AccountFormFactory
 			$accountContainer->addCheckbox('sendEmail', 'Odeslat e-mail o vytvoření');
 		}
 	}
-
-	public function create(bool $delete = true, ?array $beforeSubmitsContainer = null)
+	
+	public function create(bool $delete = true, ?callable $beforeSubmits = null)
 	{
 		$form = $this->adminFormFactory->create();
-
+		
 		$this->addContainer($form);
-
-		if ($beforeSubmitsContainer) {
-			$form->addComponent($beforeSubmitsContainer[1], $beforeSubmitsContainer[0]);
+		
+		if ($beforeSubmits) {
+			\call_user_func_array($beforeSubmits, [$form]);
 		}
 
 		$form->addSubmits();
