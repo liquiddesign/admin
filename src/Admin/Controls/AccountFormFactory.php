@@ -63,6 +63,11 @@ class AccountFormFactory
 	{
 		$accountContainer = $form->addContainer('account');
 		$accountContainer->addHidden('uuid')->setNullable();
+		
+		if ($fullname){
+			$accountContainer->addText('fullname', 'Jméno a příjmení');
+		}
+		
 		$accountContainer->addText('login', 'Login')
 			->setRequired()
 			->addRule([$this, 'validateLogin'], 'Login již existuje', [$this->accountRepository, $form['account']['uuid']]);
@@ -71,11 +76,7 @@ class AccountFormFactory
 		$accountContainer->addPassword('passwordCheck', 'Kontrola hesla')
 			->addRule($form::EQUAL, 'Hesla nejsou shodná!', $form['account']['password']);
 		$accountContainer->addCheckbox('active', 'Aktivní')->setDefaultValue(true);
-
-		if($fullname){
-			$accountContainer->addText('fullname', 'Jméno a příjmení');
-		}
-
+		
 		$accountContainer->addHidden('email');
 
 		if ($sendEmail) {
