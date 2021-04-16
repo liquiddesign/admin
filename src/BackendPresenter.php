@@ -13,6 +13,7 @@ use Nette\Application\UI\Presenter;
 use Nette\DI\Container;
 use Nette\Localization\Translator;
 use Nette\Utils\FileSystem;
+use Pages\DB\PageRepository;
 use StORM\Entity;
 
 abstract class BackendPresenter extends Presenter

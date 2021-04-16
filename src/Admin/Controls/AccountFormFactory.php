@@ -6,7 +6,6 @@ namespace Admin\Admin\Controls;
 
 use Admin\Controls\AdminForm;
 use Admin\Controls\AdminFormFactory;
-use Forms\Container;
 use Messages\DB\TemplateRepository;
 use Nette\Forms\Controls\Button;
 use Nette\Mail\Mailer;
@@ -60,7 +59,7 @@ class AccountFormFactory
 		$this->mailer = $mailer;
 	}
 
-	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true)
+	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true, bool $fullname = false)
 	{
 		$accountContainer = $form->addContainer('account');
 		$accountContainer->addHidden('uuid')->setNullable();
@@ -72,6 +71,11 @@ class AccountFormFactory
 		$accountContainer->addPassword('passwordCheck', 'Kontrola hesla')
 			->addRule($form::EQUAL, 'Hesla nejsou shodná!', $form['account']['password']);
 		$accountContainer->addCheckbox('active', 'Aktivní')->setDefaultValue(true);
+
+		if($fullname){
+			$accountContainer->addText('fullname', 'Jméno a příjmení');
+		}
+
 		$accountContainer->addHidden('email');
 
 		if ($sendEmail) {
@@ -79,11 +83,11 @@ class AccountFormFactory
 		}
 	}
 	
-	public function create(bool $delete = true, ?callable $beforeSubmits = null)
+	public function create(bool $delete = true, ?callable $beforeSubmits = null, bool $fullname = false)
 	{
 		$form = $this->adminFormFactory->create();
 		
-		$this->addContainer($form);
+		$this->addContainer($form, false, true, $fullname);
 		
 		if ($beforeSubmits) {
 			\call_user_func_array($beforeSubmits, [$form]);

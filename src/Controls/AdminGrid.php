@@ -283,9 +283,9 @@ class AdminGrid extends \Grid\Datagrid
 			}, [], null, ['class' => 'minimal']);
 	}
 
-	public function addColumnActionDeleteSystemic()
+	public function addColumnActionDeleteSystemic(?callable $beforeDeleteCallback = null, bool $override = false)
 	{
-		$column = $this->addColumnActionDelete(null, false, function (Entity $object) {
+		$column = $this->addColumnActionDelete($beforeDeleteCallback, $override, function (Entity $object) {
 			return !$object->isSystemic();
 		});
 
