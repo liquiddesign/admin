@@ -13,8 +13,11 @@ use Nette\Forms\Controls\SelectBox;
 use Nette\Forms\Controls\TextInput;
 use Nette\Http\Session;
 use Nette\Utils\Html;
+use StORM\Collection;
 use StORM\Entity;
 use StORM\ICollection;
+use StORM\Meta\RelationNxN;
+use StORM\RelationCollection;
 
 /**
  * @method onDelete(Entity $object)
@@ -566,29 +569,37 @@ class AdminGrid extends \Grid\Datagrid
 		}
 
 		$form->addSubmit('submitAndBack', 'Uložit a zpět');
-
+		
 		$form->onSuccess[] = function (AdminForm $form) use ($ids) {
 			$values = $form->getValues('array');
-
+			$source = $this->getSource(false);
+			$ids = $values['bulkType'] === 'selected' ? $ids : $this->getFilteredSource()->toArrayOf($this->getSourceIdName());
+			
 			foreach ($values['keep'] as $name => $keep) {
 				if (!$keep) {
 					continue;
 				}
-
+				
+				$structure = $source instanceof Collection ? $source->getRepository()->getStructure() : null;
+				
+				if ($values['values'][$name] && $structure && $structure->getRelation($name) instanceof RelationNxN) {
+					foreach ($ids as $id) {
+						$relation = new RelationCollection($source->getRepository(), $structure->getRelation($name), $id);
+						$relation->relate($values['values'][$name]);
+					}
+				}
+				
 				unset($values['values'][$name]);
 			}
-
+			
 			if (\count($values['values']) === 0) {
 				return;
 			}
-
-			$ids = $values['bulkType'] === 'selected' ? $ids : $this->getFilteredSource()->toArrayOf($this->getSourceIdName());
-
+			
 			foreach ($ids as $id) {
-
 				$this->getSource()->where($this->getSourceIdName(), $id)->update($values['values']);
 			}
-
+			
 			$this->getPresenter()->flashMessage('Uloženo', 'success');
 			$this->getPresenter()->redirect($this->bulkFormDefaultLink ?? 'this');
 		};
