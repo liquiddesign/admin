@@ -18,7 +18,6 @@ class Menu extends Control
 	
 	public function __construct(Container $context)
 	{
-		$this->context = $context;
 		$this->admin = $context->getService('admin.administrator');
 	}
 	
@@ -43,7 +42,7 @@ class Menu extends Control
 	
 	public function render(): void
 	{
-		$this->template->setFile($this->getAdminRootPath() . 'templates' . \DIRECTORY_SEPARATOR . 'menu.latte');
+		$this->template->setFile($this->template->getFile() ?: __DIR__ . '/menu.latte');
 		$this->template->menu = [];
 		$items = $this->items;
 		
@@ -72,11 +71,6 @@ class Menu extends Control
 		}
 		
 		$this->template->render();
-	}
-	
-	private function getAdminRootPath(): string
-	{
-		return $this->context->parameters['appDir'] . \DIRECTORY_SEPARATOR . 'Admin' . \DIRECTORY_SEPARATOR;
 	}
 	
 	/**

@@ -1,0 +1,33 @@
+<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+	{foreach $menu as $item}
+		{if count($item->items) > 0}
+			<li class="nav-item {$item->active ? 'menu-open' : ''}">
+				<a href="{$item->link ? $presenter->link($item->link) : '#'}" class="nav-link nav-link-category">
+					<i class="nav-icon fas fa-{ifset $item->icon}{$item->icon}{else}th{/ifset}"></i>
+					<p>
+						{$item->label}
+						<i class="right fas fa-angle-left"></i>
+					</p>
+				</a>
+				{else}
+			<li class="nav-item">
+			<a href="{$item->link ? $presenter->link($item->link) : '#'}" class="nav-link">
+				<i class="nav-icon fas fa-{ifset $item->icon}{$item->icon}{else}th{/ifset}"></i>
+				<p>
+					{$item->label}
+				</p>
+			</a>
+		{/if}
+		<ul class="nav nav-treeview">
+			{foreach $item->items as $subItem}
+				<li class="nav-item">
+					<a href="{$subItem->link ? $presenter->link($subItem->link) : '#'}" class="nav-link {$subItem->active ? 'active' : ''}">
+						<span class="pl-1 pr-2">&mdash;</span>
+						<p>{$subItem->label}</p>
+					</a>
+				</li>
+			{/foreach}
+		</ul>
+		</li>
+	{/foreach}
+</ul>
