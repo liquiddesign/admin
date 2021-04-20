@@ -213,7 +213,7 @@ class AdminGrid extends \Grid\Datagrid
 			$selectBox->setHtmlAttribute('class', 'form-control form-control-sm');
 
 			return $selectBox;
-		}, $setValueExpression, $defaultValue, $orderExpression, ['class' => 'minimal'] + $wrapperAttributes);
+		}, $setValueExpression, $defaultValue, $orderExpression, $wrapperAttributes);
 	}
 
 	public function addColumnLinkDetail(string $destination = 'detail', array $arguments = []): Column
@@ -226,7 +226,7 @@ class AdminGrid extends \Grid\Datagrid
 	public function addColumnLink(string $destination, string $label = '', ?string $th = null, $wrappers = ['class' => 'minimal']): Column
 	{
 		return $this->addColumn($th, function ($object, $datagrid) use ($destination, $label) {
-			return $datagrid->getPresenter()->link($destination, $object);
+			return $datagrid->getPresenter()->link($destination, $object instanceof Entity ? $object : \call_user_func($this->idCallback, $object));
 		}, '<a class="btn btn-outline-primary btn-sm text-xs" style="white-space: nowrap" href="%s">' . $label . '</a>', null, $wrappers);
 	}
 
