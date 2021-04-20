@@ -255,7 +255,7 @@ class AdminGrid extends \Grid\Datagrid
 	public function addColumnActionDelete(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null)
 	{
 		return $this->addColumnAction('', "<a href=\"%s\" class='btn btn-danger btn-sm text-xs' title='Smazat' onclick=\"return confirm('Opravdu?')\"><i class='far fa-trash-alt'></i></a>",
-			function (Entity $object) use ($beforeDeleteCallback, $override, $condition) {
+			function ($object) use ($beforeDeleteCallback, $override, $condition) {
 				try {
 					$this->getPresenter()->flashMessage('Provedeno', 'success');
 
@@ -273,7 +273,7 @@ class AdminGrid extends \Grid\Datagrid
 						}
 
 						if (!$override) {
-							$object->delete();
+							$this->getSource()->where($this->getSource(false)->getPrefix() . $this->getSourceIdName(), \call_user_func($this->idCallback, $object))->delete();
 						}
 					} else {
 						$this->getPresenter()->flashMessage('Chyba: Je zákázáno tuto položku smazat!', 'error');
