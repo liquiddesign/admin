@@ -219,7 +219,7 @@ class AdminGrid extends \Grid\Datagrid
 	public function addColumnLinkDetail(string $destination = 'detail', array $arguments = []): Column
 	{
 		return $this->addColumn('', function ($object, $datagrid) use ($destination, $arguments) {
-			return $datagrid->getPresenter()->link($destination, [$object] + $arguments);
+			return $datagrid->getPresenter()->link($destination, [$object instanceof Entity ? $object : \call_user_func($this->idCallback, $object)] + $arguments);
 		}, '<a class="btn btn-primary btn-sm text-xs" href="%s" title="Upravit"><i class="far fa-edit"></i></a>', null, ['class' => 'minimal']);
 	}
 
