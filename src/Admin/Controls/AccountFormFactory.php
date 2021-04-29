@@ -168,19 +168,22 @@ class AccountFormFactory
 		} catch (\Exception $e) {
 
 		}
-
+		
+		$holder->delete();
+		
+		/*
 		try {
 			if ($holder->getAccount()) {
 				$account = $holder->getAccount();
 			}
 
-			$holder->delete();
+			
 
 			if (isset($account)) {
 				$account->delete();
 			}
 		} catch (\Exception $e) {
 
-		}
+		}*/
 	}
 }
