@@ -80,7 +80,8 @@ class AccountFormFactory
 		$accountContainer->addHidden('email');
 
 		if ($sendEmail) {
-			$accountContainer->addCheckbox('sendEmail', 'Odeslat e-mail o vytvoření');
+			// @TODO: otestovat a predelat
+			//$accountContainer->addCheckbox('sendEmail', 'Odeslat e-mail o vytvoření');
 		}
 	}
 	
