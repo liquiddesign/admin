@@ -58,13 +58,14 @@ class BootstrapRenderer extends DefaultRenderer
 				if ($controlMutation) {
 					$activeMutation = $form->getActiveMutation();
 					$pair->setAttribute('data-mutation', $controlMutation);
+					$tmpClasses = \is_array($pair->getAttribute('class')) ? \implode(' ', $pair->getAttribute('class')) : $pair->getAttribute('class');
 					
 					if (strpos($control->getHtmlId(), Form::MUTATION_TRANSLATOR_NAME) !== false) {
-						$pair->setAttribute('class', $pair->getAttribute('class') . ' translated');
+						$pair->setAttribute('class', $tmpClasses . ' translated');
 					}
 					
 					if ($controlMutation !== $activeMutation && $activeMutation !== null) {
-						$pair->setAttribute('class', $pair->getAttribute('class') . ' inactive');
+						$pair->setAttribute('class', $tmpClasses. ' inactive');
 					}
 				}
 			}
