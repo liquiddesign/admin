@@ -19,7 +19,7 @@ class AdminFormFactory
 		$this->pageRepository = $pageRepository;
 	}
 	
-	public function create(bool $mutationSelector = false, bool $translatedCheckbox = true): AdminForm
+	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false): AdminForm
 	{
 		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->formFactory->create(AdminForm::class);
