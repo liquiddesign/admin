@@ -555,6 +555,7 @@ class AdminGrid extends \Grid\Datagrid
 
 				//$rules = clone $component->getRules();
 				$component->getRules()->reset();
+				$component->setRequired(false);
 				/*$newRules = $component->addConditionOn($keep[$nameParsed], $form::EQUAL, false);
 
 				foreach ($rules->getIterator() as $rule) {
