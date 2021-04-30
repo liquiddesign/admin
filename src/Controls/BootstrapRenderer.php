@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Admin\Controls;
 
+use Forms\Controls\UploadFile;
 use Forms\Controls\UploadImage;
 use Forms\Controls\Wysiwyg;
 use Forms\DefaultRenderer;
@@ -185,7 +186,7 @@ class BootstrapRenderer extends DefaultRenderer
 			$el->addHtml($control->getControl());
 			$el[0]->class('form-control form-control-sm');
 			
-		} elseif ($control instanceof UploadImage) {
+		} elseif ($control instanceof UploadImage || $control instanceof UploadFile) {
 			$el->addHtml($control->getControl());
 			if (isset($el[0][1]->value)) {
 				$el[0][2]->class('btn btn-danger btn-sm ml-2');
@@ -202,7 +203,6 @@ class BootstrapRenderer extends DefaultRenderer
 				$el->addHtml('<input type="text" class="form-control form-control-sm" readonly="">');
 				$el->addHtml('</div>');
 			}
-			
 		} elseif ($control instanceof Nette\Forms\Controls\UploadControl) {
 			$el = Html::el();
 			$el->addHtml('<div class="input-group col-label m-0 p-0">');
