@@ -548,7 +548,12 @@ class AdminGrid extends \Grid\Datagrid
 			foreach ($components as $nameParsed) {
 				$container = \is_string($key) ? $sourceForm[$key] : $sourceForm;
 
-				$component = $container->getComponent($nameParsed);
+				try {
+					$component = $container->getComponent($nameParsed);
+				} catch (\Exception $e) {
+					continue;
+				}
+
 				$container->removeComponent($component);
 
 				$keep->addCheckbox($nameParsed, 'Původní')->setDefaultValue(true);
