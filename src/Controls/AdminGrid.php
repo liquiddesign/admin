@@ -379,7 +379,7 @@ class AdminGrid extends \Grid\Datagrid
 						$this->onDelete($object);
 					}
 
-					if (!$override) {
+					if (!$override && $object) {
 						$object->delete();
 					}
 				}
