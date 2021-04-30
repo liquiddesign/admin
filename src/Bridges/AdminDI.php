@@ -6,6 +6,7 @@ namespace Admin\Bridges;
 
 use Admin\Administrator;
 use Admin\Authorizator;
+use Admin\Controls\AdminFormFactory;
 use Admin\Controls\ILoginFormFactory;
 use Admin\Controls\IMenuFactory;
 use Admin\DB\AdministratorRepository;
@@ -23,6 +24,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			'menu' => Expect::array([]),
 			'mutations' => Expect::list([]),
 			'superRole' => Expect::string(null),
+			'prettyPages' => Expect::bool(false),
 		]);
 	}
 	
@@ -59,6 +61,9 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		// add authorizator
 		$authorizator = $builder->addDefinition('authorizator')->setType(Authorizator::class);
 		$authorizator->addSetup('setSuperRole', [$config->superRole]);
+
+		$adminDef = $builder->addDefinition($this->prefix('adminFormFactory'))->setType(AdminFormFactory::class);
+		$adminDef->addSetup('setPrettyPages', [$config->prettyPages]);
 		
 		return;
 	}
