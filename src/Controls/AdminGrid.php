@@ -108,24 +108,26 @@ class AdminGrid extends \Grid\Datagrid
 	{
 		return parent::addColumnSelector($wrapperAttributes + ['class' => 'fit']);
 	}
-
+	
 	public function addColumnImage(string $expression, string $dir, string $subDir = 'thumb', string $th = '')
 	{
-		return $this->addColumn($th, function (Entity $entity) use ($dir, $expression, $subDir) {
+		return $this->addColumn($th, function ($entity) use ($dir, $expression, $subDir) {
 			$baseUrl = $this->getPresenter()->getHttpRequest()->getUrl()->getBaseUrl();
-
+			
 			foreach (\explode('.', $expression) as $property) {
 				$entity = $entity->$property;
 			}
-
+			
 			if ($entity === null) {
 				$path = $baseUrl . '/public/admin/img/no-image-icon.png?t=' . \time();
-
+				
 				return "<img src='$path' style='height:32px;'>";
 			}
-
-			$path = $baseUrl . '/userfiles/' . $dir . '/' . $subDir . '/' . $entity . '?t=' . \time();
-
+			
+			$subDir = $subDir ? $subDir . '/' : '';
+			
+			$path = $baseUrl . '/userfiles/' . $dir . '/' . $subDir . $entity . '?t=' . \time();
+			
 			return "<img src='$path' style='height:32px;'>";
 		}, '%s', null, ['class' => 'fit']);
 	}
