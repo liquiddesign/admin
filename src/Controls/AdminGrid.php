@@ -332,7 +332,7 @@ class AdminGrid extends \Grid\Datagrid
 					$newValue = $data[$key];
 
 					if ($value == 'float') {
-						$data[$key] = \floatval(\str_replace(',', '.', \str_replace('.', '', $newValue)));
+						$data[$key] = \floatval(\str_replace(',', '.', $newValue));
 						continue;
 					}
 
