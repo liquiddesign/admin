@@ -116,7 +116,7 @@ class AdminForm extends \Forms\Form
 		$pageContainer->addLocaleText('url', 'URL')->forAll(function (TextInput $text, $mutation) use ($page) {
 			$text->setHtmlAttribute('class', 'seo_url')
 				->addRule([$this, 'validateUrl'], 'URL již existuje',
-					[$this->pageRepository, $mutation, $page ? $page->getPK() : null]);
+					[$this->pageRepository, $mutation, $page ? $page->getPK() : null])->setNullable(false);
 		})->forPrimary(function (TextInput $text, $mutation) use ($pageType) {
 			if ($pageType === 'index') {
 				$text->setRequired(false);
