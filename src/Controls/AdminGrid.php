@@ -396,19 +396,19 @@ class AdminGrid extends \Grid\Datagrid
 		};
 	}
 
-	public function decoratorEmpty(Html $td, Entity $object)
+	public function decoratorEmpty(Html $td, $object)
 	{
 		if (!\trim(\strip_tags($td->getHtml()))) {
 			$td->setHtml('');
 		}
 	}
 
-	public function decoratorNowrap(Html $td, Entity $object)
+	public function decoratorNowrap(Html $td, $object)
 	{
 		$td->addAttributes(['style' => 'white-space: nowrap;']);
 	}
 
-	public function decoratorNumber(Html $td, Entity $object)
+	public function decoratorNumber(Html $td, $object)
 	{
 		$td->addAttributes(['style' => 'white-space: nowrap; text-align: right;']);
 	}
