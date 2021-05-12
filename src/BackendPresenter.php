@@ -44,6 +44,11 @@ abstract class BackendPresenter extends Presenter
 	/** @inject */
 	public Translator $translator;
 	
+	/** @persistent */
+	public string $lang;
+	
+	public array $langs = [];
+	
 	public function checkRequirements($element): void
 	{
 		if (!$this->admin->isLoggedIn()) {

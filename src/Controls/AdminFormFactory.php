@@ -4,32 +4,47 @@ declare(strict_types=1);
 
 namespace Admin\Controls;
 
+use Admin\Administrator;
 use Web\DB\PageRepository;
 use Forms\FormFactory;
 
 class AdminFormFactory
 {
 	private PageRepository $pageRepository;
+	
+	private Administrator $administrator;
 
 	public FormFactory $formFactory;
 
 	private bool $prettyPages;
 
-	public function __construct(FormFactory $formFactory, PageRepository $pageRepository)
+	public function __construct(Administrator $administrator, FormFactory $formFactory, PageRepository $pageRepository)
 	{
 		$this->formFactory = $formFactory;
 		$this->pageRepository = $pageRepository;
+		$this->administrator = $administrator;
 	}
 
 	public function setPrettyPages(bool $prettyPages): void
 	{
 		$this->prettyPages = $prettyPages;
 	}
+	
+	public function getMutations(): array
+	{
+		return $this->formFactory->getDefaultMutations();
+	}
 
 	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false): AdminForm
 	{
 		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->formFactory->create(AdminForm::class);
+		
+		if ($this->administrator->getIdentity() && $this->administrator->getIdentity()->role) {
+			$mutations = $this->administrator->getIdentity()->role->getMutations() === null ? $this->getMutations() : $this->administrator->getIdentity()->role->getMutations();
+			$form->setMutations($mutations);
+			$form->setPrimaryMutation($mutations[0]);
+		}
 
 		$form->setPrettyPages($this->prettyPages);
 		$form->setPageRepository($this->pageRepository);

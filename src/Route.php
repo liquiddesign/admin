@@ -7,11 +7,9 @@ use Pages\Pages;
 
 class Route extends Routers\Route
 {
-	public function __construct(?array $mutations, Pages $pages)
+	public function __construct(?string $defaultMutation, Pages $pages)
 	{
-		$lang = isset($mutations[0]) ? '[<lang=' . $mutations[0] . ' ' . \implode('|', $mutations) . '>/]' : '';
-		
-		parent::__construct('admin[/<module>/<presenter>[/<action=default>][/<id>]]' . $lang, [
+		parent::__construct('admin[/<module>/<presenter>[/<action=default>][/<id>]]?lang=<lang>', [
 			'module' => [
 				\Nette\Routing\Route::VALUE => 'Admin',
 				\Nette\Routing\Route::FILTER_IN => static function ($str) {
@@ -41,6 +39,7 @@ class Route extends Routers\Route
 				\Nette\Routing\Route::FILTER_OUT => [$pages, 'unmapParameters'],
 				\Nette\Routing\Route::FILTER_IN => [$pages, 'mapParameters'],
 			],
+			'lang' => [\Nette\Routing\Route::VALUE => $defaultMutation],
 		]);
 	}
 }

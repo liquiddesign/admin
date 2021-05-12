@@ -51,12 +51,18 @@ class RolePresenter extends BackendPresenter
 	public function createComponentNewForm(): Form
 	{
 		$form = $this->formFactory->create();
+		$mutations = $this->formFactory->getMutations();
 
 		$form->addText('name', 'Název')->setRequired();
+		$form->addDataMultiSelect('mutationsList', 'Povolené mutace', \array_combine($mutations, $mutations))
+			->setHtmlAttribute('data-info', '<br>Pokud necháte prázdné, povolené budou všechny');
 		$form->addSubmits();
 
 		$form->onSuccess[] = function (AdminForm $form) {
 			$values = $form->getValues('array');
+			
+			$values['mutations'] = $values['mutationsList'] ? \implode(';', $values['mutationsList']) : null;
+			unset($values['mutationsList']);
 
 			$role = $this->roleRepository->syncOne($values);
 
@@ -106,6 +112,7 @@ class RolePresenter extends BackendPresenter
 		/** @var Form $form */
 		$form = $this->getComponent('newForm');
 		$form->setDefaults($role->jsonSerialize());
+		$form['mutationsList']->setDefaultValue($role->getMutations());
 	}
 
 	public function createComponentRolePermissionsTable()
