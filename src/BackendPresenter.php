@@ -98,7 +98,7 @@ abstract class BackendPresenter extends Presenter
 			$arguments = ['backLink' => $this->backLink];
 		}
 		
-		return $this->createButtonWithClass($link, '<i class="fa fa-sm fa-undo-alt"></i>&nbsp;Zpět', 'btn btn-sm btn-secondary', ...$arguments);
+		return $this->createButtonWithClass($link, '<i class="fas fa-arrow-left"></i>&nbsp;Zpět', 'btn btn-sm btn-secondary', ...$arguments);
 	}
 	
 	public function handleRestoreBackLink(string $backLink)

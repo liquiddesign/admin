@@ -276,18 +276,18 @@ class BootstrapRenderer extends DefaultRenderer
 			if ($control instanceof Nette\Forms\Controls\SubmitButton) {
 				$el = Html::el();
 				$el->addHtml('<div class="pl-0 m-0">');
-				
-				if ($control->getName() == 'submitAndBack') {
-					$el->addHtml(Html::el('button type="submit" name="submitAndBack" class="btn btn-outline-primary btn-sm button m-1"'));
-					$el[1]->setHtml('<i class="fa fa-sm fa-undo-alt"></i>&nbsp;Uložit a zpět');
+
+				if ($control->getName() == 'submitAndNext') {
+					$el->addHtml(Html::el('button type="submit" name="submitAndNext" class="btn btn-outline-primary btn-sm button m-1"'));
+					$el[1]->setHtml('<i class="fa fa-sm fa-plus"></i>&nbsp;' . $control->getCaption());
 					$el->addHtml('</button>');
 				} else if ($control->getName() == 'submitAndContinue') {
 					$el->addHtml(Html::el('button type="submit" name="submitAndContinue" class="btn btn-outline-primary btn-sm button m-1"'));
-					$el[1]->setHtml('<i class="fa fa-sm fa-plus"></i>&nbsp;Uložit a vložit další');
+					$el[1]->setHtml($control->getCaption());
 					$el->addHtml('</button>');
 				} else {
 					$el->addHtml($control->getControl());
-					
+
 					if (!$el[1]->class) {
 						$el[1]->class('btn btn-primary btn-sm ml-0 mt-1 mb-1 mr-1');
 					}

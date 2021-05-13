@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Admin\Controls;
 
+use Nette\Localization\Translator;
 use Pages\DB\IPage;
 use Web\DB\PageRepository;
 use Forms\Container;
@@ -23,6 +24,8 @@ class AdminForm extends \Forms\Form
 
 	private \StORM\DIConnection $storm;
 
+	private Translator $translator;
+
 	private bool $prettyPages = false;
 
 	public function setPageRepository(PageRepository $pageRepository)
@@ -35,6 +38,11 @@ class AdminForm extends \Forms\Form
 		$this->storm = $storm;
 	}
 
+	public function setAdminFormTranslator(Translator $translator)
+	{
+		$this->translator = $translator;
+	}
+
 	public function setPrettyPages(bool $prettyPages)
 	{
 		$this->prettyPages = $prettyPages;
@@ -45,19 +53,19 @@ class AdminForm extends \Forms\Form
 		return $this->prettyPages;
 	}
 
-	public function addSubmits(bool $continue = false, bool $stayPut = true)
+	public function addSubmits(bool $stayPut = false, bool $continue = true)
 	{
 		$this->addGroup();
 
-		if ($stayPut) {
-			$this->addSubmit('submit', 'Uložit');
-		}
+		$this->addSubmit('submit', $this->translator->translate('admin.save', 'Uložit'));
 
 		if ($continue) {
-			$this->addSubmit('submitAndContinue', 'Uložit a vložit další');
+			$this->addSubmit('submitAndContinue', $this->translator->translate('admin.saveAndContinue', 'Uložit a pokračovat'));
 		}
 
-		$this->addSubmit('submitAndBack', 'Uložit a zpět');
+		if ($stayPut) {
+			$this->addSubmit('submitAndNext', $this->translator->translate('admin.saveAndNext', 'Uložit a vložit další'));
+		}
 	}
 
 	public function syncPages(callable $callback)
@@ -79,15 +87,15 @@ class AdminForm extends \Forms\Form
 		$backLink = $backLink ?: $detailLink;
 
 		if ($submitter->getName() === 'submit') {
-			$this->getPresenter()->redirect($detailLink, $detailArguments);
-		} elseif ($submitter->getName() === 'submitAndContinue') {
-			$this->getPresenter()->redirect('this', $continueArguments);
-		} elseif ($submitter->getName() === 'submitAndBack') {
 			if ($this->getPresenter()->getParameter('backLink')) {
 				$this->getPresenter()->restoreRequest($this->getPresenter()->getParameter('backLink'));
 			}
 
 			$this->getPresenter()->redirect($backLink, $backLinkArguments);
+		} elseif ($submitter->getName() === 'submitAndContinue') {
+			$this->getPresenter()->redirect($detailLink, $detailArguments);
+		} elseif ($submitter->getName() === 'submitAndNext') {
+			$this->getPresenter()->redirect('this', $continueArguments);
 		}
 	}
 

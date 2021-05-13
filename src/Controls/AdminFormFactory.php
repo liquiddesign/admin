@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Admin\Controls;
 
 use Admin\Administrator;
+use Nette\Localization\Translator;
 use Web\DB\PageRepository;
 use Forms\FormFactory;
 
@@ -16,13 +17,16 @@ class AdminFormFactory
 
 	public FormFactory $formFactory;
 
+	private Translator $translator;
+
 	private bool $prettyPages;
 
-	public function __construct(Administrator $administrator, FormFactory $formFactory, PageRepository $pageRepository)
+	public function __construct(Administrator $administrator, FormFactory $formFactory, PageRepository $pageRepository, Translator $translator)
 	{
 		$this->formFactory = $formFactory;
 		$this->pageRepository = $pageRepository;
 		$this->administrator = $administrator;
+		$this->translator = $translator;
 	}
 
 	public function setPrettyPages(bool $prettyPages): void
@@ -46,6 +50,7 @@ class AdminFormFactory
 			$form->setPrimaryMutation($mutations[0]);
 		}
 
+		$form->setAdminFormTranslator($this->translator);
 		$form->setPrettyPages($this->prettyPages);
 		$form->setPageRepository($this->pageRepository);
 		$form->setRenderer(new BootstrapRenderer());
