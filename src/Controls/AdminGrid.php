@@ -308,17 +308,17 @@ class AdminGrid extends \Grid\Datagrid
 	 * @param array $processTypes Asociative array where key is name of column and value desired type.
 	 * @param string|null $sourceIdName Name of source primary key
 	 * @param bool $ignore add ignore to update expression
+	 * @param callable|null $onProcessType Callback called for every column in $processTypes to do custom processing
+	 * @param callable|null $onRowUpdate Called on every row update with new data
 	 */
-	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null, bool $ignore = false)
+	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null, bool $ignore = false, ?callable $onProcessType = null, ?callable $onRowUpdate = null)
 	{
 		$grid = $this;
 		$submit = $this->getForm()->addSubmit('submit', 'Uložit');
 		$submit->setHtmlAttribute('class', 'btn btn-sm btn-primary');
-		$submit->onClick[] = function ($button) use ($grid, $processNullColumns, $processTypes, $sourceIdName, $ignore) {
+		$submit->onClick[] = function ($button) use ($grid, $processNullColumns, $processTypes, $sourceIdName, $ignore, $onProcessType, $onRowUpdate) {
 			foreach ($grid->getInputData() as $id => $data) {
-				if (empty($data)) {
-					continue;
-				}
+				$object = $grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->first();
 
 				foreach ($processNullColumns as $column) {
 					$data[$column] = $data[$column] ?? null;
@@ -329,14 +329,22 @@ class AdminGrid extends \Grid\Datagrid
 						continue;
 					}
 
-					$newValue = $data[$key];
+					if ($onProcessType) {
+						$onProcessType($key, $data, $value, $object);
+					} else {
+						$newValue = $data[$key] ?? null;
 
-					if ($value == 'float') {
-						$data[$key] = \floatval(\str_replace(',', '.', $newValue));
-						continue;
+						if ($value == 'float') {
+							$data[$key] = \floatval(\str_replace(',', '.', $newValue));
+							continue;
+						}
+
+						$data[$key] = \settype($newValue, $value) ? $newValue : null;
 					}
+				}
 
-					$data[$key] = \settype($newValue, $value) ? $newValue : null;
+				if($onRowUpdate){
+					$onRowUpdate($id, $data);
 				}
 
 				$grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->update($data, $ignore, $grid->getSource(false)->getPrefix(false));

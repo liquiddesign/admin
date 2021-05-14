@@ -18,7 +18,7 @@ use Security\DB\RoleRepository;
 
 /**
  * @method onCreateAccount(\Security\DB\Account $account, array $values)
- * @method onUpdateAccount(\Security\DB\Account $account, array $values)
+ * @method onUpdateAccount(\Security\DB\Account $account, array $values, array $oldValues)
  * @method onDeleteAccount()
  */
 class AccountFormFactory
@@ -142,8 +142,9 @@ class AccountFormFactory
 			$this->onCreateAccount($account, $form->getValues('array'));
 		} else {
 			$account = $this->accountRepository->one($values['uuid'], true);
+			$oldData = $account->toArray();
 			$account->update($values);
-			$this->onUpdateAccount($account, $form->getValues('array'));
+			$this->onUpdateAccount($account, $form->getValues('array'), $oldData);
 		}
 	}
 
