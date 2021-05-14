@@ -98,7 +98,7 @@ abstract class BackendPresenter extends Presenter
 			$arguments = ['backLink' => $this->backLink];
 		}
 		
-		return $this->createButtonWithClass($link, '<i class="fas fa-arrow-left"></i>&nbsp;Zpět', 'btn btn-sm btn-secondary', ...$arguments);
+		return $this->createButtonWithClass($link, '<i class="fas fa-arrow-left"></i>&nbsp;' . $this->translator->translate('admin.backButton', 'Zpět'), 'btn btn-sm btn-secondary', ...$arguments);
 	}
 	
 	public function handleRestoreBackLink(string $backLink)
@@ -108,7 +108,7 @@ abstract class BackendPresenter extends Presenter
 	
 	protected function createNewItemButton(string $link, array $args = [], string $label = null): string
 	{
-		return "<a href=\"" . $this->link($link, $args) . "\"><button class='btn btn-success btn-sm'><i class='fa fa-sm fa-plus m-1'></i>" . ($label ?: 'Nová položka') . "</button></a>";
+		return "<a href=\"" . $this->link($link, $args) . "\"><button class='btn btn-success btn-sm'><i class='fa fa-sm fa-plus m-1'></i>" . ($label ?: $this->translator->translate('admin.newItem', 'Nová položka')) . "</button></a>";
 	}
 	
 	protected function createButtonWithClass(string $link, string $label, string $class, ...$arguments): string
@@ -172,7 +172,7 @@ abstract class BackendPresenter extends Presenter
 	public function actionBulkEdit(string $grid = 'grid', string $backLink = 'default', string $label = 'Úprava')
 	{
 		$this[$grid]['bulkForm']->onSuccess[] = function () {
-			$this->flashMessage('Uloženo', 'success');
+			$this->flashMessage($this->translator->translate('admin.saved', 'Uloženo'), 'success');
 			$this->redirect('default');
 		};
 	}

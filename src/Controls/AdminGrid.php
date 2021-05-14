@@ -12,6 +12,7 @@ use Nette\Forms\Controls\Checkbox;
 use Nette\Forms\Controls\SelectBox;
 use Nette\Forms\Controls\TextInput;
 use Nette\Http\Session;
+use Nette\Localization\Translator;
 use Nette\Utils\Html;
 use StORM\Collection;
 use StORM\Entity;
@@ -28,6 +29,8 @@ class AdminGrid extends \Grid\Datagrid
 	 * @var callable[]
 	 */
 	public array $onDelete = [];
+
+	public Translator $translator;
 
 	private ?string $bulkFormId = null;
 
@@ -81,6 +84,11 @@ class AdminGrid extends \Grid\Datagrid
 		};
 
 		$this->session = $session;
+	}
+
+	public function setAdminGridTranslator(Translator $translator)
+	{
+		$this->translator = $translator;
 	}
 
 	protected function createComponentFilterForm(): \Nette\Application\UI\Form
@@ -222,7 +230,7 @@ class AdminGrid extends \Grid\Datagrid
 	{
 		return $this->addColumn('', function ($object, $datagrid) use ($destination, $arguments) {
 			return $datagrid->getPresenter()->link($destination, [$object instanceof Entity ? $object : \call_user_func($this->idCallback, $object)] + $arguments);
-		}, '<a class="btn btn-primary btn-sm text-xs" href="%s" title="Upravit"><i class="far fa-edit"></i></a>', null, ['class' => 'minimal']);
+		}, '<a class="btn btn-primary btn-sm text-xs" href="%s" title="'. $this->translator->translate('admin.edit', 'Upravit') .'"><i class="far fa-edit"></i></a>', null, ['class' => 'minimal']);
 	}
 
 	public function addColumnLink(string $destination, string $label = '', ?string $th = null, $wrappers = ['class' => 'minimal']): Column
@@ -234,7 +242,7 @@ class AdminGrid extends \Grid\Datagrid
 
 	public function addColumnMutations(string $property)
 	{
-		$this->addColumn('Mutace', function (Entity $object) use ($property) {
+		$this->addColumn($this->translator->translate('admin.mutations', 'Mutace'), function (Entity $object) use ($property) {
 			$img = [];
 			$baseUrl = $this->getPresenter()->getHttpRequest()->getUrl()->getBaseUrl();
 
@@ -256,10 +264,10 @@ class AdminGrid extends \Grid\Datagrid
 	 */
 	public function addColumnActionDelete(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null)
 	{
-		return $this->addColumnAction('', "<a href=\"%s\" class='btn btn-danger btn-sm text-xs' title='Smazat' onclick=\"return confirm('Opravdu?')\"><i class='far fa-trash-alt'></i></a>",
+		return $this->addColumnAction('', "<a href=\"%s\" class='btn btn-danger btn-sm text-xs' title='" . $this->translator->translate('admin.remove', 'Smazat') . "' onclick=\"return confirm('" .$this->translator->translate('admin.really', 'Opravdu?'). "')\"><i class='far fa-trash-alt'></i></a>",
 			function ($object) use ($beforeDeleteCallback, $override, $condition) {
 				try {
-					$this->getPresenter()->flashMessage('Provedeno', 'success');
+					$this->getPresenter()->flashMessage($this->translator->translate('admin.done', 'Provedeno'), 'success');
 
 					if ($condition) {
 						$allowed = $condition($object);
@@ -278,11 +286,11 @@ class AdminGrid extends \Grid\Datagrid
 							$this->getSource()->where($this->getSource(false)->getPrefix() . $this->getSourceIdName(), \call_user_func($this->idCallback, $object))->delete();
 						}
 					} else {
-						$this->getPresenter()->flashMessage('Chyba: Je zákázáno tuto položku smazat!', 'error');
+						$this->getPresenter()->flashMessage($this->translator->translate('admin.unableToRemoveItem', 'Chyba: Je zákázáno tuto položku smazat!'), 'error');
 						$this->getPresenter()->redirect('this');
 					}
 				} catch (\Exception $e) {
-					$this->getPresenter()->flashMessage('Chyba: Nelze smazat.', 'error');
+					$this->getPresenter()->flashMessage($this->translator->translate('admin.unableToRemove', 'Chyba: Nelze smazat.'), 'error');
 				}
 				$this->getPresenter()->redirect('this');
 			}, [], null, ['class' => 'minimal']);
@@ -312,7 +320,7 @@ class AdminGrid extends \Grid\Datagrid
 	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null, bool $ignore = false)
 	{
 		$grid = $this;
-		$submit = $this->getForm()->addSubmit('submit', 'Uložit');
+		$submit = $this->getForm()->addSubmit('submit', $this->translator->translate('admin.save', 'Uložit'));
 		$submit->setHtmlAttribute('class', 'btn btn-sm btn-primary');
 		$submit->onClick[] = function ($button) use ($grid, $processNullColumns, $processTypes, $sourceIdName, $ignore) {
 			foreach ($grid->getInputData() as $id => $data) {
@@ -342,7 +350,7 @@ class AdminGrid extends \Grid\Datagrid
 				$grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
 			}
 
-			$grid->getPresenter()->flashMessage('Uloženo', 'success');
+			$grid->getPresenter()->flashMessage($this->translator->translate('admin.saved', 'Uloženo'), 'success');
 			$grid->getPresenter()->redirect('this');
 		};
 	}
@@ -356,9 +364,9 @@ class AdminGrid extends \Grid\Datagrid
 	public function addButtonDeleteSelected(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null, ?string $sourceIdName = null)
 	{
 		$grid = $this;
-		$submit = $this->getForm()->addSubmit('deleteAll', 'Smazat');
+		$submit = $this->getForm()->addSubmit('deleteAll', $this->translator->translate('admin.remove', 'Smazat'));
 		$submit->setHtmlAttribute('class', 'btn btn-sm btn-danger');
-		$submit->setHtmlAttribute('onClick', 'return confirm("Opravdu?")');
+		$submit->setHtmlAttribute('onClick', 'return confirm("'. $this->translator->translate('admin.really', 'Opravdu?') .'")');
 		$submit->onClick[] = function ($button) use ($grid, $beforeDeleteCallback, $override, $condition, $sourceIdName) {
 			$warning = false;
 			foreach ($grid->getSelectedIds() as $id) {
@@ -388,10 +396,10 @@ class AdminGrid extends \Grid\Datagrid
 			}
 
 			if ($warning) {
-				$grid->getPresenter()->flashMessage('Varování: Některé položky nebylo možné smazat!', 'warning');
+				$grid->getPresenter()->flashMessage($this->translator->translate('admin.cantBeRemoved', 'Varování: Některé položky nebylo možné smazat!'), 'warning');
 			}
 
-			$grid->getPresenter()->flashMessage('Provedeno', 'success');
+			$grid->getPresenter()->flashMessage($this->translator->translate('admin.done', 'Provedeno'), 'success');
 			$grid->getPresenter()->redirect('this');
 		};
 	}
@@ -419,13 +427,13 @@ class AdminGrid extends \Grid\Datagrid
 	public function addFilterButtons(array $resetLink = ['default'])
 	{
 		$grid = $this;
-		$grid->getFilterForm()->addSubmit('submit', 'Filtrovat')->setHtmlAttribute('class', 'btn btn-sm btn-primary');
+		$grid->getFilterForm()->addSubmit('submit', $this->translator->translate('admin.filter', 'Filtrovat'))->setHtmlAttribute('class', 'btn btn-sm btn-primary');
 
 		$grid->getFilterForm()->onSuccess[] = function (Form $form) {
 			$this->setPage(1);
 		};
 
-		$reset = $grid->getFilterForm()->addSubmit('reset', 'Zrušit')->setHtmlAttribute('class', 'btn btn-sm btn-secondary');
+		$reset = $grid->getFilterForm()->addSubmit('reset', $this->translator->translate('admin.cancelFilter', 'Zrušit'))->setHtmlAttribute('class', 'btn btn-sm btn-secondary');
 		$reset->onClick[] = function () use ($grid, $resetLink) {
 			// for persistance session storage
 			$grid->setFilters(null);
