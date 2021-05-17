@@ -58,15 +58,15 @@ class AdminFormFactory
 		$form->addGroup('HLAVNÍ ÚDAJE');
 
 		if ($mutationSelector && \count($form->getMutations()) > 1) {
-			$form->addMutationSelector('Zvolte mutaci');
+			$form->addMutationSelector($this->translator->translate('admin.selectMutatiom', 'Zvolte mutaci'));
 			if ($translatedCheckbox) {
-				$form->addTranslatedCheckbox('Mutace je aktivní');
+				$form->addTranslatedCheckbox($this->translator->translate('admin.activeMutation', 'Mutace je aktivní'));
 			}
 			$form->addGroup();
 		}
 
 		$form->onError[] = function (AdminForm $form) {
-			$form->getPresenter()->flashMessage('Chybně vyplněný formulář!', 'error');
+			$form->getPresenter()->flashMessage($this->translator->translate('admin.formError', 'Chybně vyplněný formulář!'), 'error');
 		};
 
 		return $form;
