@@ -20,6 +20,8 @@ class AdminGridFactory
 
 	private bool $showItemsPerPage;
 
+	private ?int $defaultOnPage;
+
 	public function __construct(AdminFormFactory $formFactory,Session $session, Translator $translator)
 	{
 		$this->formFactory = $formFactory;
@@ -36,6 +38,11 @@ class AdminGridFactory
 	{
 		$this->showItemsPerPage = $show;
 	}
+
+	public function setDefaultOnPage(?int $defaultOnPage = null): void
+	{
+		$this->defaultOnPage = $defaultOnPage;
+	}
 	
 	public function create(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false)
 	{
@@ -43,6 +50,11 @@ class AdminGridFactory
 		$grid->setFormsFactory($this->formFactory);
 		$grid->setItemsPerPage($this->itemsPerPage);
 		$grid->setShowItemsPerPage($this->showItemsPerPage);
+
+		if ($this->defaultOnPage && !$defaultOnPage) {
+			$grid->setDefaultOnPage($this->defaultOnPage);
+		}
+
 		$grid->setAdminGridTranslator($this->translator);
 		
 		return $grid;

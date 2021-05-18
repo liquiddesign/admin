@@ -65,7 +65,7 @@ class AdminGrid extends \Grid\Datagrid
 			Datalist::saveSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getPresenter()->getName() . $datalist->getName()));
 		};
 
-		$this->onAnchor[] = function (AdminGrid $grid) {
+		$this->onAnchor[] = function (AdminGrid $grid) use ($defaultOnPage) {
 			$grid->template->setFile(__DIR__ . '/adminGrid.latte');
 			$grid->template->paginator = $grid->getPaginator(true);
 			$grid->template->onpage = $grid->getName() . '-onpage';
@@ -73,6 +73,14 @@ class AdminGrid extends \Grid\Datagrid
 			$grid->template->showItemsPerPage = $this->showItemsPerPage;
 			$grid->template->itemsPerPage = $this->itemsPerPage;
 			$grid->template->itemCountMessage = $this->translator->translate('admin.itemCountMessage', 'Celkem položek');
+
+			if (!$this->showItemsPerPage) {
+				if ($defaultOnPage) {
+					$grid->setOnPage($defaultOnPage);
+				}
+
+				$grid->setOnPage($grid->getDefaultOnPage());
+			}
 
 			[$orderColumn, $orderDirection] = \explode('-', $this->getOrderParameter());
 

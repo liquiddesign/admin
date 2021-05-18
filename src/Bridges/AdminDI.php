@@ -73,6 +73,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		$adminDef = $builder->addDefinition($this->prefix('adminGridFactory'))->setFactory(AdminGridFactory::class, [$adminDef]);
 		$adminDef->addSetup('setItemsPerPage', [$config->adminGrid['itemsPerPage'] ?? array(5, 10, 20)]);
 		$adminDef->addSetup('setShowItemsPerPage', [$config->adminGrid['showItemsPerPage'] ?? true]);
+		$adminDef->addSetup('setDefaultOnPage', [$config->adminGrid['defaulOnPage'] ?? null]);
 		
 		return;
 	}
