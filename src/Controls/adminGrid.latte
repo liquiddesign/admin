@@ -48,6 +48,7 @@
 	{/form}
 </div>
 <div class="pagination ml-lg-auto">
+	{if $showItemsPerPage}
 	<div class="col-12">
 		<ul class="pagination align-items-center mr-lg-2 mb-2 mb-lg-0">
 			<li class="page-item disabled"><a href="#" class="page-link" style="border: 0;">Na stránce:</a></li>
@@ -58,6 +59,7 @@
 			<li class="page-item disabled"><a href="#" class="page-link" style="border: 0;">{$itemCountMessage}: {$paginator->itemCount|number:0:',':' '}</a></li>
 		</ul>
 	</div>
+	{/if}
 
 	<div class="col-12">
 		<ul class="pagination align-items-center mb-0">
