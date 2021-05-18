@@ -72,7 +72,7 @@ class AdminGrid extends \Grid\Datagrid
 			$grid->template->page = $grid->getName() . '-page';
 			$grid->template->showItemsPerPage = $this->showItemsPerPage;
 			$grid->template->itemsPerPage = $this->itemsPerPage;
-			$grid->template->itemCountMessage = $this->translator->translate('admin.itemCountMessage', 'Celkem položek');
+			$grid->template->itemCountMessage = $this->translator->translate('admin.itemCountMessage', 'Položek');
 
 			if (!$this->showItemsPerPage) {
 				if ($defaultOnPage) {
