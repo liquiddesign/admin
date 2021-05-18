@@ -8,6 +8,7 @@ use Admin\Administrator;
 use Admin\Authorizator;
 use Admin\BackendPresenter;
 use Admin\Controls\AdminFormFactory;
+use Admin\Controls\AdminGridFactory;
 use Admin\Controls\ILoginFormFactory;
 use Admin\Controls\IMenuFactory;
 use Admin\DB\AdministratorRepository;
@@ -28,6 +29,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			'mutations' => Expect::list([]),
 			'superRole' => Expect::string(null),
 			'prettyPages' => Expect::bool(false),
+			'adminGrid' => Expect::array([]),
 		]);
 	}
 	
@@ -67,6 +69,10 @@ class AdminDI extends \Nette\DI\CompilerExtension
 
 		$adminDef = $builder->addDefinition($this->prefix('adminFormFactory'))->setFactory(AdminFormFactory::class, [$adminDef]);
 		$adminDef->addSetup('setPrettyPages', [$config->prettyPages]);
+
+		$adminDef = $builder->addDefinition($this->prefix('adminGridFactory'))->setFactory(AdminGridFactory::class, [$adminDef]);
+		$adminDef->addSetup('setItemsPerPage', [$config->adminGrid['itemsPerPage'] ?? array(5, 10, 20)]);
+		$adminDef->addSetup('setShowItemsPerPage', [$config->adminGrid['showItemsPerPage'] ?? true]);
 		
 		return;
 	}

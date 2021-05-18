@@ -42,13 +42,18 @@ class AdminGrid extends \Grid\Datagrid
 
 	private ?Session $session;
 
+	private array $itemsPerPage;
+
+	private bool $showItemsPerPage;
+
 	public function __construct(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false, ?Session $session = null)
 	{
 		parent::__construct($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId);
 
 		$this->onRender[] = function (\Nette\Utils\Html $tbody, array $columns) {
 			if (\count($tbody) === 0) {
-				$tbody->addHtml((\Nette\Utils\Html::el('tr')->addHtml(\Nette\Utils\Html::el('td', ['colspan' => \count($columns)])->setHtml('<i>Žádný výsledek. Zkuste změnit nebo vymazat filtry.</i>')->class('text-center p-2'))));
+				$tNoResult = $this->translator->translate('admin.gridNoResult', 'Žádný výsledek. Zkuste změnit nebo vymazat filtry.');
+				$tbody->addHtml((\Nette\Utils\Html::el('tr')->addHtml(\Nette\Utils\Html::el('td', ['colspan' => \count($columns)])->setHtml('<i>'. $tNoResult .'</i>')->class('text-center p-2'))));
 			}
 		};
 		
@@ -65,6 +70,9 @@ class AdminGrid extends \Grid\Datagrid
 			$grid->template->paginator = $grid->getPaginator(true);
 			$grid->template->onpage = $grid->getName() . '-onpage';
 			$grid->template->page = $grid->getName() . '-page';
+			$grid->template->showItemsPerPage = $this->showItemsPerPage;
+			$grid->template->itemsPerPage = $this->itemsPerPage;
+			$grid->template->itemCountMessage = $this->translator->translate('admin.itemCountMessage', 'Celkem položek');
 
 			[$orderColumn, $orderDirection] = \explode('-', $this->getOrderParameter());
 
@@ -84,6 +92,16 @@ class AdminGrid extends \Grid\Datagrid
 		};
 
 		$this->session = $session;
+	}
+
+	public function setItemsPerPage(array $items): void
+	{
+		$this->itemsPerPage = $items;
+	}
+
+	public function setShowItemsPerPage(bool $show): void
+	{
+		$this->showItemsPerPage = $show;
 	}
 
 	public function setAdminGridTranslator(Translator $translator)

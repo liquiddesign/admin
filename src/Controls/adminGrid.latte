@@ -51,10 +51,11 @@
 	<div class="col-12">
 		<ul class="pagination align-items-center mr-lg-2 mb-2 mb-lg-0">
 			<li class="page-item disabled"><a href="#" class="page-link" style="border: 0;">Na stránce:</a></li>
-			<li class="page-item {if $paginator->getItemsPerPage() == 5}disabled{/if}"><a href="{plink this $onpage => 5}" class="page-link">5</a></li>
-			<li class="page-item {if $paginator->getItemsPerPage() == 10}disabled{/if}"><a href="{plink this $onpage => 10}" class="page-link">10</a></li>
-			<li class="page-item {if $paginator->getItemsPerPage() == 20}disabled{/if}"><a href="{plink this $onpage => 20}" class="page-link">20</a></li>
-			<li class="page-item disabled"><a href="#" class="page-link" style="border: 0;">&sum; {$paginator->itemCount|number:0:',':' '}</a></li>
+			{foreach $itemsPerPage as $ipp}
+				<li class="page-item {if $paginator->getItemsPerPage() == $ipp}disabled{/if}"><a href="{plink this $onpage => $ipp}" class="page-link">{$ipp}</a></li>
+			{/foreach}
+
+			<li class="page-item disabled"><a href="#" class="page-link" style="border: 0;">{$itemCountMessage}: {$paginator->itemCount|number:0:',':' '}</a></li>
 		</ul>
 	</div>
 
