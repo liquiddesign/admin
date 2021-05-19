@@ -309,7 +309,7 @@ class AdminGrid extends \Grid\Datagrid
 						}
 
 						if (!$override) {
-							$this->getSource()->where($this->getSource(false)->getPrefix() . $this->getSourceIdName(), \call_user_func($this->idCallback, $object))->delete();
+							$this->getSource()->where($this->getSource(false)->getPrefix() . $this->getSourceIdName(), \call_user_func($this->idCallback, $object))->setOrderBy([])->delete();
 						}
 					} else {
 						$this->getPresenter()->flashMessage($this->translator->translate('admin.unableToRemoveItem', 'Chyba: Je zákázáno tuto položku smazat!'), 'error');
