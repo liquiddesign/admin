@@ -25,6 +25,10 @@ class AccountFormFactory
 {
 	use SmartObject;
 
+	protected const CONFIGURATIONS = [
+		'preferredMutation' => false,
+	];
+
 	/**
 	 * @var callable[]&callable(\Security\DB\Account, array): void
 	 */
@@ -75,6 +79,11 @@ class AccountFormFactory
 		$accountContainer->addPassword('password', 'Heslo');
 		$accountContainer->addPassword('passwordCheck', 'Kontrola hesla')
 			->addRule($form::EQUAL, 'Hesla nejsou shodná!', $form['account']['password']);
+
+//		if(isset(static::CONFIGURATIONS['preferredMutation']) && static::CONFIGURATIONS['preferredMutation']){
+		$accountContainer->addDataSelect('preferredMutation', 'Preferovaný jazyk', \array_combine($this->adminFormFactory->formFactory->getDefaultMutations(),$this->adminFormFactory->formFactory->getDefaultMutations()))->setPrompt('Automaticky');
+//		}
+
 		$accountContainer->addCheckbox('active', 'Aktivní')->setDefaultValue(true);
 		
 		$accountContainer->addHidden('email');
