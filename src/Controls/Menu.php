@@ -35,6 +35,7 @@ class Menu extends Control
 			if (\is_array($link)) {
 				$subItem->link = $link['link'];
 				$subItem->itemName = $link['itemName'];
+				$subItem->label = $label;
 			} else {
 				$subItem->link = $link;
 				$subItem->label = $label;
