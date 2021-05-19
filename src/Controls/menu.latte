@@ -5,7 +5,12 @@
 				<a href="{$item->link ? $presenter->link($item->link) : '#'}" class="nav-link nav-link-category">
 					<i class="nav-icon fas fa-{ifset $item->icon}{$item->icon}{else}th{/ifset}"></i>
 					<p>
-						{$item->label}
+						{if key_exists($lang, $item->itemName)}
+							{$item->itemName[$lang]}
+						{else}
+							{$item->label}
+						{/if}
+
 						<i class="right fas fa-angle-left"></i>
 					</p>
 				</a>
@@ -14,16 +19,31 @@
 			<a href="{$item->link ? $presenter->link($item->link) : '#'}" class="nav-link">
 				<i class="nav-icon fas fa-{ifset $item->icon}{$item->icon}{else}th{/ifset}"></i>
 				<p>
-					{$item->label}
+					{if key_exists($lang, $item->itemName)}
+						{$item->itemName[$lang]}
+					{else}
+						{$item->label}
+					{/if}
 				</p>
 			</a>
 		{/if}
 		<ul class="nav nav-treeview">
 			{foreach $item->items as $subItem}
+				{dump $subItem}
 				<li class="nav-item">
 					<a href="{$subItem->link ? $presenter->link($subItem->link) : '#'}" class="nav-link {$subItem->active ? 'active' : ''}">
 						<span class="pl-1 pr-2">&mdash;</span>
-						<p>{$subItem->label}</p>
+						<p>
+							{if $subItem->itemName}
+								{if key_exists($lang, $subItem->itemName)}
+									{$subItem->itemName[$lang]}
+								{else}
+									{$subItem->label}
+								{/if}
+							{else}
+								{$subItem->label}
+							{/if}
+						</p>
 					</a>
 				</li>
 			{/foreach}

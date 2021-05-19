@@ -21,17 +21,26 @@ class Menu extends Control
 		$this->admin = $context->getService('admin.administrator');
 	}
 	
-	public function addMenuItem($label, $link, $subitems = [], $icon = null): MenuItem
+	public function addMenuItem($label, $link, $subitems = [], $icon = null, $itemName = []): MenuItem
 	{
 		$menuItem = new MenuItem();
 		$menuItem->label = $label;
 		$menuItem->link = $link;
 		$menuItem->icon = $icon;
+		$menuItem->itemName = $itemName;
 		
 		foreach ($subitems as $label => $link) {
 			$subItem = new MenuItem();
-			$subItem->label = $label;
-			$subItem->link = $link;
+
+			if (\is_array($link)) {
+				$subItem->link = $link['link'];
+				$subItem->itemName = $link['itemName'];
+				$subItem->label = $label;
+			} else {
+				$subItem->link = $link;
+				$subItem->label = $label;
+			}
+
 			$menuItem->items[] = $subItem;
 		}
 		
@@ -44,6 +53,7 @@ class Menu extends Control
 	{
 		$this->template->setFile($this->template->getFile() ?: __DIR__ . '/menu.latte');
 		$this->template->menu = [];
+		$this->template->lang = $this->getPresenter()->lang;
 		$items = $this->items;
 		
 		foreach ($items as $item) {
