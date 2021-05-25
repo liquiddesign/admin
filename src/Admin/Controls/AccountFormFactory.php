@@ -85,10 +85,10 @@ class AccountFormFactory
 		$accountContainer->addDataSelect('preferredMutation', 'Preferovaný jazyk', \array_combine($this->adminFormFactory->formFactory->getDefaultMutations(),$this->adminFormFactory->formFactory->getDefaultMutations()))->setPrompt('Automaticky');
 //		}
 
-		if(isset(static::CONFIGURATIONS['newsletter']) && static::CONFIGURATIONS['newsletter']) {
+//		if(isset(static::CONFIGURATIONS['newsletter']) && static::CONFIGURATIONS['newsletter']) {
 			$accountContainer->addCheckbox('newsletter', 'Přihlášen k newsletteru')->addCondition($form::EQUAL, true)->toggle('frm-accountForm-account-newsletterGroup-toogle');
 			$accountContainer->addText('newsletterGroup', 'Skupina pro newsletter');
-		}
+//		}
 
 		$accountContainer->addCheckbox('active', 'Aktivní')->setDefaultValue(true);
 		
