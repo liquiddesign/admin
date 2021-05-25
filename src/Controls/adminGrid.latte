@@ -51,7 +51,7 @@
 	{if $showItemsPerPage}
 	<div class="col-12">
 		<ul class="pagination align-items-center mr-lg-2 mb-2 mb-lg-0">
-			<li class="page-item disabled"><a href="#" class="page-link" style="border: 0;">Na stránce:</a></li>
+			<li class="page-item disabled"><a href="#" class="page-link" style="border: 0;">{_'admin.onPage', 'Na stránce'}:</a></li>
 			{foreach $itemsPerPage as $ipp}
 				<li class="page-item {if $paginator->getItemsPerPage() == $ipp}disabled{/if}"><a href="{plink this $onpage => $ipp, $page => 1}" class="page-link">{$ipp}</a></li>
 			{/foreach}
@@ -63,7 +63,7 @@
 
 	<div class="col-12">
 		<ul class="pagination align-items-center mb-0">
-			<li class="page-item {if $paginator->isFirst()}disabled{/if}"><a href="{plink this $page => 1}" class="page-link">První</a></li>
+			<li class="page-item {if $paginator->isFirst()}disabled{/if}"><a href="{plink this $page => 1}" class="page-link">{_'admin.firstPage', 'První'}</a></li>
 			<li class="page-item {if $paginator->isFirst()}disabled{/if}">
 				<a href="{plink this $page => $paginator->page-1}" class="page-link">
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: .75rem; line-height: 1;">
@@ -71,7 +71,7 @@
 					</svg>
 				</a>
 			</li>
-			<li class="page-item disabled"><a href="#" class="page-link" style="border: 0;">{if $paginator->pageCount === 0}Žádné stránky{else}Stránka {$paginator->page} z {$paginator->pageCount}{/if}</a></li>
+			<li class="page-item disabled"><a href="#" class="page-link" style="border: 0;">{if $paginator->pageCount === 0}{_'admin.noPage', 'Žádné stránky'}{else}{_'admin.page', 'Stránka'} {$paginator->page} {_'admin.pageFrom', 'z'} {$paginator->pageCount}{/if}</a></li>
 			<li class="page-item {if $paginator->isLast()}disabled{/if}">
 				<a href="{plink this $page => $paginator->page+1}" class="page-link">
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: .75rem; line-height: 1;">
@@ -79,7 +79,7 @@
 					</svg>
 				</a>
 			</li>
-			<li class="page-item {if $paginator->isLast()}disabled{/if}"><a href="{plink this $page => $paginator->pageCount}" class="page-link">Poslední</a></li>
+			<li class="page-item {if $paginator->isLast()}disabled{/if}"><a href="{plink this $page => $paginator->pageCount}" class="page-link">{_'admin.lastPage', 'Poslední'}</a></li>
 		</ul>
 	</div>
 </div>
