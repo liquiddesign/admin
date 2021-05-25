@@ -117,9 +117,13 @@ class AdminForm extends \Forms\Form
 
 		/** @var \Web\DB\Page|null $page */
 		$page = $pageType ? $this->pageRepository->getPageByTypeAndParams($pageType, null, $params, true) : null;
-
-		$this->addGroup('URL a SEO');
-		$pageContainer = $this->addContainer('page');
+		
+		/** @var Container $pageContainer */
+		$pageContainer = $this->getComponent('page', false) ?: $this->addContainer('page');
+		
+		$group = $this->addGroup('URL a SEO', true);
+		$pageContainer->setCurrentGroup($group);
+		
 		$pageContainer->addHidden('uuid')->setNullable();
 		$pageContainer->addLocaleText('url', 'URL')->forAll(function (TextInput $text, $mutation) use ($page, $pageType) {
 			$text->setHtmlAttribute('class', 'seo_url')
@@ -133,9 +137,11 @@ class AdminForm extends \Forms\Form
 				$text->setRequired(true);
 			}
 		});
-
-		$pageContainer->addCheckbox('isOffline', 'Nedostupná')->setHtmlAttribute('data-info',
-			'Na daném URL bude stránka jako stránka 404');
+		
+		if (!isset($pageContainer['isOffline'])) {
+			$pageContainer->addCheckbox('isOffline', 'Nedostupná')->setHtmlAttribute('data-info',
+				'Na daném URL bude stránka jako stránka 404');
+		}
 
 		$pageContainer->addLocaleText('title', 'Titulek')->forAll(function (TextInput $text) {
 			$text->setHtmlAttribute('data-characters', 70);
