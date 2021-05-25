@@ -109,7 +109,8 @@ class AdminForm extends \Forms\Form
 	public function addPageContainer(
 		?string $pageType = null,
 		array $params = [],
-		?LocaleContainer $copyControls = null
+		?LocaleContainer $copyControls = null,
+		bool $isOffline = false
 	): Container {
 		if (!$this->prettyPages) {
 			return $this->addContainer('page');
@@ -138,7 +139,7 @@ class AdminForm extends \Forms\Form
 			}
 		});
 		
-		if (!isset($pageContainer['isOffline'])) {
+		if ($isOffline) {
 			$pageContainer->addCheckbox('isOffline', 'Nedostupná')->setHtmlAttribute('data-info',
 				'Na daném URL bude stránka jako stránka 404');
 		}
