@@ -27,6 +27,8 @@ class AdminForm extends \Forms\Form
 	private Translator $translator;
 
 	private bool $prettyPages = false;
+	
+	public ?string $entityName = null;
 
 	public function setPageRepository(PageRepository $pageRepository)
 	{
@@ -46,6 +48,11 @@ class AdminForm extends \Forms\Form
 	public function setPrettyPages(bool $prettyPages)
 	{
 		$this->prettyPages = $prettyPages;
+	}
+	
+	public function setLogging(string $entityName): void
+	{
+		$this->entityName = $entityName;
 	}
 
 	public function getPrettyPages(): bool
