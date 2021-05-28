@@ -143,6 +143,14 @@ class AdminGrid extends \Grid\Datagrid
 		return parent::addColumnSelector($wrapperAttributes + ['class' => 'fit']);
 	}
 	
+	public function addColumnTextFit($th, $expressions, $td, ?string $orderExpression = null, array $wrapperAttributes = []): Column
+	{
+		$column = parent::addColumnText($th, $expressions, $td, $orderExpression, $wrapperAttributes + ['class' => 'fit']);
+		$column->onRenderCell[] = [$this, 'decoratorNowrap'];
+		
+		return $column;
+	}
+	
 	public function addColumnImage(string $expression, string $dir, string $subDir = 'thumb', string $th = '')
 	{
 		return $this->addColumn($th, function ($entity) use ($dir, $expression, $subDir) {
