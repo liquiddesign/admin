@@ -112,7 +112,7 @@ class AdminGrid extends \Grid\Datagrid
 		$this->showItemsPerPage = $show;
 	}
 
-	public function setAdminGridTranslator(Translator $translator)
+	public function setTranslator(Translator $translator)
 	{
 		$this->translator = $translator;
 	}
@@ -675,5 +675,11 @@ class AdminGrid extends \Grid\Datagrid
 
 			return $textInput;
 		}, $setValueExpression, $defaultValue, $orderExpression, $wrapperAttributes);
+	}
+	
+	public function render(): void
+	{
+		$this->template->setTranslator($this->translator);
+		parent::render();
 	}
 }

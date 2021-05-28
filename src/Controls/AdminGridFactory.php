@@ -55,7 +55,7 @@ class AdminGridFactory
 			$grid->setDefaultOnPage($this->defaultOnPage);
 		}
 
-		$grid->setAdminGridTranslator($this->translator);
+		$grid->setTranslator($this->translator);
 		
 		return $grid;
 	}
