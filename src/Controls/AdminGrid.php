@@ -274,15 +274,21 @@ class AdminGrid extends \Grid\Datagrid
 		}, '<a class="btn btn-outline-primary btn-sm text-xs" style="white-space: nowrap" href="%s">' . $label . '</a>', null, $wrappers);
 	}
 
-	public function addColumnMutations(string $property)
+	public function addColumnMutations(string $property, bool $nullable = true)
 	{
-		$this->addColumn($this->translator->translate('admin.mutations', 'Mutace'), function (Entity $object) use ($property) {
+		$this->addColumn($this->translator->translate('admin.mutations', 'Mutace'), function (Entity $object) use ($property, $nullable) {
 			$img = [];
 			$baseUrl = $this->getPresenter()->getHttpRequest()->getUrl()->getBaseUrl();
 
 			foreach ($this->formFactory->formFactory->getDefaultMutations() as $mutation) {
 				[$flagsPath, $flagsExt, $flagsMap] = $this->formFactory->formFactory->getDefaultFlagsConfiguration();
-				$style = $object->getValue($property, $mutation) === null ? 'filter: grayscale(100%);' : '';
+				
+				if ($nullable) {
+					$style = $object->getValue($property, $mutation) === null ? 'filter: grayscale(100%);' : '';
+				} else {
+					$style = !$object->getValue($property, $mutation) ? 'filter: grayscale(100%);' : '';
+				}
+				
 				$img[] = "<img class='mutation-flag' style='$style' src='$baseUrl$flagsPath/$flagsMap[$mutation].$flagsExt' alt='$mutation' title='$mutation'>";
 			}
 
