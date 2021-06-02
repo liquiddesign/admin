@@ -128,13 +128,14 @@ class AdminForm extends \Forms\Form
 		$pageContainer->addHidden('uuid')->setNullable();
 		$pageContainer->addLocaleText('url', 'URL')->forAll(function (TextInput $text, $mutation) use ($page, $pageType) {
 			$text->setHtmlAttribute('class', 'seo_url')
-				->addRule([$this, 'validateUrl'], 'URL již existuje',
-					[$this->pageRepository, $mutation, $page ? $page->getPK() : null])->setNullable($pageType !== 'index');
-		})->forPrimary(function (TextInput $text, $mutation) use ($pageType) {
+				->addRule([$this, 'validateUrl'], 'URL již existuje', [$this->pageRepository, $mutation, $page ? $page->getPK() : null])->setNullable($pageType !== 'index');
+			
 			if ($pageType === 'index') {
 				$text->setRequired(false);
 				$text->setHtmlAttribute('readonly', 'readonly');
-			} else {
+			}
+		})->forPrimary(function (TextInput $text, $mutation) use ($pageType) {
+			if ($pageType !== 'index') {
 				$text->setRequired(true);
 			}
 		});
