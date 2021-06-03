@@ -475,13 +475,13 @@ class AdminGrid extends \Grid\Datagrid
 	public function addFilterButtons(array $resetLink = ['default'])
 	{
 		$grid = $this;
-		$grid->getFilterForm()->addSubmit('submit', $this->translator->translate('admin.filter', 'Filtrovat'))->setHtmlAttribute('class', 'btn btn-sm btn-primary');
+		$grid->getFilterForm()->addSubmit('submit', $this->translator->translate('admin.filter', 'Filtrovat'))->setHtmlAttribute('class', 'btn btn-sm btn-primary h-100');
 
 		$grid->getFilterForm()->onSuccess[] = function (Form $form) {
 			$this->setPage(1);
 		};
 
-		$reset = $grid->getFilterForm()->addSubmit('reset', $this->translator->translate('admin.cancelFilter', 'Zrušit'))->setHtmlAttribute('class', 'btn btn-sm btn-secondary');
+		$reset = $grid->getFilterForm()->addSubmit('reset', $this->translator->translate('admin.cancelFilter', 'Zrušit'))->setHtmlAttribute('class', 'btn btn-sm btn-secondary h-100');
 		$reset->onClick[] = function () use ($grid, $resetLink) {
 			// for persistance session storage
 			$grid->setFilters(null);
