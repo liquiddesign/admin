@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Admin\Controls;
 
+use Admin\DB\ChangelogRepository;
 use Forms\Form;
 use Grid\Column;
 use Grid\Datalist;
@@ -31,6 +32,8 @@ class AdminGrid extends \Grid\Datagrid
 	public array $onDelete = [];
 
 	public Translator $translator;
+	
+	private ChangelogRepository $changelogRepository;
 
 	private ?string $bulkFormId = null;
 
@@ -45,6 +48,8 @@ class AdminGrid extends \Grid\Datagrid
 	private array $itemsPerPage;
 
 	private bool $showItemsPerPage;
+	
+	private ?string $entityName = null;
 
 	public function __construct(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false, ?Session $session = null)
 	{
@@ -101,6 +106,11 @@ class AdminGrid extends \Grid\Datagrid
 
 		$this->session = $session;
 	}
+	
+	public function setChangelogRepository(ChangelogRepository $changelogRepository): void
+	{
+		$this->changelogRepository = $changelogRepository;
+	}
 
 	public function setItemsPerPage(array $items): void
 	{
@@ -115,6 +125,11 @@ class AdminGrid extends \Grid\Datagrid
 	public function setTranslator(Translator $translator)
 	{
 		$this->translator = $translator;
+	}
+	
+	public function setLogging(string $entityName): void
+	{
+		$this->entityName = $entityName;
 	}
 
 	protected function createComponentFilterForm(): \Nette\Application\UI\Form
@@ -394,6 +409,13 @@ class AdminGrid extends \Grid\Datagrid
 				if($onRowUpdate){
 					$onRowUpdate($id, $data);
 				}
+				
+				$this->changelogRepository->createOne([
+					'user' => $grid->getPresenter()->admin->getIdentity()->getAccount()->login,
+					'entity' => $grid->entityName,
+					'objectId' => $id,
+					'type' => 'grid-edit',
+				]);
 
 				$grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
 			}

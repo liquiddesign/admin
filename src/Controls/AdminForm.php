@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Admin\Controls;
 
-use Nette\Http\FileUpload;
 use Nette\Localization\Translator;
-use Nette\NotImplementedException;
+use Pages\DB\IPage;
 use Web\DB\PageRepository;
 use Forms\Container;
 use Forms\LocaleContainer;
@@ -67,6 +66,9 @@ class AdminForm extends \Forms\Form
 		return $properties;
 	}
 	
+	
+	public ?string $entityName = null;
+
 	public function setPageRepository(PageRepository $pageRepository)
 	{
 		$this->pageRepository = $pageRepository;
@@ -87,6 +89,11 @@ class AdminForm extends \Forms\Form
 		$this->prettyPages = $prettyPages;
 	}
 	
+	public function setLogging(string $entityName): void
+	{
+		$this->entityName = $entityName;
+	}
+
 	public function getPrettyPages(): bool
 	{
 		return $this->prettyPages;
@@ -106,7 +113,7 @@ class AdminForm extends \Forms\Form
 			$this->addSubmit('submitAndNext', $this->translator->translate('admin.saveAndNext', 'Uložit a vložit další'));
 		}
 	}
-	
+
 	public function syncPages(callable $callback)
 	{
 		if ($this->prettyPages) {
@@ -194,7 +201,7 @@ class AdminForm extends \Forms\Form
 		});
 		$pageContainer->addHidden('type', $pageType);
 		$pageContainer->addHidden('params', $params ? \http_build_query($params) . '&' : '');
-		
+
 		if ($page) {
 			$pageContainer->setDefaults($page->toArray());
 		}
@@ -215,7 +222,7 @@ class AdminForm extends \Forms\Form
 		$element->addCondition(Form::FILLED)
 			->addRule(Form::INTEGER);
 		$element->setHtmlType('number');
-		
+
 		return $this[$name] = $element;
 	}
 	
@@ -234,10 +241,10 @@ class AdminForm extends \Forms\Form
 				if (!isset($containerStructures[$control->getParent()->getName()])) {
 					continue;
 				}
-				
+
 				$structure = $containerStructures[$control->getParent()->getName()];
 			}
-			
+
 			if (!$structure || !$structure->getColumn($name)) {
 				continue;
 			}

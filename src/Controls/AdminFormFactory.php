@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Admin\Controls;
 
 use Admin\Administrator;
+use Admin\DB\ChangelogRepository;
 use Nette\Localization\Translator;
 use StORM\Connection;
 use StORM\DIConnection;
@@ -13,21 +14,21 @@ use Forms\FormFactory;
 
 class AdminFormFactory
 {
+	private ChangelogRepository $changelogRepository;
+	
 	private PageRepository $pageRepository;
 	
 	private Administrator $administrator;
-	
+
 	public FormFactory $formFactory;
-	
+
 	private Translator $translator;
-	
-	private DIConnection $connection;
-	
+
 	private bool $prettyPages;
 	
 	private array $mutations;
 	
-	public function __construct(Administrator $administrator, FormFactory $formFactory, DIConnection $connection, PageRepository $pageRepository, Translator $translator)
+	public function __construct(Administrator $administrator, FormFactory $formFactory, DIConnection $connection, PageRepository $pageRepository, Translator $translator, ChangelogRepository $changelogRepository)
 	{
 		$this->formFactory = $formFactory;
 		$this->pageRepository = $pageRepository;
@@ -35,8 +36,9 @@ class AdminFormFactory
 		$this->translator = $translator;
 		$this->connection = $connection;
 		$this->mutations = $formFactory->getDefaultMutations();
+		$this->changelogRepository = $changelogRepository;
 	}
-	
+
 	public function setPrettyPages(bool $prettyPages): void
 	{
 		$this->prettyPages = $prettyPages;
@@ -51,7 +53,7 @@ class AdminFormFactory
 	{
 		$this->mutations = $mutations;
 	}
-	
+
 	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false): AdminForm
 	{
 		/** @var \Admin\Controls\AdminForm $form */
@@ -84,6 +86,18 @@ class AdminFormFactory
 			$form->getPresenter()->flashMessage($this->translator->translate('admin.formError', 'Chybně vyplněný formulář!'), 'error');
 		};
 		
+		
+		$form->onSuccess[] = function (AdminForm $form) {
+			if ($form->entityName) {
+				$this->changelogRepository->createOne([
+					'user' => $form->getPresenter()->admin->getIdentity()->getAccount()->login,
+					'entity' => $form->entityName,
+					'objectId' => $form->getValues()['uuid'],
+					'type' => $form->getPresenterIfExists()->getParameter('action')
+				]);
+			}
+		};
+
 		return $form;
 	}
 }

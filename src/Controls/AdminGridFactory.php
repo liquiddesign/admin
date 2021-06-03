@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Admin\Controls;
 
+use Admin\DB\ChangelogRepository;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
 use StORM\ICollection;
 
 class AdminGridFactory
 {
+	private ChangelogRepository $changelogRepository;
+	
 	private AdminFormFactory $formFactory;
 
 	private Session $session;
@@ -22,11 +25,12 @@ class AdminGridFactory
 
 	private ?int $defaultOnPage;
 
-	public function __construct(AdminFormFactory $formFactory,Session $session, Translator $translator)
+	public function __construct(AdminFormFactory $formFactory,Session $session, Translator $translator, ChangelogRepository $changelogRepository)
 	{
 		$this->formFactory = $formFactory;
 		$this->session = $session;
 		$this->translator = $translator;
+		$this->changelogRepository = $changelogRepository;
 	}
 
 	public function setItemsPerPage(array $items): void
@@ -50,6 +54,7 @@ class AdminGridFactory
 		$grid->setFormsFactory($this->formFactory);
 		$grid->setItemsPerPage($this->itemsPerPage);
 		$grid->setShowItemsPerPage($this->showItemsPerPage);
+		$grid->setChangelogRepository($this->changelogRepository);
 
 		if ($this->defaultOnPage && !$defaultOnPage) {
 			$grid->setDefaultOnPage($this->defaultOnPage);
