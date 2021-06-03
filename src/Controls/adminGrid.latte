@@ -9,7 +9,7 @@
 			<div class="col-12">
 				<div class="form-group row">
 					{foreach $components as $component}
-						<div class="col-auto p-1 inline-style">
+						<div n:tag-if="!$component instanceof Nette\Forms\Controls\HiddenField"  class="col-auto p-1 inline-style">
 							{$component->getControl()}
 						</div>
 					{/foreach}
