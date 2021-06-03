@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Admin\Controls;
 
+use Nette\Http\FileUpload;
 use Nette\Localization\Translator;
 use Pages\DB\IPage;
+use StORM\Entity;
 use Web\DB\PageRepository;
 use Forms\Container;
 use Forms\LocaleContainer;
@@ -19,7 +21,6 @@ use StORM\Meta\Structure;
 
 class AdminForm extends \Forms\Form
 {
-
 	private PageRepository $pageRepository;
 
 	private \StORM\DIConnection $storm;
@@ -27,6 +28,42 @@ class AdminForm extends \Forms\Form
 	private Translator $translator;
 
 	private bool $prettyPages = false;
+	
+	public function getChangedProperties(?Entity $entity, array $relations = []): ?array
+	{
+		if ($entity === null) {
+			return null;
+		}
+		
+		$properties = [];
+		$entityValues = $entity->toArray($relations);
+		$connection = $entity->getParent()->getRepository()->getConnection();
+		$values = $this->getValues('array');
+		
+		foreach ($values as $name => $value) {
+			if (\is_scalar($value)) {
+				if ($value != $entityValues[$name]) {
+					$properties[$name] = $name;
+				}
+			}
+			
+			if (\is_array($value) && isset($entityValues[$name]) && $diff = \array_diff($value, $entityValues[$name])) {
+				if ($this[$name] instanceof LocaleContainer) {
+					foreach (\array_keys($diff) as $mutation) {
+						$properties[$name . $connection->getAvailableMutations()[$mutation]] = $name;
+					}
+				} else {
+					$properties[$name] = $name;
+				}
+			}
+			
+			if ($value instanceof FileUpload && $value->hasFile()) {
+				$properties[$name] = $name;
+			}
+		}
+		
+		return $properties;
+	}
 
 	public function setPageRepository(PageRepository $pageRepository)
 	{
