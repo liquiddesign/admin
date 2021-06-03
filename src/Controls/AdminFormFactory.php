@@ -7,7 +7,6 @@ namespace Admin\Controls;
 use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
 use Nette\Localization\Translator;
-use StORM\Connection;
 use StORM\DIConnection;
 use Web\DB\PageRepository;
 use Forms\FormFactory;
@@ -23,6 +22,8 @@ class AdminFormFactory
 	public FormFactory $formFactory;
 
 	private Translator $translator;
+	
+	private DIConnection $connection;
 
 	private bool $prettyPages;
 	
@@ -90,7 +91,7 @@ class AdminFormFactory
 		$form->onSuccess[] = function (AdminForm $form) {
 			if ($form->entityName) {
 				$this->changelogRepository->createOne([
-					'user' => $form->getPresenter()->admin->getIdentity()->getAccount()->login,
+					'user' => $this->administrator->getIdentity()->getAccount()->login,
 					'entity' => $form->entityName,
 					'objectId' => $form->getValues()['uuid'],
 					'type' => $form->getPresenterIfExists()->getParameter('action')
