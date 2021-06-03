@@ -410,12 +410,12 @@ class AdminGrid extends \Grid\Datagrid
 					$onRowUpdate($id, $data);
 				}
 				
-				$this->changelogRepository->createOne([
+				/*$this->changelogRepository->createOne([
 					'user' => $grid->getPresenter()->admin->getIdentity()->getAccount()->login,
 					'entity' => $grid->entityName,
 					'objectId' => $id,
 					'type' => 'grid-edit',
-				]);
+				]);*/
 
 				$grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
 			}
