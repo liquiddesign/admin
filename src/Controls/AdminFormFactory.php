@@ -6,6 +6,8 @@ namespace Admin\Controls;
 
 use Admin\Administrator;
 use Nette\Localization\Translator;
+use StORM\Connection;
+use StORM\DIConnection;
 use Web\DB\PageRepository;
 use Forms\FormFactory;
 
@@ -19,16 +21,19 @@ class AdminFormFactory
 	
 	private Translator $translator;
 	
+	private DIConnection $connection;
+	
 	private bool $prettyPages;
 	
 	private array $mutations;
 	
-	public function __construct(Administrator $administrator, FormFactory $formFactory, PageRepository $pageRepository, Translator $translator)
+	public function __construct(Administrator $administrator, FormFactory $formFactory, DIConnection $connection, PageRepository $pageRepository, Translator $translator)
 	{
 		$this->formFactory = $formFactory;
 		$this->pageRepository = $pageRepository;
 		$this->administrator = $administrator;
 		$this->translator = $translator;
+		$this->connection = $connection;
 		$this->mutations = $formFactory->getDefaultMutations();
 	}
 	
@@ -62,7 +67,9 @@ class AdminFormFactory
 		$form->setPrettyPages($this->prettyPages);
 		$form->setPageRepository($this->pageRepository);
 		$form->setRenderer(new BootstrapRenderer());
+		$form->setConnection($this->connection);
 		$form->addHidden('uuid')->setNullable();
+		$form->addHidden('_defaults')->setNullable()->setOmitted(true);
 		$form->addGroup('HLAVNÍ ÚDAJE');
 		
 		if ($mutationSelector && \count($form->getMutations()) > 1) {
