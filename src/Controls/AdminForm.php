@@ -193,7 +193,8 @@ class AdminForm extends \Forms\Form
 		}
 		
 		$pageContainer->addLocaleText('title', 'Titulek')->forAll(function (TextInput $text) {
-			$text->setHtmlAttribute('data-characters', 70);
+			$text->setHtmlAttribute('data-characters', 70)
+				->setHtmlAttribute('style', 'width: 450px !important');
 		});
 		
 		$pageContainer->addLocaleTextArea('description', 'Popisek')->forAll(function (TextArea $text) {
