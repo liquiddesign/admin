@@ -55,7 +55,7 @@ class AdminFormFactory
 		$this->mutations = $mutations;
 	}
 
-	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false): AdminForm
+	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false, bool $generateUuid = false): AdminForm
 	{
 		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->formFactory->create(AdminForm::class);
@@ -71,7 +71,7 @@ class AdminFormFactory
 		$form->setPageRepository($this->pageRepository);
 		$form->setRenderer(new BootstrapRenderer());
 		$form->setConnection($this->connection);
-		$form->addHidden('uuid')->setNullable();
+		$form->addHidden('uuid')->setDefaultValue($generateUuid ? DIConnection::generateUuid() : null)->setNullable();
 		$form->addHidden('_defaults')->setNullable()->setOmitted(true);
 		$form->addGroup('HLAVNÍ ÚDAJE');
 		
