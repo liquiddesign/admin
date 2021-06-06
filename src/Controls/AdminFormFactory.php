@@ -55,7 +55,7 @@ class AdminFormFactory
 		$this->mutations = $mutations;
 	}
 
-	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false, bool $generateUuid = false): AdminForm
+	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false, bool $generateUuid = false, bool $defaultsField = false): AdminForm
 	{
 		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->formFactory->create(AdminForm::class);
@@ -72,7 +72,11 @@ class AdminFormFactory
 		$form->setRenderer(new BootstrapRenderer());
 		$form->setConnection($this->connection);
 		$form->addHidden('uuid')->setDefaultValue($generateUuid ? DIConnection::generateUuid() : null)->setNullable();
-		$form->addHidden('_defaults')->setNullable()->setOmitted(true);
+		
+		if ($defaultsField) {
+			$form->addHidden('_defaults')->setNullable()->setOmitted(true);
+		}
+		
 		$form->addGroup('HLAVNÍ ÚDAJE');
 		
 		if ($mutationSelector && \count($form->getMutations()) > 1) {
