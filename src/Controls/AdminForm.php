@@ -27,7 +27,7 @@ class AdminForm extends \Forms\Form
 	
 	private bool $prettyPages = false;
 	
-	public function getChangedProperties(): ?array
+	public function getChangedProperties(?string $containerName = null): ?array
 	{
 		if (!isset($this['_defaults'])) {
 			throw new NotImplementedException('"_defaults" input is not set');
@@ -35,14 +35,25 @@ class AdminForm extends \Forms\Form
 		
 		$entityValues = \json_decode($this['_defaults']->getValue(), true);
 		
+		if ($containerName) {
+			$entityValues = $entityValues[$containerName];
+		}
+		
 		if (!\is_array($entityValues)) {
 			return null;
 		}
 		
 		$properties = [];
-		$values = $this->getValues('array');
+		
+		$container = $containerName ? $this[$containerName] : $this;
+		
+		$values = $container->getValues('array');
 		
 		foreach ($values as $name => $value) {
+			if ($container[$name] instanceof Container && !$container[$name] instanceof LocaleContainer) {
+				continue;
+			}
+			
 			if (\is_scalar($value)) {
 				if ($value != $entityValues[$name]) {
 					$properties[$name] = $name;
@@ -50,7 +61,7 @@ class AdminForm extends \Forms\Form
 			}
 			
 			if (\is_array($value) && isset($entityValues[$name]) && $diff = \array_diff($value, $entityValues[$name])) {
-				if ($this[$name] instanceof LocaleContainer) {
+				if ($container[$name] instanceof LocaleContainer) {
 					foreach (\array_keys($diff) as $mutation) {
 						$properties[$name . $this->storm->getAvailableMutations()[$mutation]] = $name;
 					}
