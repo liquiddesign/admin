@@ -336,6 +336,8 @@ class AdminGrid extends \Grid\Datagrid
 						if (isset($this->onDelete)) {
 							$this->onDelete($object);
 						}
+						
+						$this->onDeleteRow($object);
 
 						if (!$override) {
 							$this->getSource()->where($this->getSource(false)->getPrefix() . $this->getSourceIdName(), \call_user_func($this->idCallback, $object))->setOrderBy([])->delete();
@@ -377,11 +379,27 @@ class AdminGrid extends \Grid\Datagrid
 	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null, bool $ignore = false, ?callable $onProcessType = null, ?callable $onRowUpdate = null)
 	{
 		$grid = $this;
+		$defaults = $this->getForm()->addHidden('_defaults')->setNullable(true)->setOmitted(true);
+		
 		$submit = $this->getForm()->addSubmit('submit', $this->translator->translate('admin.save', 'Uložit'));
 		$submit->setHtmlAttribute('class', 'btn btn-sm btn-primary');
-		$submit->onClick[] = function ($button) use ($grid, $processNullColumns, $processTypes, $sourceIdName, $ignore, $onProcessType, $onRowUpdate) {
+		
+		$grid->onRender[] = function () use ($defaults, $grid) {
+			$defaults->setDefaultValue(\json_encode($grid->inputsValues));
+		};
+		
+		$submit->onClick[] = function ($button) use ($grid, $defaults, $processNullColumns, $processTypes, $sourceIdName, $ignore, $onProcessType, $onRowUpdate) {
+			$array = \json_decode($defaults->getValue(), true);
+			
 			foreach ($grid->getInputData() as $id => $data) {
 				$object = $grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->first();
+				
+				// filter data
+				$data = \array_diff($data, $array[$id]);
+				
+				if (!$data) {
+					continue;
+				}
 
 				foreach ($processNullColumns as $column) {
 					$data[$column] = $data[$column] ?? null;
@@ -409,6 +427,8 @@ class AdminGrid extends \Grid\Datagrid
 				if($onRowUpdate){
 					$onRowUpdate($id, $data);
 				}
+				
+				$this->onUpdateRow($id, $data);
 				
 				/*$this->changelogRepository->createOne([
 					'user' => $grid->getPresenter()->admin->getIdentity()->getAccount()->login,
