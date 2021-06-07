@@ -28,6 +28,8 @@ class AdminFormFactory
 	private bool $prettyPages;
 	
 	private array $mutations;
+
+	private ?string $defaultMutation = null;
 	
 	public function __construct(Administrator $administrator, FormFactory $formFactory, DIConnection $connection, PageRepository $pageRepository, Translator $translator, ChangelogRepository $changelogRepository)
 	{
@@ -55,6 +57,16 @@ class AdminFormFactory
 		$this->mutations = $mutations;
 	}
 
+	public function getDefaultMutation(): ?string
+	{
+		return $this->defaultMutation;
+	}
+
+	public function setDefaultMutation(?string $defaultMutation): void
+	{
+		$this->defaultMutation = $defaultMutation;
+	}
+
 	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false, bool $generateUuid = false, bool $defaultsField = false): AdminForm
 	{
 		/** @var \Admin\Controls\AdminForm $form */
@@ -63,7 +75,7 @@ class AdminFormFactory
 		if ($this->administrator->getIdentity() && $this->administrator->getIdentity()->role) {
 			$mutations = $this->administrator->getIdentity()->role->getMutations() === null ? $this->getMutations() : $this->administrator->getIdentity()->role->getMutations();
 			$form->setMutations($mutations);
-			$form->setPrimaryMutation($mutations[0]);
+			$form->setPrimaryMutation($this->getDefaultMutation() ?? $mutations[0]);
 		}
 		
 		$form->setAdminFormTranslator($this->translator);
