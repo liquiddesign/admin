@@ -33,6 +33,10 @@ class AdminForm extends \Forms\Form
 			throw new NotImplementedException('"_defaults" input is not set');
 		}
 		
+		if (!$this['_defaults']->getValue()) {
+			return null;
+		}
+		
 		$entityValues = \json_decode($this['_defaults']->getValue(), true);
 		
 		if ($containerName) {
