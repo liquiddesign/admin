@@ -65,6 +65,7 @@ class AdministratorPresenter extends BackendPresenter
 		
 		
 		$this->accountFormFactory->addContainer($form, true, !$this->getParameter('administrator'));
+		$form->addCheckbox('urlEditor', 'Může editovat URL');
 		$form->addSubmits(!$this->getParameter('administrator'));
 		
 		
