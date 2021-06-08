@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Admin\Controls;
 
+use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
@@ -14,6 +15,8 @@ class AdminGridFactory
 	private ChangelogRepository $changelogRepository;
 	
 	private AdminFormFactory $formFactory;
+	
+	private Administrator $administrator;
 
 	private Session $session;
 
@@ -25,12 +28,13 @@ class AdminGridFactory
 
 	private ?int $defaultOnPage;
 
-	public function __construct(AdminFormFactory $formFactory,Session $session, Translator $translator, ChangelogRepository $changelogRepository)
+	public function __construct(Administrator $administrator, AdminFormFactory $formFactory, Session $session, Translator $translator, ChangelogRepository $changelogRepository)
 	{
 		$this->formFactory = $formFactory;
 		$this->session = $session;
 		$this->translator = $translator;
 		$this->changelogRepository = $changelogRepository;
+		$this->administrator = $administrator;
 	}
 
 	public function setItemsPerPage(array $items): void
@@ -61,6 +65,27 @@ class AdminGridFactory
 		}
 
 		$grid->setTranslator($this->translator);
+		
+		$grid->onUpdateRow[] = function ($object) use ($grid) {
+			if ($grid->entityName) {
+				$this->changelogRepository->createOne([
+					'user' => $this->administrator->getIdentity()->getAccount()->login,
+					'entity' => $grid->entityName,
+					'objectId' => $object,
+					'type' => 'update',
+				]);
+			}
+		};
+		$grid->onDeleteRow[] = function ($object) use ($grid) {
+			if ($grid->entityName) {
+				$this->changelogRepository->createOne([
+					'user' => $this->administrator->getIdentity()->getAccount()->login,
+					'entity' => $grid->entityName,
+					'objectId' => $object->uuid,
+					'type' => 'delete',
+				]);
+			}
+		};
 		
 		return $grid;
 	}

@@ -49,7 +49,7 @@ class AdminGrid extends \Grid\Datagrid
 
 	private bool $showItemsPerPage;
 	
-	private ?string $entityName = null;
+	public ?string $entityName = null;
 
 	public function __construct(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false, ?Session $session = null)
 	{
