@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Admin\Controls;
 
+use Admin\Administrator;
 use Nette\Localization\Translator;
 use Pages\DB\IPage;
 use Web\DB\PageRepository;
@@ -24,6 +25,8 @@ class AdminForm extends \Forms\Form
 	private \StORM\DIConnection $storm;
 	
 	private Translator $translator;
+	
+	private Administrator $administrator;
 	
 	private bool $prettyPages = false;
 	
@@ -84,6 +87,11 @@ class AdminForm extends \Forms\Form
 	
 	
 	public ?string $entityName = null;
+	
+	public function setAdministrator(Administrator $administrator): void
+	{
+		$this->administrator = $administrator;
+	}
 
 	public function setPageRepository(PageRepository $pageRepository)
 	{
@@ -194,6 +202,10 @@ class AdminForm extends \Forms\Form
 			
 			if ($pageType === 'index') {
 				$text->setRequired(false);
+				$text->setHtmlAttribute('readonly', 'readonly');
+			}
+			
+			if (!$this->administrator->getIdentity()->urlEditor && $page) {
 				$text->setHtmlAttribute('readonly', 'readonly');
 			}
 		})->forPrimary(function (TextInput $text, $mutation) use ($pageType) {

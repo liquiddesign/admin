@@ -19,6 +19,12 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	public ?string $fullName = null;
 	
 	/**
+	 * Může editovat URL stránky
+	 * @column
+	 */
+	public bool $urlEditor = false;
+	
+	/**
 	 * @relationNxN
 	 * @var \StORM\RelationCollection<\Security\DB\Account>|\Security\DB\Account[]
 	 */

@@ -78,6 +78,7 @@ class AdminFormFactory
 			$form->setPrimaryMutation($this->getDefaultMutation() ?? $mutations[0]);
 		}
 		
+		$form->setAdministrator($this->administrator);
 		$form->setAdminFormTranslator($this->translator);
 		$form->setPrettyPages($this->prettyPages);
 		$form->setPageRepository($this->pageRepository);
