@@ -29,7 +29,6 @@
 		{/if}
 		<ul class="nav nav-treeview">
 			{foreach $item->items as $subItem}
-				{dump $subItem}
 				<li class="nav-item">
 					<a href="{$subItem->link ? $presenter->link($subItem->link) : '#'}" class="nav-link {$subItem->active ? 'active' : ''}">
 						<span class="pl-1 pr-2">&mdash;</span>
