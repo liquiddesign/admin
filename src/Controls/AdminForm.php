@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Admin\Controls;
 
 use Admin\Administrator;
+use Nette\Http\FileUpload;
 use Nette\Localization\Translator;
-use Pages\DB\IPage;
 use Web\DB\PageRepository;
 use Forms\Container;
 use Forms\LocaleContainer;
