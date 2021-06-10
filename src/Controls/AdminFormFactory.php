@@ -14,23 +14,23 @@ use Forms\FormFactory;
 class AdminFormFactory
 {
 	private ChangelogRepository $changelogRepository;
-	
+
 	private PageRepository $pageRepository;
-	
+
 	private Administrator $administrator;
 
 	public FormFactory $formFactory;
 
 	private Translator $translator;
-	
+
 	private DIConnection $connection;
 
 	private bool $prettyPages;
-	
+
 	private array $mutations;
 
 	private ?string $defaultMutation = null;
-	
+
 	public function __construct(Administrator $administrator, FormFactory $formFactory, DIConnection $connection, PageRepository $pageRepository, Translator $translator, ChangelogRepository $changelogRepository)
 	{
 		$this->formFactory = $formFactory;
@@ -46,12 +46,17 @@ class AdminFormFactory
 	{
 		$this->prettyPages = $prettyPages;
 	}
-	
+
+	public function getPrettyPages(): bool
+	{
+		return $this->prettyPages;
+	}
+
 	public function getMutations(): array
 	{
 		return $this->mutations;
 	}
-	
+
 	public function setMutations(array $mutations): void
 	{
 		$this->mutations = $mutations;
@@ -71,13 +76,13 @@ class AdminFormFactory
 	{
 		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->formFactory->create(AdminForm::class);
-		
+
 		if ($this->administrator->getIdentity() && $this->administrator->getIdentity()->role) {
 			$mutations = $this->administrator->getIdentity()->role->getMutations() === null ? $this->getMutations() : $this->administrator->getIdentity()->role->getMutations();
 			$form->setMutations($mutations);
 			$form->setPrimaryMutation($this->getDefaultMutation() ?? $mutations[0]);
 		}
-		
+
 		$form->setAdministrator($this->administrator);
 		$form->setAdminFormTranslator($this->translator);
 		$form->setPrettyPages($this->prettyPages);
@@ -85,13 +90,13 @@ class AdminFormFactory
 		$form->setRenderer(new BootstrapRenderer());
 		$form->setConnection($this->connection);
 		$form->addHidden('uuid')->setDefaultValue($generateUuid ? DIConnection::generateUuid() : null)->setNullable();
-		
+
 		if ($defaultsField) {
 			$form->addHidden('_defaults')->setNullable()->setOmitted(true);
 		}
-		
+
 		$form->addGroup('HLAVNÍ ÚDAJE');
-		
+
 		if ($mutationSelector && \count($form->getMutations()) > 1) {
 			$form->addMutationSelector($this->translator->translate('admin.selectMutatiom', 'Zvolte mutaci'));
 			if ($translatedCheckbox) {
@@ -99,12 +104,12 @@ class AdminFormFactory
 			}
 			$form->addGroup();
 		}
-		
+
 		$form->onError[] = function (AdminForm $form) {
 			$form->getPresenter()->flashMessage($this->translator->translate('admin.formError', 'Chybně vyplněný formulář!'), 'error');
 		};
-		
-		
+
+
 		$form->onSuccess[] = function (AdminForm $form) {
 			if ($form->entityName) {
 				$this->changelogRepository->createOne([
