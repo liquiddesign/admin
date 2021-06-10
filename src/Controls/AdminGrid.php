@@ -49,7 +49,7 @@ class AdminGrid extends \Grid\Datagrid
 
 	private bool $showItemsPerPage;
 	
-	private ?string $entityName = null;
+	public ?string $entityName = null;
 
 	public function __construct(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false, ?Session $session = null)
 	{
@@ -375,8 +375,9 @@ class AdminGrid extends \Grid\Datagrid
 	 * @param bool $ignore add ignore to update expression
 	 * @param callable|null $onProcessType Callback called for every column in $processTypes to do custom processing
 	 * @param callable|null $onRowUpdate Called on every row update with new data
+	 * @param bool $diff Check diff on every row
 	 */
-	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null, bool $ignore = false, ?callable $onProcessType = null, ?callable $onRowUpdate = null)
+	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null, bool $ignore = false, ?callable $onProcessType = null, ?callable $onRowUpdate = null, bool $diff = true)
 	{
 		$grid = $this;
 		$defaults = $this->getForm()->addHidden('_defaults')->setNullable(true)->setOmitted(true);
@@ -388,17 +389,19 @@ class AdminGrid extends \Grid\Datagrid
 			$defaults->setDefaultValue(\json_encode($grid->inputsValues));
 		};
 		
-		$submit->onClick[] = function ($button) use ($grid, $defaults, $processNullColumns, $processTypes, $sourceIdName, $ignore, $onProcessType, $onRowUpdate) {
+		$submit->onClick[] = function ($button) use ($grid, $defaults, $processNullColumns, $processTypes, $sourceIdName, $ignore, $onProcessType, $onRowUpdate, $diff) {
 			$array = \json_decode($defaults->getValue(), true);
 			
 			foreach ($grid->getInputData() as $id => $data) {
 				$object = $grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->first();
-				
+
 				// filter data
-				$data = \array_diff($data, $array[$id]);
-				
-				if (!$data) {
-					continue;
+				if ($diff) {
+					$data = \array_diff($data, $array[$id]);
+
+					if (!$data) {
+						continue;
+					}
 				}
 
 				foreach ($processNullColumns as $column) {

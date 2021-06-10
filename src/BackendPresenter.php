@@ -129,6 +129,11 @@ abstract class BackendPresenter extends Presenter
 		return "<img class='mutation-flag' src='$baseUrl$flagsPath/$flagsMap[$mutation].$flagsExt' alt='$mutation' title='$mutation'>";
 	}
 	
+	public function _($message, $parameters): string
+	{
+		return $this->translator->translate($message, $parameters);
+	}
+	
 	
 	protected function createImageDirs(string $dir)
 	{

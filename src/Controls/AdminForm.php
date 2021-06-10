@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Admin\Controls;
 
-use Nette\Forms\Controls\UploadControl;
+use Admin\Administrator;
 use Nette\Localization\Translator;
 use Pages\DB\IPage;
 use Web\DB\PageRepository;
@@ -26,12 +26,18 @@ class AdminForm extends \Forms\Form
 	
 	private Translator $translator;
 	
+	private Administrator $administrator;
+	
 	private bool $prettyPages = false;
 	
 	public function getChangedProperties(?string $containerName = null): ?array
 	{
 		if (!isset($this['_defaults'])) {
 			throw new NotImplementedException('"_defaults" input is not set');
+		}
+		
+		if (!$this['_defaults']->getValue()) {
+			return null;
 		}
 		
 		$entityValues = \json_decode($this['_defaults']->getValue(), true);
@@ -71,7 +77,7 @@ class AdminForm extends \Forms\Form
 				}
 			}
 			
-			if ($container[$name] instanceof UploadControl && $container[$name]->getValue()) {
+			if ($value instanceof FileUpload && $value->hasFile()) {
 				$properties[$name] = $name;
 			}
 		}
@@ -81,6 +87,11 @@ class AdminForm extends \Forms\Form
 	
 	
 	public ?string $entityName = null;
+	
+	public function setAdministrator(Administrator $administrator): void
+	{
+		$this->administrator = $administrator;
+	}
 
 	public function setPageRepository(PageRepository $pageRepository)
 	{
@@ -191,6 +202,10 @@ class AdminForm extends \Forms\Form
 			
 			if ($pageType === 'index') {
 				$text->setRequired(false);
+				$text->setHtmlAttribute('readonly', 'readonly');
+			}
+			
+			if (!$this->administrator->getIdentity()->urlEditor && $page) {
 				$text->setHtmlAttribute('readonly', 'readonly');
 			}
 		})->forPrimary(function (TextInput $text, $mutation) use ($pageType) {
