@@ -131,6 +131,16 @@ abstract class BackendPresenter extends Presenter
 	
 	public function _($message, $parameters): string
 	{
+		if (!\str_contains($message, '.')) {
+			$source = \explode(':', $this->getName());
+			$module = $source[\count($source) - 1];
+			return $this->translator->translate('admin' . $source[0] . $module . '.' . $message, $parameters);
+		}
+		
+		if (\substr($message, 0, 1) === '.') {
+			return $this->translator->translate('admin' . $message, $parameters);
+		}
+		
 		return $this->translator->translate($message, $parameters);
 	}
 	
