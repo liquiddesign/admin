@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Admin\Controls;
 
+use Nette\Forms\Controls\UploadControl;
 use Nette\Localization\Translator;
 use Pages\DB\IPage;
 use Web\DB\PageRepository;
@@ -70,7 +71,7 @@ class AdminForm extends \Forms\Form
 				}
 			}
 			
-			if ($value instanceof FileUpload && $value->hasFile()) {
+			if ($container[$name] instanceof UploadControl && $container[$name]->getValue()) {
 				$properties[$name] = $name;
 			}
 		}
