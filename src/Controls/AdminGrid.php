@@ -632,7 +632,7 @@ class AdminGrid extends \Grid\Datagrid
 		}
 
 		$ids = $this->getParameter('selected') ?: [];
-		$totalNo = $this->getFilteredSource()->enum();
+		$totalNo = $this->getFilteredSource()->enum($this->getFilteredSource()->getPrefix(true) . $this->getSourceIdName(), true);
 		$selectedNo = \count($ids);
 
 		$form = $this->formFactory->create();
