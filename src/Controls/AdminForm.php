@@ -180,7 +180,8 @@ class AdminForm extends \Forms\Form
 		?string $pageType = null,
 		array $params = [],
 		?LocaleContainer $copyControls = null,
-		bool $isOffline = false
+		bool $isOffline = false,
+		bool $required = true
 	): Container {
 		if (!$this->prettyPages) {
 			return $this->addContainer('page');
@@ -192,7 +193,7 @@ class AdminForm extends \Forms\Form
 		/** @var Container $pageContainer */
 		$pageContainer = $this->getComponent('page', false) ?: $this->addContainer('page');
 		
-		$group = $this->addGroup('URL a SEO', true);
+		$group = $this->addGroup('Stránka', true);
 		$pageContainer->setCurrentGroup($group);
 		
 		$pageContainer->addHidden('uuid')->setNullable();
@@ -208,8 +209,8 @@ class AdminForm extends \Forms\Form
 			if (!$this->administrator->getIdentity()->urlEditor && $page) {
 				$text->setHtmlAttribute('readonly', 'readonly');
 			}
-		})->forPrimary(function (TextInput $text, $mutation) use ($pageType) {
-			if ($pageType !== 'index') {
+		})->forPrimary(function (TextInput $text, $mutation) use ($pageType, $required) {
+			if ($pageType !== 'index' && $required) {
 				$text->setRequired(true);
 			}
 		});
@@ -228,6 +229,11 @@ class AdminForm extends \Forms\Form
 			$text->setHtmlAttribute('style', 'width: 862px !important;')
 				->setHtmlAttribute('data-characters', 150);
 		});
+
+		$pageContainer->addLocaleTextArea('content', 'Obsah')->forAll(function (TextArea $text) {
+			$text->setHtmlAttribute('style', 'width: 862px !important;');
+		});
+
 		$pageContainer->addHidden('type', $pageType);
 		$pageContainer->addHidden('params', $params ? \http_build_query($params) . '&' : '');
 
