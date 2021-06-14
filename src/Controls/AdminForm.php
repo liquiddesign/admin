@@ -193,7 +193,7 @@ class AdminForm extends \Forms\Form
 		/** @var Container $pageContainer */
 		$pageContainer = $this->getComponent('page', false) ?: $this->addContainer('page');
 		
-		$group = $this->addGroup('URL a SEO', true);
+		$group = $this->addGroup('Stránka', true);
 		$pageContainer->setCurrentGroup($group);
 		
 		$pageContainer->addHidden('uuid')->setNullable();
@@ -229,6 +229,11 @@ class AdminForm extends \Forms\Form
 			$text->setHtmlAttribute('style', 'width: 862px !important;')
 				->setHtmlAttribute('data-characters', 150);
 		});
+
+		$pageContainer->addLocaleTextArea('content', 'Obsah')->forAll(function (TextArea $text) {
+			$text->setHtmlAttribute('style', 'width: 862px !important;');
+		});
+
 		$pageContainer->addHidden('type', $pageType);
 		$pageContainer->addHidden('params', $params ? \http_build_query($params) . '&' : '');
 
