@@ -67,7 +67,7 @@ class AdminForm extends \Forms\Form
 				}
 			}
 			
-			if (\is_array($value) && isset($entityValues[$name]) && $diff = \array_diff($value, $entityValues[$name])) {
+			if (\is_array($value) && isset($entityValues[$name]) && $diff = \array_merge(\array_diff($value, $entityValues[$name]), \array_diff($entityValues[$name], $value))) {
 				if ($container[$name] instanceof LocaleContainer) {
 					foreach (\array_keys($diff) as $mutation) {
 						$properties[$name . $this->storm->getAvailableMutations()[$mutation]] = $name;
