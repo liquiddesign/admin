@@ -181,7 +181,8 @@ class AdminForm extends \Forms\Form
 		array $params = [],
 		?LocaleContainer $copyControls = null,
 		bool $isOffline = false,
-		bool $required = true
+		bool $required = true,
+		bool $content = true
 	): Container {
 		if (!$this->prettyPages) {
 			return $this->addContainer('page');
@@ -230,9 +231,11 @@ class AdminForm extends \Forms\Form
 				->setHtmlAttribute('data-characters', 150);
 		});
 
-		$pageContainer->addLocaleTextArea('content', 'Obsah')->forAll(function (TextArea $text) {
-			$text->setHtmlAttribute('style', 'width: 862px !important;');
-		});
+		if ($content) {
+			$pageContainer->addLocaleTextArea('content', 'Obsah')->forAll(function (TextArea $text) {
+				$text->setHtmlAttribute('style', 'width: 862px !important;');
+			});
+		}
 
 		$pageContainer->addHidden('type', $pageType);
 		$pageContainer->addHidden('params', $params ? \http_build_query($params) . '&' : '');
