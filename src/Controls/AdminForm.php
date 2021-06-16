@@ -182,7 +182,8 @@ class AdminForm extends \Forms\Form
 		?LocaleContainer $copyControls = null,
 		bool $isOffline = false,
 		bool $required = true,
-		bool $content = false
+		bool $content = false,
+		string $title = 'URL a SEO'
 	): Container {
 		if (!$this->prettyPages) {
 			return $this->addContainer('page');
@@ -194,7 +195,7 @@ class AdminForm extends \Forms\Form
 		/** @var Container $pageContainer */
 		$pageContainer = $this->getComponent('page', false) ?: $this->addContainer('page');
 		
-		$group = $this->addGroup('Stránka', true);
+		$group = $this->addGroup($title, true);
 		$pageContainer->setCurrentGroup($group);
 		
 		$pageContainer->addHidden('uuid')->setNullable();
