@@ -182,7 +182,7 @@ class AdminForm extends \Forms\Form
 		?LocaleContainer $copyControls = null,
 		bool $isOffline = false,
 		bool $required = true,
-		bool $content = true
+		bool $content = false
 	): Container {
 		if (!$this->prettyPages) {
 			return $this->addContainer('page');
