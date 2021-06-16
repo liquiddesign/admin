@@ -275,6 +275,11 @@ class AdminGrid extends \Grid\Datagrid
 		}, $setValueExpression, $defaultValue, $orderExpression, $wrapperAttributes);
 	}
 
+	public function addColumnPriority()
+	{
+		return $this->addColumnInputInteger($this->translator->translate('.priority', 'Pořadí'), 'priority', '', '', 'priority', [], true);
+	}
+
 	public function addColumnLinkDetail(string $destination = 'detail', array $arguments = []): Column
 	{
 		return $this->addColumn('', function ($object, $datagrid) use ($destination, $arguments) {
