@@ -95,6 +95,12 @@ class AdminFormFactory
 			$form->addHidden('_defaults')->setNullable()->setOmitted(true);
 		}
 
+		$form->onAnchor[] = function (AdminForm $form) {
+			if ($lang = $form->getPresenter()->getParameter('selectedLang')) {
+				$form->getComponent(AdminForm::MUTATION_SELECTOR_NAME)->setDefaultValue($lang);
+			}
+		};
+
 		$form->addGroup('HLAVNÍ ÚDAJE');
 
 		if ($mutationSelector && \count($form->getMutations()) > 1) {

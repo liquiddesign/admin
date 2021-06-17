@@ -163,6 +163,11 @@ class AdminForm extends \Forms\Form
 			
 			$this->getPresenter()->redirect($backLink, $backLinkArguments);
 		} elseif ($submitter->getName() === 'submitAndContinue') {
+			if ($this->getComponent(\Forms\Form::MUTATION_SELECTOR_NAME, false)) {
+				$selectedLang = $this->getComponent(\Forms\Form::MUTATION_SELECTOR_NAME)->getValue();
+				$detailArguments['selectedLang'] = $selectedLang;
+			}
+
 			$this->getPresenter()->redirect($detailLink, $detailArguments);
 		} elseif ($submitter->getName() === 'submitAndNext') {
 			$this->getPresenter()->redirect('this', $continueArguments);
