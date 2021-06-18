@@ -14,15 +14,15 @@ use Nette\Forms\Controls\TextInput;
 use Nette\Forms\Form;
 use Nette\Http\FileUpload;
 use Nette\Localization\Translator;
+use Pages\DB\IPageRepository;
 use StORM\DIConnection;
 use StORM\Meta\Structure;
-use Web\DB\PageRepository;
 
 class AdminForm extends \Forms\Form
 {
 	public ?string $entityName = null;
 
-	private PageRepository $pageRepository;
+	private IPageRepository $pageRepository;
 	
 	private \StORM\DIConnection $storm;
 	
@@ -92,7 +92,7 @@ class AdminForm extends \Forms\Form
 		$this->administrator = $administrator;
 	}
 
-	public function setPageRepository(PageRepository $pageRepository): void
+	public function setPageRepository(IPageRepository $pageRepository): void
 	{
 		$this->pageRepository = $pageRepository;
 	}
@@ -185,7 +185,7 @@ class AdminForm extends \Forms\Form
 			return $this->addContainer('page');
 		}
 		
-		/** @var \Web\DB\Page|null $page */
+		/** @var \Pages\DB\IPage|null $page */
 		$page = $pageType ? $this->pageRepository->getPageByTypeAndParams($pageType, null, $params, true) : null;
 		
 		/** @var Container $pageContainer */

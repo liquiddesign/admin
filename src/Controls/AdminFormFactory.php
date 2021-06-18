@@ -8,8 +8,8 @@ use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
 use Forms\FormFactory;
 use Nette\Localization\Translator;
+use Pages\DB\IPageRepository;
 use StORM\DIConnection;
-use Web\DB\PageRepository;
 
 class AdminFormFactory
 {
@@ -17,7 +17,7 @@ class AdminFormFactory
 	
 	private ChangelogRepository $changelogRepository;
 
-	private PageRepository $pageRepository;
+	private IPageRepository $pageRepository;
 
 	private Administrator $administrator;
 
@@ -35,7 +35,7 @@ class AdminFormFactory
 		Administrator $administrator,
 		FormFactory $formFactory,
 		DIConnection $connection,
-		PageRepository $pageRepository,
+		IPageRepository $pageRepository,
 		Translator $translator,
 		ChangelogRepository $changelogRepository
 	) {
@@ -107,7 +107,7 @@ class AdminFormFactory
 			}
 		};
 
-		$form->addGroup('HLAVNÍ ÚDAJE');
+		$form->addGroup($this->translator->translate('admin.mainContainer', 'HLAVNÍ ÚDAJE'));
 
 		if ($mutationSelector && \count($form->getMutations()) > 1) {
 			$form->addMutationSelector($this->translator->translate('admin.selectMutatiom', 'Zvolte mutaci'));
