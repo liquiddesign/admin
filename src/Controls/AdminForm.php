@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Admin\Controls;
 
 use Admin\Administrator;
-use Nette\Http\FileUpload;
-use Nette\Localization\Translator;
-use Web\DB\PageRepository;
 use Forms\Container;
 use Forms\LocaleContainer;
 use Nette\Forms\Controls\BaseControl;
@@ -15,11 +12,16 @@ use Nette\Forms\Controls\TextArea;
 use Nette\Forms\Controls\TextBase;
 use Nette\Forms\Controls\TextInput;
 use Nette\Forms\Form;
+use Nette\Http\FileUpload;
+use Nette\Localization\Translator;
 use StORM\DIConnection;
 use StORM\Meta\Structure;
+use Web\DB\PageRepository;
 
 class AdminForm extends \Forms\Form
 {
+	public ?string $entityName = null;
+
 	private PageRepository $pageRepository;
 	
 	private \StORM\DIConnection $storm;
@@ -85,30 +87,27 @@ class AdminForm extends \Forms\Form
 		return $properties;
 	}
 	
-	
-	public ?string $entityName = null;
-	
 	public function setAdministrator(Administrator $administrator): void
 	{
 		$this->administrator = $administrator;
 	}
 
-	public function setPageRepository(PageRepository $pageRepository)
+	public function setPageRepository(PageRepository $pageRepository): void
 	{
 		$this->pageRepository = $pageRepository;
 	}
 	
-	public function setConnection(DIConnection $storm)
+	public function setConnection(DIConnection $storm): void
 	{
 		$this->storm = $storm;
 	}
 	
-	public function setAdminFormTranslator(Translator $translator)
+	public function setAdminFormTranslator(Translator $translator): void
 	{
 		$this->translator = $translator;
 	}
 	
-	public function setPrettyPages(bool $prettyPages)
+	public function setPrettyPages(bool $prettyPages): void
 	{
 		$this->prettyPages = $prettyPages;
 	}
@@ -123,10 +122,9 @@ class AdminForm extends \Forms\Form
 		return $this->prettyPages;
 	}
 	
-	public function addSubmits(bool $stayPut = false, bool $continue = true)
+	public function addSubmits(bool $stayPut = false, bool $continue = true): void
 	{
 		$this->addGroup();
-		
 		$this->addSubmit('submit', $this->translator->translate('admin.save', 'Uložit'));
 		
 		if ($continue) {
@@ -138,7 +136,7 @@ class AdminForm extends \Forms\Form
 		}
 	}
 
-	public function syncPages(callable $callback)
+	public function syncPages(callable $callback): void
 	{
 		if ($this->prettyPages) {
 			$callback();
@@ -151,7 +149,7 @@ class AdminForm extends \Forms\Form
 		array $detailArguments = [],
 		array $backLinkArguments = [],
 		array $continueArguments = []
-	) {
+	): void {
 		/** @var \Nette\Forms\Controls\Button $submitter */
 		$submitter = $this->isSubmitted();
 		$backLink = $backLink ?: $detailLink;
@@ -172,13 +170,6 @@ class AdminForm extends \Forms\Form
 		} elseif ($submitter->getName() === 'submitAndNext') {
 			$this->getPresenter()->redirect('this', $continueArguments);
 		}
-	}
-	
-	public static function validateUrl(\Nette\Forms\Controls\TextInput $input, array $args): bool
-	{
-		[$repository, $mutation, $uuid] = $args;
-		
-		return (bool )$repository->isUrlAvailable((string)$input->getValue(), $mutation, $uuid);
 	}
 	
 	public function addPageContainer(
@@ -204,9 +195,13 @@ class AdminForm extends \Forms\Form
 		$pageContainer->setCurrentGroup($group);
 		
 		$pageContainer->addHidden('uuid')->setNullable();
-		$pageContainer->addLocaleText('url', 'URL')->forAll(function (TextInput $text, $mutation) use ($page, $pageType) {
+		$pageContainer->addLocaleText('url', 'URL')->forAll(function (TextInput $text, $mutation) use ($page, $pageType): void {
 			$text->setHtmlAttribute('class', 'seo_url')
-				->addRule([$this, 'validateUrl'], 'URL již existuje', [$this->pageRepository, $mutation, $page ? $page->getPK() : null])->setNullable($pageType !== 'index');
+				->addRule(
+					[$this, 'validateUrl'],
+					$this->translator->translate('admin.urlError', 'URL již existuje'),
+					[$this->pageRepository, $mutation, $page ? $page->getPK() : null],
+				)->setNullable($pageType !== 'index');
 			
 			if ($pageType === 'index') {
 				$text->setRequired(false);
@@ -216,31 +211,34 @@ class AdminForm extends \Forms\Form
 			if (!$this->administrator->getIdentity()->urlEditor && $page) {
 				$text->setHtmlAttribute('readonly', 'readonly');
 			}
-		})->forPrimary(function (TextInput $text, $mutation) use ($pageType, $required) {
+		})->forPrimary(function (TextInput $text, $mutation) use ($pageType, $required): void {
 			if ($pageType !== 'index' && $required) {
 				$text->setRequired(true);
 			}
 		});
 		
 		if ($isOffline) {
-			$pageContainer->addCheckbox('isOffline', 'Nedostupná')->setHtmlAttribute('data-info',
-				'Na daném URL bude stránka jako stránka 404');
+			$pageContainer->addCheckbox('isOffline', $this->translator->translate('admin.isOffline', 'Nedostupná'))
+				->setHtmlAttribute('data-info', 'Na daném URL bude stránka jako stránka 404');
 		}
 		
-		$pageContainer->addLocaleText('title', 'Titulek')->forAll(function (TextInput $text) {
-			$text->setHtmlAttribute('data-characters', 70)
-				->setHtmlAttribute('style', 'width: 450px !important');
-		});
+		$pageContainer->addLocaleText('title', $this->translator->translate('admin.title', 'Titulek'))
+			->forAll(function (TextInput $text): void {
+				$text->setHtmlAttribute('data-characters', 70)
+					->setHtmlAttribute('style', 'width: 450px !important');
+			});
 		
-		$pageContainer->addLocaleTextArea('description', 'Popisek')->forAll(function (TextArea $text) {
-			$text->setHtmlAttribute('style', 'width: 862px !important;')
-				->setHtmlAttribute('data-characters', 150);
-		});
+		$pageContainer->addLocaleTextArea('description', $this->translator->translate('admin.description', 'Popisek'))
+			->forAll(function (TextArea $text): void {
+				$text->setHtmlAttribute('style', 'width: 862px !important;')
+					->setHtmlAttribute('data-characters', 150);
+			});
 
 		if ($content) {
-			$pageContainer->addLocaleTextArea('content', 'Obsah')->forAll(function (TextArea $text) {
-				$text->setHtmlAttribute('style', 'width: 862px !important;');
-			});
+			$pageContainer->addLocaleTextArea('content', $this->translator->translate('admin.content', 'Obsah'))
+				->forAll(function (TextArea $text): void {
+					$text->setHtmlAttribute('style', 'width: 862px !important;');
+				});
 		}
 
 		$pageContainer->addHidden('type', $pageType);
@@ -251,7 +249,7 @@ class AdminForm extends \Forms\Form
 		}
 		
 		if ($copyControls) {
-			$copyControls->forAll(function (TextInput $text) {
+			$copyControls->forAll(function (TextInput $text): void {
 				$text->setHtmlAttribute('data-copy', 'page[title],page[url]');
 			});
 		}
@@ -310,6 +308,13 @@ class AdminForm extends \Forms\Form
 			$this['_defaults']->setDefaultValue(\json_encode($data));
 		}
 		
-		return parent::setDefaults($data, $erase); // TODO: Change the autogenerated stub
+		return parent::setDefaults($data, $erase);
+	}
+	
+	public static function validateUrl(\Nette\Forms\Controls\TextInput $input, array $args): bool
+	{
+		[$repository, $mutation, $uuid] = $args;
+		
+		return (bool )$repository->isUrlAvailable((string)$input->getValue(), $mutation, $uuid);
 	}
 }
