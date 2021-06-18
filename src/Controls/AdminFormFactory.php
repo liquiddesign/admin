@@ -6,20 +6,20 @@ namespace Admin\Controls;
 
 use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
+use Forms\FormFactory;
 use Nette\Localization\Translator;
 use StORM\DIConnection;
 use Web\DB\PageRepository;
-use Forms\FormFactory;
 
 class AdminFormFactory
 {
+	public FormFactory $formFactory;
+	
 	private ChangelogRepository $changelogRepository;
 
 	private PageRepository $pageRepository;
 
 	private Administrator $administrator;
-
-	public FormFactory $formFactory;
 
 	private Translator $translator;
 
@@ -31,8 +31,14 @@ class AdminFormFactory
 
 	private ?string $defaultMutation = null;
 
-	public function __construct(Administrator $administrator, FormFactory $formFactory, DIConnection $connection, PageRepository $pageRepository, Translator $translator, ChangelogRepository $changelogRepository)
-	{
+	public function __construct(
+		Administrator $administrator,
+		FormFactory $formFactory,
+		DIConnection $connection,
+		PageRepository $pageRepository,
+		Translator $translator,
+		ChangelogRepository $changelogRepository
+	) {
 		$this->formFactory = $formFactory;
 		$this->pageRepository = $pageRepository;
 		$this->administrator = $administrator;
@@ -95,7 +101,7 @@ class AdminFormFactory
 			$form->addHidden('_defaults')->setNullable()->setOmitted(true);
 		}
 
-		$form->onAnchor[] = function (AdminForm $form) {
+		$form->onAnchor[] = function (AdminForm $form): void {
 			if ($lang = $form->getPresenter()->getParameter('selectedLang')) {
 				$form->getComponent(AdminForm::MUTATION_SELECTOR_NAME)->setDefaultValue($lang);
 			}
@@ -105,24 +111,25 @@ class AdminFormFactory
 
 		if ($mutationSelector && \count($form->getMutations()) > 1) {
 			$form->addMutationSelector($this->translator->translate('admin.selectMutatiom', 'Zvolte mutaci'));
+			
 			if ($translatedCheckbox) {
 				$form->addTranslatedCheckbox($this->translator->translate('admin.activeMutation', 'Mutace je aktivní'));
 			}
+			
 			$form->addGroup();
 		}
 
-		$form->onError[] = function (AdminForm $form) {
+		$form->onError[] = function (AdminForm $form): void {
 			$form->getPresenter()->flashMessage($this->translator->translate('admin.formError', 'Chybně vyplněný formulář!'), 'error');
 		};
-
-
-		$form->onSuccess[] = function (AdminForm $form) {
+		
+		$form->onSuccess[] = function (AdminForm $form): void {
 			if ($form->entityName) {
 				$this->changelogRepository->createOne([
 					'user' => $this->administrator->getIdentity()->getAccount()->login,
 					'entity' => $form->entityName,
 					'objectId' => $form->getValues()['uuid'],
-					'type' => $form->getPresenterIfExists()->getParameter('action')
+					'type' => $form->getPresenterIfExists()->getParameter('action'),
 				]);
 			}
 		};
