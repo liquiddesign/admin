@@ -219,7 +219,7 @@ class AdminForm extends \Forms\Form
 		
 		if ($isOffline) {
 			$pageContainer->addCheckbox('isOffline', $this->translator->translate('admin.isOffline', 'Nedostupná'))
-				->setHtmlAttribute('data-info', 'Na daném URL bude stránka jako stránka 404');
+				->setHtmlAttribute('data-info', $this->translator->translate('admin.isOfflineDescription', 'Na daném URL bude stránka jako stránka 404'));
 		}
 		
 		$pageContainer->addLocaleText('title', $this->translator->translate('admin.title', 'Titulek'))
