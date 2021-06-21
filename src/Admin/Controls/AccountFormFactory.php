@@ -8,10 +8,10 @@ use Admin\Controls\AdminForm;
 use Admin\Controls\AdminFormFactory;
 use Messages\DB\TemplateRepository;
 use Nette\Forms\Controls\Button;
+use Nette\Localization\Translator;
 use Nette\Mail\Mailer;
 use Nette\SmartObject;
 use Security\Authenticator;
-use Security\DB\Account;
 use Security\DB\AccountRepository;
 use Security\DB\IUser;
 use Security\DB\RoleRepository;
@@ -53,38 +53,59 @@ class AccountFormFactory
 	private AdminFormFactory $adminFormFactory;
 
 	private RoleRepository $roleRepository;
+	
+	private Translator $translator;
 
-	public function __construct(AdminFormFactory $adminFormFactory, AccountRepository $accountRepository, TemplateRepository $templateRepository, RoleRepository $roleRepository, Mailer $mailer)
-	{
+	public function __construct(
+		AdminFormFactory $adminFormFactory,
+		AccountRepository $accountRepository,
+		TemplateRepository $templateRepository,
+		RoleRepository $roleRepository,
+		Mailer $mailer,
+		Translator $translator
+	) {
 		$this->adminFormFactory = $adminFormFactory;
 		$this->accountRepository = $accountRepository;
 		$this->templateRepository = $templateRepository;
 		$this->roleRepository = $roleRepository;
 		$this->mailer = $mailer;
+		$this->translator = $translator;
 	}
 
-	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true, bool $fullname = false)
+	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true, bool $fullname = false): void
 	{
 		$accountContainer = $form->addContainer('account');
 		$accountContainer->addHidden('uuid')->setNullable();
 		
-		if ($fullname){
-			$accountContainer->addText('fullname', 'Jméno a příjmení');
+		if ($fullname) {
+			$accountContainer->addText('fullname', $this->translator->translate('adminAdminAdministrator.fullName', 'Jméno a příjmení'));
 		}
 		
 		$accountContainer->addText('login', 'Login')
 			->setRequired()
-			->addRule([$this, 'validateLogin'], 'Login již existuje', [$this->accountRepository, $form['account']['uuid']]);
+			->addRule(
+				[$this, 'validateLogin'],
+				$this->translator->translate('adminAdminAdministrator.loginExists', 'Login již existuje'),
+				[$this->accountRepository, $form['account']['uuid']],
+			);
 
-		$accountContainer->addPassword('password', 'Heslo');
-		$accountContainer->addPassword('passwordCheck', 'Kontrola hesla')
-			->addRule($form::EQUAL, 'Hesla nejsou shodná!', $form['account']['password']);
+		$accountContainer->addPassword('password', $this->translator->translate('adminAdminAdministrator.password', 'Heslo'));
+		$accountContainer->addPassword('passwordCheck', $this->translator->translate('adminAdminAdministrator.passwordCheck', 'Kontrola hesla'))
+			->addRule(
+				$form::EQUAL,
+				$this->translator->translate('adminAdminAdministrator.passwordError', 'Hesla nejsou shodná!'),
+				$form['account']['password'],
+			);
 
 //		if(isset(static::CONFIGURATIONS['preferredMutation']) && static::CONFIGURATIONS['preferredMutation']){
-		$accountContainer->addDataSelect('preferredMutation', 'Preferovaný jazyk', \array_combine($this->adminFormFactory->formFactory->getDefaultMutations(),$this->adminFormFactory->formFactory->getDefaultMutations()))->setPrompt('Automaticky');
+		$accountContainer->addDataSelect(
+			'preferredMutation',
+			$this->translator->translate('adminAdminAdministrator.language', 'Preferovaný jazyk'),
+			\array_combine($this->adminFormFactory->formFactory->getDefaultMutations(), $this->adminFormFactory->formFactory->getDefaultMutations()),
+		)->setPrompt($this->translator->translate('adminAdminAdministrator.auto', 'Automaticky'));
 //		}
 
-		$accountContainer->addCheckbox('active', 'Aktivní')->setDefaultValue(true);
+		$accountContainer->addCheckbox('active', $this->translator->translate('adminAdminAdministrator.active', 'Aktivní'))->setDefaultValue(true);
 		
 		$accountContainer->addHidden('email');
 
@@ -94,7 +115,7 @@ class AccountFormFactory
 		}
 	}
 	
-	public function create(bool $delete = true, ?callable $beforeSubmits = null, bool $fullname = false)
+	public function create(bool $delete = true, ?callable $beforeSubmits = null, bool $fullname = false): AdminForm
 	{
 		$form = $this->adminFormFactory->create();
 		
@@ -110,7 +131,7 @@ class AccountFormFactory
 			$submit = $form->addSubmit('delete');
 			$class = 'btn btn-outline-danger btn-sm ml-0 mt-1 mb-1 mr-1';
 			$submit->setHtmlAttribute('class', $class)->getControlPrototype()->setName('button')->setHtml('<i class="far fa-trash-alt"></i>');
-			$submit->onClick[] = function (Button $button) {
+			$submit->onClick[] = function (Button $button): void {
 				$values = $button->getForm()->getValues('array')['account'];
 				$this->accountRepository->many()->where('uuid', $values['uuid'])->delete();
 				$this->onDeleteAccount();
@@ -146,7 +167,7 @@ class AccountFormFactory
 		}
 
 		if (!$values['uuid']) {
-			/** @var Account $account */
+			/** @var \Security\DB\Account $account */
 			$account = $this->accountRepository->createOne($values, true);
 			$this->onCreateAccount($account, $form->getValues('array'));
 		} else {
@@ -156,44 +177,28 @@ class AccountFormFactory
 			$this->onUpdateAccount($account, $form->getValues('array'), $oldData);
 		}
 	}
+	
+	public function deleteAccountHolder(IUser $holder): void
+	{
+		try {
+			$holder->accounts->delete();
+		} catch (\Exception $e) {
+			throw new \Exception($e);
+		}
+		
+		$holder->delete();
+	}
 
 	public static function validateLogin(\Nette\Forms\Controls\TextInput $input, array $args): bool
 	{
 		/** @var \Security\DB\AccountRepository $repository */
 		$repository = $args[0];
 		$collection = $repository->many()->where('login', (string)$input->getValue());
-
-
+		
 		if (isset($args[1]) && $args[1]) {
 			$collection->whereNot('this.uuid', $args[1]);
 		}
 
 		return $collection->isEmpty();
-	}
-
-	public function deleteAccountHolder(IUser $holder)
-	{
-		try {
-			$holder->accounts->delete();
-		} catch (\Exception $e) {
-
-		}
-		
-		$holder->delete();
-		
-		/*
-		try {
-			if ($holder->getAccount()) {
-				$account = $holder->getAccount();
-			}
-
-			
-
-			if (isset($account)) {
-				$account->delete();
-			}
-		} catch (\Exception $e) {
-
-		}*/
 	}
 }

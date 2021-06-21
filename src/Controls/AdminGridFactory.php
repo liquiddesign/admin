@@ -52,7 +52,7 @@ class AdminGridFactory
 		$this->defaultOnPage = $defaultOnPage;
 	}
 	
-	public function create(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false)
+	public function create(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false): AdminGrid
 	{
 		$grid = new AdminGrid($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId, $this->session);
 		$grid->setFormsFactory($this->formFactory);
@@ -66,7 +66,7 @@ class AdminGridFactory
 
 		$grid->setTranslator($this->translator);
 		
-		$grid->onUpdateRow[] = function ($object) use ($grid) {
+		$grid->onUpdateRow[] = function ($object) use ($grid): void {
 			if ($grid->entityName) {
 				$this->changelogRepository->createOne([
 					'user' => $this->administrator->getIdentity()->getAccount()->login,
@@ -76,7 +76,8 @@ class AdminGridFactory
 				]);
 			}
 		};
-		$grid->onDeleteRow[] = function ($object) use ($grid) {
+		
+		$grid->onDeleteRow[] = function ($object) use ($grid): void {
 			if ($grid->entityName) {
 				$this->changelogRepository->createOne([
 					'user' => $this->administrator->getIdentity()->getAccount()->login,

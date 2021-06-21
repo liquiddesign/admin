@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Admin\Admin;
 
 use Admin\BackendPresenter;
+use Admin\Controls\AdminGrid;
 use Admin\Controls\Menu;
 use Admin\Controls\AdminForm;
 use Forms\Form;
@@ -29,20 +30,26 @@ class RolePresenter extends BackendPresenter
 	
 	/** @inject */
 	public DIConnection $stm;
-
-	public function createComponentGrid()
+	
+	public string $tRole;
+	
+	public function beforeRender(): void
+	{
+		parent::beforeRender();
+		
+		$this->tRole = $this->_('role', 'Role');
+	}
+	
+	public function createComponentGrid(): AdminGrid
 	{
 		$grid = $this->gridFactory->create($this->roleRepository->many()->where('uuid != "servis"'), 20, 'name');
 		$grid->addColumnSelector();
-		$grid->addColumnText('Název', 'name', '%s', 'name');
-		$grid->addColumnLink('rolePermissions', 'Oprávnění');
+		$grid->addColumnText($this->_('name', 'Název'), 'name', '%s', 'name');
+		$grid->addColumnLink('rolePermissions', $this->_('rolePermissions', 'Oprávnění'));
 		$grid->addColumnLinkDetail('Detail');
 		$grid->addColumnActionDelete();
-
 		$grid->addButtonDeleteSelected();
-
-		$grid->addFilterTextInput('search', ['name'], null, 'Název');
-
+		$grid->addFilterTextInput('search', ['name'], null, $this->_('name', 'Název'));
 		$grid->addFilterButtons();
 
 		return $grid;
@@ -58,7 +65,7 @@ class RolePresenter extends BackendPresenter
 			->setHtmlAttribute('data-info', '<br>Pokud necháte prázdné, povolené budou všechny');
 		$form->addSubmits();
 
-		$form->onSuccess[] = function (AdminForm $form) {
+		$form->onSuccess[] = function (AdminForm $form): void {
 			$values = $form->getValues('array');
 			
 			$values['mutations'] = $values['mutationsList'] ? \implode(';', $values['mutationsList']) : null;
@@ -68,18 +75,18 @@ class RolePresenter extends BackendPresenter
 
 			$this->permissionRepository->syncOne(['resource' => $this->admin->getFallbackLink(), 'privilege' => 777, 'role' => $role->getPK()]);
 
-			$this->flashMessage('Uloženo', 'success');
+			$this->flashMessage($this->_('.saved', 'Uloženo'), 'success');
 			$form->processRedirect('detail', 'default', [$role]);
 		};
 
 		return $form;
 	}
 
-	public function renderDefault()
+	public function renderDefault(): void
 	{
-		$this->template->headerLabel = 'Role';
+		$this->template->headerLabel = $this->tRole;
 		$this->template->headerTree = [
-			['Role'],
+			[$this->tRole],
 		];
 		$this->template->displayButtons = [$this->createNewItemButton('new')];
 		$this->template->displayControls = [$this->getComponent('grid')];
@@ -87,29 +94,30 @@ class RolePresenter extends BackendPresenter
 
 	public function renderNew()
 	{
-		$this->template->headerLabel = 'Nová položka';
+		$tNew = $this->_('new', 'Nová role');
+		$this->template->headerLabel = $tNew;
 		$this->template->headerTree = [
-			['Role', 'default'],
-			['Nová položka'],
+			[$this->tRole, 'default'],
+			[$tNew],
 		];
 		$this->template->displayButtons = [$this->createBackButton('default')];
 		$this->template->displayControls = [$this->getComponent('newForm')];
 	}
 
-	public function renderDetail()
+	public function renderDetail(): void
 	{
 		$this->template->headerLabel = 'Detail';
 		$this->template->headerTree = [
-			['Role', 'default'],
+			[$this->tRole, 'default'],
 			['Detail'],
 		];
 		$this->template->displayButtons = [$this->createBackButton('default')];
 		$this->template->displayControls = [$this->getComponent('newForm')];
 	}
 
-	public function actionDetail(Role $role)
+	public function actionDetail(Role $role): void
 	{
-		/** @var Form $form */
+		/** @var \Forms\Form $form */
 		$form = $this->getComponent('newForm');
 		$form->setDefaults($role->jsonSerialize());
 		$form['mutationsList']->setDefaultValue($role->getMutations());
@@ -125,7 +133,7 @@ class RolePresenter extends BackendPresenter
 	
 	public function createComponentPermissionGrid()
 	{
-		/** @var Menu $menu */
+		/** @var \Admin\Controls\Menu $menu */
 		$menu = $this->getComponent('menu');
 		/** @var \Admin\DB\Role $role */
 		$role = $this->getParameter('role');
@@ -140,11 +148,11 @@ class RolePresenter extends BackendPresenter
 		$grid->setItemCountCallback(function ($row) use ($resources) {
 			return \count($resources);
 		});
-		$grid->addColumnText('Název', 'name', '%s', 'name')->onRenderCell[] = function (Html $td, $object) {
+		$grid->addColumnText($this->_('name', 'Název'), 'name', '%s', 'name')->onRenderCell[] = function (Html $td, $object): void {
 			$td->setHtml($object->root ? '<strong>' .$td->getHtml(). '</strong>' : '---- ' . $td->getHtml());
 		};
 
-		$grid->addColumnInputCheckbox('Povolit', 'allow')->onRenderCell[] = function (Html $td, $object) {
+		$grid->addColumnInputCheckbox($this->_('allow', 'Povolit'), 'allow')->onRenderCell[] = function (Html $td, $object): void {
 			if (!$object->resource) {
 				$td->setHtml('<input type="checkbox" class="form-check form-control-sm" style="visibility: hidden;">');
 			}
@@ -152,7 +160,7 @@ class RolePresenter extends BackendPresenter
 		
 		$button = $grid->getForm()->addSubmit('submit', 'Uložit');
 		$button->setHtmlAttribute('class', 'btn btn-sm btn-primary');
-		$button->onClick[] = function ($button) use ($grid, $resources, $role) {
+		$button->onClick[] = function ($button) use ($grid, $resources, $role): void {
 			foreach ($grid->getInputData() as $id => $data) {
 				if (!$resources[$id] || !$this->admin->isAllowed($resources[$id])) {
 					continue;
@@ -165,7 +173,7 @@ class RolePresenter extends BackendPresenter
 				}
 			}
 			
-			$grid->getPresenter()->flashMessage('Uloženo', 'success');
+			$grid->getPresenter()->flashMessage($this->_('.saved', 'Uloženo'), 'success');
 			$grid->getPresenter()->redirect('this');
 		};
 		
@@ -174,12 +182,13 @@ class RolePresenter extends BackendPresenter
 		return $grid;
 	}
 
-	public function renderRolePermissions(Role $role)
+	public function renderRolePermissions(Role $role): void
 	{
-		$this->template->headerLabel = 'Oprávnění role';
+		$tRolePermissions = $this->_('rolePermissions', 'Oprávnění role');
+		$this->template->headerLabel = $tRolePermissions;
 		$this->template->headerTree = [
-			['Role', 'default'],
-			['Oprávnění role'],
+			[$this->tRole, 'default'],
+			[$tRolePermissions],
 		];
 		$this->template->displayButtons = [$this->createBackButton('default')];
 		$this->template->displayControls = [$this->getComponent('permissionGrid')];
@@ -191,13 +200,14 @@ class RolePresenter extends BackendPresenter
 		
 		foreach ($menu->getItems() as $group) {
 			foreach (\array_merge([$group], $group->items) as $item) {
-				$uuid = $item->link ? str_replace(':', '_', $item->link) : DIConnection::generateUuid();
-				$root =  $group === $item;
+				$uuid = $item->link ? \str_replace(':', '_', $item->link) : DIConnection::generateUuid();
+				$root = $group === $item;
 				$allow = $item->link ? $this->authorizator->isAllowed($role->getPK(), $item->link, 777) : false;
 				$resources[$uuid] = $item->link ? \substr($item->link, 0, \strrpos($item->link, ':')) . ':*' : null;
 				
 				if ($select === null) {
 					$select = "'$uuid' as uuid, '$uuid' as uuid, '$item->label' as name, '$allow' as allow, '$item->link' as resource, '$root' as root";
+					
 					continue;
 				}
 				
