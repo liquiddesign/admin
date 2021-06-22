@@ -81,7 +81,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 	}
 
 
-	public function beforeCompile()
+	public function beforeCompile(): void
 	{
 		$config = $this->getConfig();
 		$this->getContainerBuilder()->resolve();

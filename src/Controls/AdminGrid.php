@@ -55,22 +55,22 @@ class AdminGrid extends \Grid\Datagrid
 	{
 		parent::__construct($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId);
 
-		$this->onRender[] = function (\Nette\Utils\Html $tbody, array $columns) {
+		$this->onRender[] = function (\Nette\Utils\Html $tbody, array $columns): void {
 			if (\count($tbody) === 0) {
 				$tNoResult = $this->translator->translate('admin.gridNoResult', 'Žádný výsledek. Zkuste změnit nebo vymazat filtry.');
 				$tbody->addHtml((\Nette\Utils\Html::el('tr')->addHtml(\Nette\Utils\Html::el('td', ['colspan' => \count($columns)])->setHtml('<i>'. $tNoResult .'</i>')->class('text-center p-2'))));
 			}
 		};
 		
-		$this->onLoadState[] = function (Datalist $datalist, $params) use ($session) {
+		$this->onLoadState[] = function (Datalist $datalist, $params) use ($session): void {
 			Datalist::loadSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getPresenter()->getName() . $datalist->getName()));
 		};
 		
-		$this->onSaveState[] = function (Datalist $datalist, $params) use ($session) {
+		$this->onSaveState[] = function (Datalist $datalist, $params) use ($session): void {
 			Datalist::saveSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getPresenter()->getName() . $datalist->getName()));
 		};
 
-		$this->onAnchor[] = function (AdminGrid $grid) use ($defaultOnPage) {
+		$this->onAnchor[] = function (AdminGrid $grid) use ($defaultOnPage): void {
 			$grid->template->setFile(__DIR__ . '/adminGrid.latte');
 			$grid->template->paginator = $grid->getPaginator(true);
 			$grid->template->onpage = $grid->getName() . '-onpage';
@@ -90,7 +90,7 @@ class AdminGrid extends \Grid\Datagrid
 			[$orderColumn, $orderDirection] = \explode('-', $this->getOrderParameter());
 
 			foreach ($this->columns as $column) {
-				$column->onRender[] = function (\Nette\Utils\Html $th) use ($orderColumn, $orderDirection, $column) {
+				$column->onRender[] = function (\Nette\Utils\Html $th) use ($orderColumn, $orderDirection, $column): void {
 					if ($column->getOrderExpression() && $orderColumn == $column->getOrderExpression()) {
 						$th->setHtml('<i class="mr-1 ' . (\strpos($orderColumn, 'DESC') !== false ? 'fa fa-sort-amount-down' : ($orderDirection == 'ASC' ? 'fa fa-sort-amount-up-alt' : 'fa fa-sort-amount-down')) . '"></i>' . $th->getHtml());
 					}
@@ -122,7 +122,7 @@ class AdminGrid extends \Grid\Datagrid
 		$this->showItemsPerPage = $show;
 	}
 
-	public function setTranslator(Translator $translator)
+	public function setTranslator(Translator $translator): void
 	{
 		$this->translator = $translator;
 	}
@@ -131,6 +131,19 @@ class AdminGrid extends \Grid\Datagrid
 	{
 		$this->entityName = $entityName;
 	}
+	
+	public function setFormsFactory(AdminFormFactory $formFactory): void
+	{
+		$this->formFactory = $formFactory;
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function addColumnSelectorMinimal(array $wrapperAttributes = []): Column
+	{
+		return $this->addColumnSelector($wrapperAttributes);
+	}
 
 	protected function createComponentFilterForm(): \Nette\Application\UI\Form
 	{
@@ -138,19 +151,6 @@ class AdminGrid extends \Grid\Datagrid
 		$this->makeFilterForm($form);
 
 		return $form;
-	}
-
-	public function setFormsFactory(AdminFormFactory $formFactory)
-	{
-		$this->formFactory = $formFactory;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	public function addColumnSelectorMinimal(array $wrapperAttributes = []): Column
-	{
-		return $this->addColumnSelector($wrapperAttributes);
 	}
 
 	public function addColumnSelector(array $wrapperAttributes = []): Column
@@ -275,6 +275,16 @@ class AdminGrid extends \Grid\Datagrid
 		}, $setValueExpression, $defaultValue, $orderExpression, $wrapperAttributes);
 	}
 
+	public function addColumnPriority()
+	{
+		return $this->addColumnInputInteger($this->translator->translate('admin.priority', 'Pořadí'), 'priority', '', '', 'priority', [], true);
+	}
+	
+	public function addColumnHidden(): Column
+	{
+		return $this->addColumnInputCheckbox('<i title="'. $this->translator->translate('admin.hidden', 'Skryto') .'" class="far fa-eye-slash"></i>', 'hidden', '', '', 'hidden');
+	}
+
 	public function addColumnLinkDetail(string $destination = 'detail', array $arguments = []): Column
 	{
 		return $this->addColumn('', function ($object, $datagrid) use ($destination, $arguments) {
@@ -320,7 +330,7 @@ class AdminGrid extends \Grid\Datagrid
 	public function addColumnActionDelete(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null)
 	{
 		return $this->addColumnAction('', "<a href=\"%s\" class='btn btn-danger btn-sm text-xs' title='" . $this->translator->translate('admin.remove', 'Smazat') . "' onclick=\"return confirm('" .$this->translator->translate('admin.really', 'Opravdu?'). "')\"><i class='far fa-trash-alt'></i></a>",
-			function ($object) use ($beforeDeleteCallback, $override, $condition) {
+			function ($object) use ($beforeDeleteCallback, $override, $condition): void {
 				try {
 					$this->getPresenter()->flashMessage($this->translator->translate('admin.done', 'Provedeno'), 'success');
 
@@ -731,6 +741,7 @@ class AdminGrid extends \Grid\Datagrid
 	public function render(): void
 	{
 		$this->template->setTranslator($this->translator);
+		
 		parent::render();
 	}
 }

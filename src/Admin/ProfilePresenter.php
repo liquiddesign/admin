@@ -18,32 +18,33 @@ class ProfilePresenter extends BackendPresenter
 	/** @inject */
 	public AdministratorRepository $adminRepo;
 	
-	public function createComponentAccountForm()
+	public function createComponentAccountForm(): AdminForm
 	{
 		$form = $this->formFactory->create();
 		
 		$profile = $form->addContainer('profile');
-		$profile->addText('fullName', 'Jméno');
+		$profile->addText('fullName', $this->_('name', 'Jméno'));
 		
 		$account = $form->addContainer('account');
 		$account->addText('login', 'Login')->setDisabled();
 		$account->addText('role', 'Role')->setDisabled();
-		$account->addPassword('oldPassword', 'Staré heslo')
-			->addRule([FormValidators::class, 'checkOldPassword'], 'Staré heslo není správné!', $this->admin->getIdentity()->getAccount());
-		$account->addPassword('newPassword', 'Nové heslo');
-		$account->addPassword('newPasswordCheck', 'Kontrola nového hesla')
-			->addRule($form::EQUAL, 'Hesla nejsou shodná!', $form['account']['newPassword']);
+		$account->addPassword('oldPassword', $this->_('oldPassword', 'Staré heslo'))
+			->addRule([FormValidators::class, 'checkOldPassword'], $this->_('oldPasswordCheck', 'Staré heslo není správné!'), $this->admin->getIdentity()->getAccount());
+		$account->addPassword('newPassword', $this->_('newPassword', 'Nové heslo'));
+		$account->addPassword('newPasswordCheck', $this->_('passwordCheck', 'Kontrola nového hesla'))
+			->addRule($form::EQUAL, $this->_('passCheckError', 'Hesla nejsou shodná!'), $form['account']['newPassword']);
 		
-		$form->addSubmit('submit', 'Uložit');
+		$form->addSubmit('submit', $this->_('.save', 'Uložit'));
 		
 		return $form;
 	}
 	
-	public function renderDefault()
+	public function renderDefault(): void
 	{
-		$this->template->headerLabel = 'Profil';
+		$tProfile = $this->_('profile', 'Profil');
+		$this->template->headerLabel = $tProfile;
 		$this->template->headerTree = [
-			['Profil'],
+			[$tProfile],
 		];
 		$this->template->displayButtons = [];
 		$this->template->displayControls = [
@@ -51,21 +52,21 @@ class ProfilePresenter extends BackendPresenter
 		];
 	}
 	
-	public function actionDefault()
+	public function actionDefault(): void
 	{
 		/** @var \Forms\Form $form */
 		$form = $this->getComponent('accountForm');
 		
-		/** @var \Admin\DB\Administrator $account */
+		/** @var \Admin\DB\Administrator $administrator */
 		$administrator = $this->admin->getIdentity();
 		
 		if ($administrator->getAccount()) {
 			$form->setDefaults([
 				'account' => $administrator->getAccount()->toArray(),
-				'profile' => $administrator->toArray()
+				'profile' => $administrator->toArray(),
 			]);
 			
-			$form->onSuccess[] = function (AdminForm $form) use ($administrator) {
+			$form->onSuccess[] = function (AdminForm $form) use ($administrator): void {
 				$values = $form->getValues();
 				
 				if ($values['account']->newPassword && $values['account']->oldPassword) {
@@ -74,7 +75,7 @@ class ProfilePresenter extends BackendPresenter
 				
 				$administrator->update($values['profile']);
 				
-				$this->flashMessage('Uloženo', 'success');
+				$this->flashMessage($this->_('.saved', 'Uloženo'), 'success');
 				$this->redirect('this');
 			};
 		}

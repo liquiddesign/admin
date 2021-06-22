@@ -6,14 +6,15 @@ namespace Admin\Admin;
 
 use Admin\Admin\Controls\AccountFormFactory;
 use Admin\BackendPresenter;
+use Admin\Controls\AdminForm;
+use Admin\Controls\AdminGrid;
 use Admin\DB\Administrator;
 use Admin\DB\AdministratorRepository;
-use Admin\Controls\AdminForm;
+use Admin\DB\RoleRepository;
 use Forms\Form;
 use Messages\DB\TemplateRepository;
 use Nette\Mail\Mailer;
 use Security\DB\AccountRepository;
-use Admin\DB\RoleRepository;
 
 class AdministratorPresenter extends BackendPresenter
 {
@@ -35,21 +36,30 @@ class AdministratorPresenter extends BackendPresenter
 	/** @inject */
 	public Mailer $mailer;
 	
-	public function createComponentGrid()
+	public string $tAdministrators;
+	
+	public function beforeRender(): void
+	{
+		parent::beforeRender();
+		
+		$this->tAdministrators = $this->_('.administrators', 'Administrátoři');
+	}
+	
+	public function createComponentGrid(): AdminGrid
 	{
 		$source = $this->adminRepo->many()->where('fk_role != "servis" OR fk_role IS NULL');
 		
 		$grid = $this->gridFactory->create($source, 20, 'fullName', 'ASC', true);
 		$grid->addColumnSelector();
 		
-		$grid->addColumnText('Jméno', 'fullName', '%s', 'fullName');
-		$grid->addColumnText('Role', 'role.name', '%s');
+		$grid->addColumnText($this->_('fullname', 'Jméno a Příjmení'), 'fullName', '%s', 'fullName');
+		$grid->addColumnText($this->_('role', 'Role'), 'role.name', '%s');
 		$grid->addColumnLinkDetail('Detail');
 		
 		$grid->addColumnActionDelete([$this->accountFormFactory, 'deleteAccountHolder'], true);
 		$grid->addButtonDeleteSelected([$this->accountFormFactory, 'deleteAccountHolder'], true);
 		
-		$grid->addFilterTextInput('search', ['fullName'], null, 'Jméno');
+		$grid->addFilterTextInput('search', ['fullName'], null, $this->_('fullname', 'Jméno a Příjmení'));
 		$grid->addFilterButtons();
 		
 		return $grid;
@@ -59,76 +69,78 @@ class AdministratorPresenter extends BackendPresenter
 	{
 		$form = $this->formFactory->create();
 		
-		$form->addText('fullName', 'Jméno')->setRequired();
+		$form->addText('fullName', $this->_('fullname', 'Jméno a Příjmení'))->setRequired();
 		
-		$form->addSelect('role', 'Role', $this->roleRepo->many()->whereNot('uuid', 'servis')->toArrayOf('name'))->setPrompt('Žádná');
+		$form->addSelect('role', $this->_('role', 'Role'), $this->roleRepo->many()->whereNot('uuid', 'servis')->toArrayOf('name'))->setPrompt('Žádná');
 		
 		
 		$this->accountFormFactory->addContainer($form, true, !$this->getParameter('administrator'));
-		$form->addCheckbox('urlEditor', 'Může editovat URL');
+		$form->addCheckbox('urlEditor', $this->_('canEdit', 'Může editovat URL'));
 		$form->addSubmits(!$this->getParameter('administrator'));
 		
 		
-		$form->onSuccess[] = function (AdminForm $form) {
+		$form->onSuccess[] = function (AdminForm $form): void {
 			$values = $form->getValues('array');
 			unset($values['account']);
 			
 			$administrator = $this->adminRepo->syncOne($values, null, true);
-			$this->accountFormFactory->onCreateAccount[] = function ($account) use ($administrator) {
+			$this->accountFormFactory->onCreateAccount[] = function ($account) use ($administrator): void {
 				$administrator->accounts->relate([$account]);
 			};
 			$this->accountFormFactory->success($form);
 			
-			$form->getPresenter()->flashMessage('Uloženo', 'success');
+			$form->getPresenter()->flashMessage($this->_('.saved', 'Uloženo'), 'success');
 			$form->processRedirect('detail', 'default', [$administrator]);
 		};
 		
 		return $form;
 	}
 	
-	public function renderDefault()
+	public function renderDefault(): void
 	{
-		$this->template->headerLabel = 'Administrátoři';
+		$this->template->headerLabel = $this->tAdministrators;
 		$this->template->headerTree = [
-			['Administrátoři'],
+			[$this->tAdministrators],
 		];
 		$this->template->displayButtons = [$this->createNewItemButton('new')];
 		$this->template->displayControls = [$this->getComponent('grid')];
 	}
 	
-	public function renderNew()
+	public function renderNew(): void
 	{
-		$this->template->headerLabel = 'Nová položka';
+		$tNew = $this->_('newAdmin', 'Nová položka');
+		$this->template->headerLabel = $tNew;
 		$this->template->headerTree = [
-			['Správci', 'default'],
-			['Nová položka'],
+			[$this->tAdministrators, 'default'],
+			[$tNew],
 		];
 		$this->template->displayButtons = [$this->createBackButton('default')];
 		$this->template->displayControls = [$this->getComponent('newForm')];
 	}
 	
-	public function renderDetail()
+	public function renderDetail(): void
 	{
-		$this->template->headerLabel = 'Detail';
+		$tDetail = $this->_('detail', 'Detail');
+		$this->template->headerLabel = $tDetail;
 		$this->template->headerTree = [
-			['Správci', 'default'],
-			['Detail'],
+			[$this->tAdministrators, 'default'],
+			[$tDetail],
 		];
 		$this->template->displayButtons = [$this->createBackButton('default')];
 		$this->template->displayControls = [$this->getComponent('newForm')];
 	}
 	
-	public function actionNew()
+	public function actionNew(): void
 	{
-		/** @var Form $form */
+		/** @var \Forms\Form $form */
 		$form = $this->getComponent('newForm');
 		$form['account']['password']->setRequired();
 		$form['account']['passwordCheck']->setRequired();
 	}
 	
-	public function actionDetail(Administrator $administrator)
+	public function actionDetail(Administrator $administrator): void
 	{
-		/** @var Form $form */
+		/** @var \Forms\Form $form */
 		$form = $this->getComponent('newForm');
 		$form->setDefaults($administrator->toArray());
 		

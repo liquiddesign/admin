@@ -17,24 +17,23 @@ class LogPresenter extends BackendPresenter
 	
 	public function renderDefault(): void
 	{
-		$tLog = $this->translator->translate('adminWebLog.logs', 'Log změn');
+		$tLog = $this->_('logs', 'Log změn');
 		$this->template->headerLabel = $tLog;
 		$this->template->headerTree = [
 			[$tLog],
 		];
 		$this->template->displayControls = [$this->getComponent('grid')];
 	}
+	
 	public function createComponentGrid(): AdminGrid
 	{
 		$grid = $this->gridFactory->create($this->changelogRepository->many());
 		$grid->setDefaultOrder('created', 'DESC');
-		$grid->addColumn($this->translator->translate('admin.created', 'Vytvořeno'), function (Changelog $changelog) {
-			return DateTime::from($changelog->created)->format('d.m.Y G:i:s');
-		}, '%s', 'created');
-		$grid->addColumnText($this->translator->translate('admin.user', 'Uživatel'), 'user', '%s', 'user');
-		$grid->addColumnText($this->translator->translate('adminWebLog.entity', 'Entita'), 'entity', '%s', 'entity');
-		$grid->addColumnText($this->translator->translate('adminWebLog.objectId', 'Id záznamu'), 'objectId', '%s', 'objectId');
-		$grid->addColumnText($this->translator->translate('adminWebLog.type', 'Typ změny'), 'type', '%s', 'type');
+		$grid->addColumnText($this->_('.created', 'Vytvořeno'), "created|date:'d.m.Y G:i:s'", '%s', 'created');
+		$grid->addColumnText($this->_('.user', 'Uživatel'), 'user', '%s', 'user');
+		$grid->addColumnText($this->_('entity', 'Entita'), 'entity', '%s', 'entity');
+		$grid->addColumnText($this->_('objectId', 'Id záznamu'), 'objectId', '%s', 'objectId');
+		$grid->addColumnText($this->_('type', 'Typ změny'), 'type', '%s', 'type');
 		
 		return $grid;
 	}
