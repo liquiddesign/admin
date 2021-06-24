@@ -406,7 +406,7 @@ class AdminGrid extends \Grid\Datagrid
 				$object = $grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->first();
 
 				// filter data
-				if ($diff) {
+				if ($diff && isset($array[$id])) {
 					$data = \array_diff($data, $array[$id]);
 
 					if (!$data) {
@@ -450,7 +450,7 @@ class AdminGrid extends \Grid\Datagrid
 					'type' => 'grid-edit',
 				]);*/
 
-				$grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
+				$grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->setGroupBy([])->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
 			}
 
 			$grid->getPresenter()->flashMessage($this->translator->translate('admin.saved', 'Uloženo'), 'success');
@@ -716,7 +716,7 @@ class AdminGrid extends \Grid\Datagrid
 			}
 			
 			foreach ($ids as $id) {
-				$this->getSource()->where($this->getSourceIdName(), $id)->update($values['values']);
+				$this->getSource()->where($this->getSourceIdName(), $id)->setGroupBy([])->update($values['values']);
 			}
 			
 			$this->getPresenter()->flashMessage('Uloženo', 'success');
