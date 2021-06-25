@@ -14,7 +14,7 @@ use StORM\DIConnection;
 class AdminFormFactory
 {
 	public FormFactory $formFactory;
-	
+
 	private ChangelogRepository $changelogRepository;
 
 	private IPageRepository $pageRepository;
@@ -38,7 +38,8 @@ class AdminFormFactory
 		IPageRepository $pageRepository,
 		Translator $translator,
 		ChangelogRepository $changelogRepository
-	) {
+	)
+	{
 		$this->formFactory = $formFactory;
 		$this->pageRepository = $pageRepository;
 		$this->administrator = $administrator;
@@ -78,7 +79,7 @@ class AdminFormFactory
 		$this->defaultMutation = $defaultMutation;
 	}
 
-	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false, bool $generateUuid = false, bool $defaultsField = false): AdminForm
+	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false, bool $generateUuid = false, bool $defaultsField = false, bool $defaultGroup = true): AdminForm
 	{
 		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->formFactory->create(AdminForm::class);
@@ -107,22 +108,24 @@ class AdminFormFactory
 			}
 		};
 
-		$form->addGroup($this->translator->translate('admin.mainContainer', 'HLAVNÍ ÚDAJE'));
+		if ($defaultGroup) {
+			$form->addGroup($this->translator->translate('admin.mainContainer', 'HLAVNÍ ÚDAJE'));
+		}
 
 		if ($mutationSelector && \count($form->getMutations()) > 1) {
 			$form->addMutationSelector($this->translator->translate('admin.selectMutatiom', 'Zvolte mutaci'));
-			
+
 			if ($translatedCheckbox) {
 				$form->addTranslatedCheckbox($this->translator->translate('admin.activeMutation', 'Mutace je aktivní'));
 			}
-			
+
 			$form->addGroup();
 		}
 
 		$form->onError[] = function (AdminForm $form): void {
 			$form->getPresenter()->flashMessage($this->translator->translate('admin.formError', 'Chybně vyplněný formulář!'), 'error');
 		};
-		
+
 		$form->onSuccess[] = function (AdminForm $form): void {
 			if ($form->entityName) {
 				$this->changelogRepository->createOne([
