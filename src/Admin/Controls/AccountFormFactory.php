@@ -98,11 +98,13 @@ class AccountFormFactory
 			);
 
 //		if(isset(static::CONFIGURATIONS['preferredMutation']) && static::CONFIGURATIONS['preferredMutation']){
-		$accountContainer->addDataSelect(
-			'preferredMutation',
-			$this->translator->translate('adminAdminAdministrator.language', 'Preferovaný jazyk'),
-			\array_combine($this->adminFormFactory->formFactory->getDefaultMutations(), $this->adminFormFactory->formFactory->getDefaultMutations()),
-		)->setPrompt($this->translator->translate('adminAdminAdministrator.auto', 'Automaticky'));
+		if (\count($this->adminFormFactory->getMutations()) > 1) {
+			$accountContainer->addDataSelect(
+				'preferredMutation',
+				$this->translator->translate('adminAdminAdministrator.language', 'Preferovaný jazyk'),
+				\array_combine($this->adminFormFactory->formFactory->getDefaultMutations(), $this->adminFormFactory->formFactory->getDefaultMutations()),
+			)->setPrompt($this->translator->translate('adminAdminAdministrator.auto', 'Automaticky'));
+		}
 //		}
 
 		$accountContainer->addCheckbox('active', $this->translator->translate('adminAdminAdministrator.active', 'Aktivní'))->setDefaultValue(true);
