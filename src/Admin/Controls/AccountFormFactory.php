@@ -102,7 +102,7 @@ class AccountFormFactory
 			$accountContainer->addDataSelect(
 				'preferredMutation',
 				$this->translator->translate('adminAdminAdministrator.language', 'Preferovaný jazyk'),
-				\array_combine($this->adminFormFactory->formFactory->getDefaultMutations(), $this->adminFormFactory->formFactory->getDefaultMutations()),
+				$form->getTranslatedMutations(),
 			)->setPrompt($this->translator->translate('adminAdminAdministrator.auto', 'Automaticky'));
 		}
 //		}

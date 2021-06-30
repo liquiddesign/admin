@@ -317,4 +317,15 @@ class AdminForm extends \Forms\Form
 		
 		return (bool )$repository->isUrlAvailable((string)$input->getValue(), $mutation, $uuid);
 	}
+	
+	public function getTranslatedMutations(): array
+	{
+		$mut = [];
+		
+		foreach ($this->mutations as $m) {
+			$mut[$m] = $this->translator->translate('admin.'.$m, $m);
+		}
+		
+		return $mut;
+	}
 }
