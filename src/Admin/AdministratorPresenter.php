@@ -18,6 +18,10 @@ use Security\DB\AccountRepository;
 
 class AdministratorPresenter extends BackendPresenter
 {
+	protected const CONFIGURATION = [
+		'groups' => [],
+	];
+
 	/** @inject */
 	public AccountFormFactory $accountFormFactory;
 	
@@ -75,7 +79,11 @@ class AdministratorPresenter extends BackendPresenter
 		
 		
 		$this->accountFormFactory->addContainer($form, true, !$this->getParameter('administrator'));
-		$form->addCheckbox('urlEditor', $this->_('canEdit', 'Může editovat URL'));
+
+		if (\in_array('editUrl', static::CONFIGURATION['groups'])) {
+			$form->addCheckbox('urlEditor', $this->_('canEdit', 'Může editovat URL'));
+		}
+
 		$form->addSubmits(!$this->getParameter('administrator'));
 		
 		
