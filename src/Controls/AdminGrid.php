@@ -48,6 +48,10 @@ class AdminGrid extends \Grid\Datagrid
 	private array $itemsPerPage;
 
 	private bool $showItemsPerPage;
+
+	private bool $showPaginator = true;
+
+	private string $appendClass = '';
 	
 	public ?string $entityName = null;
 
@@ -77,6 +81,8 @@ class AdminGrid extends \Grid\Datagrid
 			$grid->template->page = $grid->getName() . '-page';
 			$grid->template->showItemsPerPage = $this->showItemsPerPage;
 			$grid->template->itemsPerPage = $this->itemsPerPage;
+			$grid->template->showPaginator = $this->showPaginator;
+			$grid->template->appendClass = $this->appendClass;
 			$grid->template->itemCountMessage = $this->translator->translate('admin.itemCountMessage', 'Položek');
 
 			if (!$this->showItemsPerPage) {
@@ -120,6 +126,16 @@ class AdminGrid extends \Grid\Datagrid
 	public function setShowItemsPerPage(bool $show): void
 	{
 		$this->showItemsPerPage = $show;
+	}
+
+	public function showPaginator(bool $show): void
+	{
+		$this->showPaginator = $show;
+	}
+
+	public function addGridClass(string $classes): void
+	{
+		$this->appendClass = $classes;
 	}
 
 	public function setTranslator(Translator $translator): void

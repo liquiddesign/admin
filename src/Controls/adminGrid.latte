@@ -1,3 +1,8 @@
+<style>
+	.small-table {
+		width: 400px;
+	}
+</style>
 {form filterForm}
 	{do $components = $form->getComponents()}
 	{do $submit = $components['submit'] ?? null}
@@ -30,7 +35,7 @@
 {/form}
 <div class="table-responsive table-striped">
 	{form form}
-		<table class="table table-sm lqd-table">
+		<table class="table table-sm lqd-table {$appendClass}">
 			<thead class="admin-head">
 			{foreach $columns as $column}
 				{$column->renderHeaderCell()|noescape}
@@ -47,7 +52,7 @@
 		</div>
 	{/form}
 </div>
-<div class="pagination ml-lg-auto">
+<div class="pagination ml-lg-auto" n:if="$showPaginator">
 	{if $showItemsPerPage}
 	<div class="col-12">
 		<ul class="pagination align-items-center mr-lg-2 mb-2 mb-lg-0">

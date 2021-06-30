@@ -27,19 +27,19 @@ class RolePresenter extends BackendPresenter
 
 	/** @inject */
 	public PermissionRepository $permissionRepository;
-	
+
 	/** @inject */
 	public DIConnection $stm;
-	
+
 	public string $tRole;
-	
+
 	public function beforeRender(): void
 	{
 		parent::beforeRender();
-		
+
 		$this->tRole = $this->_('role', 'Role');
 	}
-	
+
 	public function createComponentGrid(): AdminGrid
 	{
 		$grid = $this->gridFactory->create($this->roleRepository->many()->where('uuid != "servis"'), 20, 'name');
@@ -59,16 +59,19 @@ class RolePresenter extends BackendPresenter
 	{
 		$form = $this->formFactory->create();
 		$mutations = $this->formFactory->getMutations();
-
 		$form->addText('name', 'Název')->setRequired();
-		$form->addDataMultiSelect('mutationsList', 'Povolené mutace', \array_combine($mutations, $mutations))
-			->setHtmlAttribute('data-info', '<br>Pokud necháte prázdné, povolené budou všechny');
+
+		if (\count($mutations) > 1) {
+			$form->addDataMultiSelect('mutationsList', 'Povolené mutace', \array_combine($mutations, $mutations))
+				->setHtmlAttribute('data-info', '<br>Pokud necháte prázdné, povolené budou všechny');
+		}
+
 		$form->addSubmits();
 
 		$form->onSuccess[] = function (AdminForm $form): void {
 			$values = $form->getValues('array');
-			
-			$values['mutations'] = $values['mutationsList'] ? \implode(';', $values['mutationsList']) : null;
+
+			$values['mutations'] = (isset($values['mutationsList']) && $values['mutationsList']) ? \implode(';', $values['mutationsList']) : null;
 			unset($values['mutationsList']);
 
 			$role = $this->roleRepository->syncOne($values);
@@ -120,7 +123,12 @@ class RolePresenter extends BackendPresenter
 		/** @var \Forms\Form $form */
 		$form = $this->getComponent('newForm');
 		$form->setDefaults($role->jsonSerialize());
-		$form['mutationsList']->setDefaultValue($role->getMutations());
+		$mutations = $this->formFactory->getMutations();
+
+		if (\count($mutations) > 1) {
+			$form['mutationsList']->setDefaultValue($role->getMutations());
+		}
+
 	}
 
 	public function createComponentRolePermissionsTable()
@@ -130,18 +138,20 @@ class RolePresenter extends BackendPresenter
 
 		return $this->permsFactory->create($menu->getItems(), $this->getParameter('role'));
 	}
-	
+
 	public function createComponentPermissionGrid()
 	{
 		/** @var \Admin\Controls\Menu $menu */
 		$menu = $this->getComponent('menu');
 		/** @var \Admin\DB\Role $role */
 		$role = $this->getParameter('role');
-		
+
 		$resources = [];
 		$collection = $this->createCollectionFromMenu($menu, $role, $resources);
-		
+
 		$grid = $this->gridFactory->create($collection, 99);
+		$grid->showPaginator(false);
+		$grid->addGridClass('small-table');
 		$grid->setGetIdCallback(function ($row) {
 			return $row->uuid;
 		});
@@ -157,7 +167,7 @@ class RolePresenter extends BackendPresenter
 				$td->setHtml('<input type="checkbox" class="form-check form-control-sm" style="visibility: hidden;">');
 			}
 		};
-		
+
 		$button = $grid->getForm()->addSubmit('submit', 'Uložit');
 		$button->setHtmlAttribute('class', 'btn btn-sm btn-primary');
 		$button->onClick[] = function ($button) use ($grid, $resources, $role): void {
@@ -165,20 +175,20 @@ class RolePresenter extends BackendPresenter
 				if (!$resources[$id] || !$this->admin->isAllowed($resources[$id])) {
 					continue;
 				}
-				
+
 				if ($data['allow']) {
 					$this->permissionRepository->syncOne(['resource' => $resources[$id], 'privilege' => 777, 'role' => $role,]);
 				} else {
 					$this->permissionRepository->many()->where('resource', $resources[$id])->where('privilege', 777)->where('fk_role', $role)->delete();
 				}
 			}
-			
+
 			$grid->getPresenter()->flashMessage($this->_('.saved', 'Uloženo'), 'success');
 			$grid->getPresenter()->redirect('this');
 		};
-		
+
 		//$grid->addFilterButtons();
-		
+
 		return $grid;
 	}
 
@@ -193,28 +203,28 @@ class RolePresenter extends BackendPresenter
 		$this->template->displayButtons = [$this->createBackButton('default')];
 		$this->template->displayControls = [$this->getComponent('permissionGrid')];
 	}
-	
+
 	private function createCollectionFromMenu(Menu $menu, Role $role, array &$resources): ICollection
 	{
 		$select = null;
-		
+
 		foreach ($menu->getItems() as $group) {
 			foreach (\array_merge([$group], $group->items) as $item) {
 				$uuid = $item->link ? \str_replace(':', '_', $item->link) : DIConnection::generateUuid();
 				$root = $group === $item;
 				$allow = $item->link ? $this->authorizator->isAllowed($role->getPK(), $item->link, 777) : false;
 				$resources[$uuid] = $item->link ? \substr($item->link, 0, \strrpos($item->link, ':')) . ':*' : null;
-				
+
 				if ($select === null) {
 					$select = "'$uuid' as uuid, '$uuid' as uuid, '$item->label' as name, '$allow' as allow, '$item->link' as resource, '$root' as root";
-					
+
 					continue;
 				}
-				
+
 				$select .= " UNION SELECT ALL '$uuid', '$uuid', '$item->label', '$allow', '$item->link', '$root' as root";
 			}
 		}
-		
+
 		return $this->stm->rows(null, [$select])->setIndex('uuid', false);
 	}
 
