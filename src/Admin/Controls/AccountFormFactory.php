@@ -131,7 +131,7 @@ class AccountFormFactory
 
 		if ($delete) {
 			$submit = $form->addSubmit('delete');
-			$class = 'btn btn-outline-danger btn-sm ml-0 mt-1 mb-1 mr-1';
+			$class = 'btn btn-outline-danger btn-sm ml-1 mt-1 mb-1 mr-1';
 			$submit->setHtmlAttribute('class', $class)->getControlPrototype()->setName('button')->setHtml('<i class="far fa-trash-alt"></i>');
 			$submit->onClick[] = function (Button $button): void {
 				$values = $button->getForm()->getValues('array')['account'];
