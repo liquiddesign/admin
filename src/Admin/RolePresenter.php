@@ -8,12 +8,15 @@ use Admin\BackendPresenter;
 use Admin\Controls\AdminGrid;
 use Admin\Controls\Menu;
 use Admin\Controls\AdminForm;
+use Admin\Controls\MenuItem;
 use Forms\Form;
+use Nette\Utils\Arrays;
 use Nette\Utils\Html;
 use Admin\Authorizator;
 use Admin\DB\PermissionRepository;
 use Admin\DB\Role;
 use Admin\DB\RoleRepository;
+use Nette\Utils\Strings;
 use StORM\DIConnection;
 use StORM\ICollection;
 
@@ -63,18 +66,50 @@ class RolePresenter extends BackendPresenter
 
 		if (\count($mutations) > 1) {
 			$form->addDataMultiSelect('mutationsList', 'Povolené mutace', $form->getTranslatedMutations())
-				->setHtmlAttribute('data-info', '<br>Pokud necháte prázdné, povolené budou všechny');
+				->setHtmlAttribute('data-info', '<br>Pokud necháte prázdné, povolené budou všechny.');
+		}
+
+		/** @var \Admin\Controls\Menu $menu */
+		$menu = $this->getComponent('menu');
+
+		$form->addGroup('Oprávnění');
+		$menuItemsContainer = $form->addContainer('menuItems');
+
+		$realMenuItems = [];
+
+		/** @var MenuItem $menuItem */
+		foreach ($menu->getItems() as $menuItem) {
+			$convertedLabel = \str_replace(' ', '_', Strings::toAscii($menuItem->label));
+			$menuItemsContainer->addCheckbox($convertedLabel, $menuItem->label);
+			$realMenuItems[$convertedLabel] = $menuItem;
 		}
 
 		$form->addSubmits();
 
-		$form->onSuccess[] = function (AdminForm $form): void {
+		$form->onSuccess[] = function (AdminForm $form) use ($realMenuItems): void {
 			$values = $form->getValues('array');
 
 			$values['mutations'] = (isset($values['mutationsList']) && $values['mutationsList']) ? \implode(';', $values['mutationsList']) : null;
 			unset($values['mutationsList']);
 
+			$menuItems = Arrays::pick($values, 'menuItems');
+
 			$role = $this->roleRepository->syncOne($values);
+
+			foreach ($menuItems as $menuItemLabel => $menuItemAllowed) {
+				if (isset($realMenuItems[$menuItemLabel]) && $menuItemAllowed) {
+					/** @var MenuItem $menuItem */
+					$menuItem = $realMenuItems[$menuItemLabel];
+
+					if ($menuItem->link) {
+						$this->permissionRepository->syncOne(['resource' => $menuItem->link, 'privilege' => 777, 'role' => $role->getPK()]);
+					}
+
+					foreach ($menuItem->items as $subMenuItem) {
+						$this->permissionRepository->syncOne(['resource' => $subMenuItem->link ? \substr($subMenuItem->link, 0, \strrpos($subMenuItem->link, ':')) . ':*' : null, 'privilege' => 777, 'role' => $role->getPK()]);
+					}
+				}
+			}
 
 			$this->permissionRepository->syncOne(['resource' => $this->admin->getFallbackLink(), 'privilege' => 777, 'role' => $role->getPK()]);
 
