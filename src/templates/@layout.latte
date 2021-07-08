@@ -376,6 +376,11 @@
         var sectionDownButton = $('form').find('tr:visible .section-down').last();
         sectionDownButton.addClass('disabled');
     }
+
+    $('#check-all-permissions').click(function (e) {
+        $("input[id^=frm-permissionGrid-form-allow-]").click();
+    });
+
 </script>
 
 {block scripts}

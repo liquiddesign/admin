@@ -131,14 +131,6 @@ class RolePresenter extends BackendPresenter
 
 	}
 
-	public function createComponentRolePermissionsTable()
-	{
-		/** @var Menu $menu */
-		$menu = $this->getComponent('menu');
-
-		return $this->permsFactory->create($menu->getItems(), $this->getParameter('role'));
-	}
-
 	public function createComponentPermissionGrid()
 	{
 		/** @var \Admin\Controls\Menu $menu */
@@ -159,10 +151,16 @@ class RolePresenter extends BackendPresenter
 			return \count($resources);
 		});
 		$grid->addColumnText($this->_('name', 'Název'), 'name', '%s', 'name')->onRenderCell[] = function (Html $td, $object): void {
-			$td->setHtml($object->root ? '<strong>' .$td->getHtml(). '</strong>' : '---- ' . $td->getHtml());
+			$td->setHtml($object->root ? '<strong>' . $td->getHtml() . '</strong>' : '---- ' . $td->getHtml());
 		};
 
-		$grid->addColumnInputCheckbox($this->_('allow', 'Povolit'), 'allow')->onRenderCell[] = function (Html $td, $object): void {
+		$input = $grid->addColumnInputCheckbox($this->_('allow', 'Povolit'), 'allow', '', '', null, ['class' => 'rowSelector']);
+
+		$input->onRender[] = function (Html $th): void {
+			$th->addHtml(Html::fromHtml(" ( <input type='checkbox' id='check-all-permissions' style='vertical-align: middle;'> )"));
+		};
+
+		$input->onRenderCell[] = function (Html $td, $object): void {
 			if (!$object->resource) {
 				$td->setHtml('<input type="checkbox" class="form-check form-control-sm" style="visibility: hidden;">');
 			}
@@ -187,9 +185,16 @@ class RolePresenter extends BackendPresenter
 			$grid->getPresenter()->redirect('this');
 		};
 
-		//$grid->addFilterButtons();
-
 		return $grid;
+	}
+
+	public function handleResetOrder()
+	{
+		/** @var AdminGrid $grid */
+		$grid = $this->getComponent('permissionGrid');
+		$grid->setOrder(null);
+
+		$this->redirect('this');
 	}
 
 	public function renderRolePermissions(Role $role): void
@@ -200,7 +205,10 @@ class RolePresenter extends BackendPresenter
 			[$this->tRole, 'default'],
 			[$tRolePermissions],
 		];
-		$this->template->displayButtons = [$this->createBackButton('default')];
+		$this->template->displayButtons = [
+			$this->createBackButton('default'),
+			$this->createButtonWithClass('resetOrder!', $this->translator->translate('admin.cancelOrder', 'Zrušit řazení'), 'btn btn-sm btn-secondary')
+		];
 		$this->template->displayControls = [$this->getComponent('permissionGrid')];
 	}
 
