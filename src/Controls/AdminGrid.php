@@ -32,7 +32,7 @@ class AdminGrid extends \Grid\Datagrid
 	public array $onDelete = [];
 
 	public Translator $translator;
-	
+
 	private ChangelogRepository $changelogRepository;
 
 	private ?string $bulkFormId = null;
@@ -52,7 +52,7 @@ class AdminGrid extends \Grid\Datagrid
 	private bool $showPaginator = true;
 
 	private string $appendClass = '';
-	
+
 	public ?string $entityName = null;
 
 	public function __construct(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false, ?Session $session = null)
@@ -62,14 +62,14 @@ class AdminGrid extends \Grid\Datagrid
 		$this->onRender[] = function (\Nette\Utils\Html $tbody, array $columns): void {
 			if (\count($tbody) === 0) {
 				$tNoResult = $this->translator->translate('admin.gridNoResult', 'Žádný výsledek. Zkuste změnit nebo vymazat filtry.');
-				$tbody->addHtml((\Nette\Utils\Html::el('tr')->addHtml(\Nette\Utils\Html::el('td', ['colspan' => \count($columns)])->setHtml('<i>'. $tNoResult .'</i>')->class('text-center p-2'))));
+				$tbody->addHtml((\Nette\Utils\Html::el('tr')->addHtml(\Nette\Utils\Html::el('td', ['colspan' => \count($columns)])->setHtml('<i>' . $tNoResult . '</i>')->class('text-center p-2'))));
 			}
 		};
-		
+
 		$this->onLoadState[] = function (Datalist $datalist, $params) use ($session): void {
 			Datalist::loadSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getPresenter()->getName() . $datalist->getName()));
 		};
-		
+
 		$this->onSaveState[] = function (Datalist $datalist, $params) use ($session): void {
 			Datalist::saveSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getPresenter()->getName() . $datalist->getName()));
 		};
@@ -112,7 +112,7 @@ class AdminGrid extends \Grid\Datagrid
 
 		$this->session = $session;
 	}
-	
+
 	public function setChangelogRepository(ChangelogRepository $changelogRepository): void
 	{
 		$this->changelogRepository = $changelogRepository;
@@ -142,17 +142,17 @@ class AdminGrid extends \Grid\Datagrid
 	{
 		$this->translator = $translator;
 	}
-	
+
 	public function setLogging(string $entityName): void
 	{
 		$this->entityName = $entityName;
 	}
-	
+
 	public function setFormsFactory(AdminFormFactory $formFactory): void
 	{
 		$this->formFactory = $formFactory;
 	}
-	
+
 	/**
 	 * @deprecated
 	 */
@@ -173,34 +173,34 @@ class AdminGrid extends \Grid\Datagrid
 	{
 		return parent::addColumnSelector($wrapperAttributes + ['class' => 'fit']);
 	}
-	
+
 	public function addColumnTextFit($th, $expressions, $td, ?string $orderExpression = null, array $wrapperAttributes = []): Column
 	{
 		$column = parent::addColumnText($th, $expressions, $td, $orderExpression, $wrapperAttributes + ['class' => 'fit']);
 		$column->onRenderCell[] = [$this, 'decoratorNowrap'];
-		
+
 		return $column;
 	}
-	
+
 	public function addColumnImage(string $expression, string $dir, string $subDir = 'thumb', string $th = '')
 	{
 		return $this->addColumn($th, function ($entity) use ($dir, $expression, $subDir) {
 			$baseUrl = $this->getPresenter()->getHttpRequest()->getUrl()->getBaseUrl();
-			
+
 			foreach (\explode('.', $expression) as $property) {
 				$entity = $entity->$property;
 			}
-			
+
 			if ($entity === null) {
 				$path = $baseUrl . '/public/admin/img/no-image-icon.png?t=' . \time();
-				
+
 				return "<img src='$path' style='height:32px;'>";
 			}
-			
+
 			$subDir = $subDir ? $subDir . '/' : '';
-			
+
 			$path = $baseUrl . '/userfiles/' . $dir . '/' . $subDir . $entity . '?t=' . \time();
-			
+
 			return "<img src='$path' style='height:32px;'>";
 		}, '%s', null, ['class' => 'fit']);
 	}
@@ -295,17 +295,17 @@ class AdminGrid extends \Grid\Datagrid
 	{
 		return $this->addColumnInputInteger($this->translator->translate('admin.priority', 'Pořadí'), 'priority', '', '', 'priority', [], true);
 	}
-	
+
 	public function addColumnHidden(): Column
 	{
-		return $this->addColumnInputCheckbox('<i title="'. $this->translator->translate('admin.hidden', 'Skryto') .'" class="far fa-eye-slash"></i>', 'hidden', '', '', 'hidden');
+		return $this->addColumnInputCheckbox('<i title="' . $this->translator->translate('admin.hidden', 'Skryto') . '" class="far fa-eye-slash"></i>', 'hidden', '', '', 'hidden');
 	}
 
 	public function addColumnLinkDetail(string $destination = 'detail', array $arguments = []): Column
 	{
 		return $this->addColumn('', function ($object, $datagrid) use ($destination, $arguments) {
 			return $datagrid->getPresenter()->link($destination, [$object instanceof Entity ? $object : \call_user_func($this->idCallback, $object)] + $arguments);
-		}, '<a class="btn btn-primary btn-sm text-xs" href="%s" title="'. $this->translator->translate('admin.edit', 'Upravit') .'"><i class="far fa-edit"></i></a>', null, ['class' => 'minimal']);
+		}, '<a class="btn btn-primary btn-sm text-xs" href="%s" title="' . $this->translator->translate('admin.edit', 'Upravit') . '"><i class="far fa-edit"></i></a>', null, ['class' => 'minimal']);
 	}
 
 	public function addColumnLink(string $destination, string $label = '', ?string $th = null, $wrappers = ['class' => 'minimal']): Column
@@ -323,13 +323,13 @@ class AdminGrid extends \Grid\Datagrid
 
 			foreach ($this->formFactory->formFactory->getDefaultMutations() as $mutation) {
 				[$flagsPath, $flagsExt, $flagsMap] = $this->formFactory->formFactory->getDefaultFlagsConfiguration();
-				
+
 				if ($nullable) {
 					$style = $object->getValue($property, $mutation) === null ? 'filter: grayscale(100%);' : '';
 				} else {
 					$style = !$object->getValue($property, $mutation) ? 'filter: grayscale(100%);' : '';
 				}
-				
+
 				$img[] = "<img class='mutation-flag' style='$style' src='$baseUrl$flagsPath/$flagsMap[$mutation].$flagsExt' alt='$mutation' title='$mutation'>";
 			}
 
@@ -345,7 +345,7 @@ class AdminGrid extends \Grid\Datagrid
 	 */
 	public function addColumnActionDelete(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null)
 	{
-		return $this->addColumnAction('', "<a href=\"%s\" class='btn btn-danger btn-sm text-xs' title='" . $this->translator->translate('admin.remove', 'Smazat') . "' onclick=\"return confirm('" .$this->translator->translate('admin.really', 'Opravdu?'). "')\"><i class='far fa-trash-alt'></i></a>",
+		return $this->addColumnAction('', "<a href=\"%s\" class='btn btn-danger btn-sm text-xs' title='" . $this->translator->translate('admin.remove', 'Smazat') . "' onclick=\"return confirm('" . $this->translator->translate('admin.really', 'Opravdu?') . "')\"><i class='far fa-trash-alt'></i></a>",
 			function ($object) use ($beforeDeleteCallback, $override, $condition): void {
 				try {
 					$this->getPresenter()->flashMessage($this->translator->translate('admin.done', 'Provedeno'), 'success');
@@ -362,7 +362,7 @@ class AdminGrid extends \Grid\Datagrid
 						if (isset($this->onDelete)) {
 							$this->onDelete($object);
 						}
-						
+
 						$this->onDeleteRow($object);
 
 						if (!$override) {
@@ -407,17 +407,17 @@ class AdminGrid extends \Grid\Datagrid
 	{
 		$grid = $this;
 		$defaults = $this->getForm()->addHidden('_defaults')->setNullable(true)->setOmitted(true);
-		
+
 		$submit = $this->getForm()->addSubmit('submit', $this->translator->translate('admin.save', 'Uložit'));
 		$submit->setHtmlAttribute('class', 'btn btn-sm btn-primary');
-		
+
 		$grid->onRender[] = function () use ($defaults, $grid) {
 			$defaults->setDefaultValue(\json_encode($grid->inputsValues));
 		};
-		
+
 		$submit->onClick[] = function ($button) use ($grid, $defaults, $processNullColumns, $processTypes, $sourceIdName, $ignore, $onProcessType, $onRowUpdate, $diff) {
 			$array = \json_decode($defaults->getValue(), true);
-			
+
 			foreach ($grid->getInputData() as $id => $data) {
 				$object = $grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->first();
 
@@ -453,12 +453,12 @@ class AdminGrid extends \Grid\Datagrid
 					}
 				}
 
-				if($onRowUpdate){
+				if ($onRowUpdate) {
 					$onRowUpdate($id, $data);
 				}
-				
+
 				$this->onUpdateRow($id, $data);
-				
+
 				/*$this->changelogRepository->createOne([
 					'user' => $grid->getPresenter()->admin->getIdentity()->getAccount()->login,
 					'entity' => $grid->entityName,
@@ -485,7 +485,7 @@ class AdminGrid extends \Grid\Datagrid
 		$grid = $this;
 		$submit = $this->getForm()->addSubmit('deleteAll', $this->translator->translate('admin.remove', 'Smazat'));
 		$submit->setHtmlAttribute('class', 'btn btn-sm btn-danger');
-		$submit->setHtmlAttribute('onClick', 'return confirm("'. $this->translator->translate('admin.really', 'Opravdu?') .'")');
+		$submit->setHtmlAttribute('onClick', 'return confirm("' . $this->translator->translate('admin.really', 'Opravdu?') . '")');
 		$submit->onClick[] = function ($button) use ($grid, $beforeDeleteCallback, $override, $condition, $sourceIdName) {
 			$warning = false;
 			foreach ($grid->getSelectedIds() as $id) {
@@ -704,37 +704,43 @@ class AdminGrid extends \Grid\Datagrid
 		}
 
 		$form->addSubmit('submitAndBack', 'Uložit a zpět');
-		
+
 		$form->onSuccess[] = function (AdminForm $form) use ($ids) {
 			$values = $form->getValues('array');
 			$source = $this->getSource(false);
 			$ids = $values['bulkType'] === 'selected' ? $ids : $this->getFilteredSource()->toArrayOf($this->getSourceIdName());
-			
+
 			foreach ($values['keep'] as $name => $keep) {
 				if (!$keep) {
 					continue;
 				}
-				
+
 				$structure = $source instanceof Collection ? $source->getRepository()->getStructure() : null;
-				
+
 				if ($values['values'][$name] && $structure && $structure->getRelation($name) instanceof RelationNxN) {
 					foreach ($ids as $id) {
 						$relation = new RelationCollection($source->getRepository(), $structure->getRelation($name), $id);
 						$relation->relate($values['values'][$name]);
 					}
 				}
-				
+
 				unset($values['values'][$name]);
 			}
-			
+
+			foreach ($values['values'] as $key => $value) {
+				$values['values'][$this->getSource()->getPrefix() . $key] = $value;
+
+				unset($values['values'][$key]);
+			}
+
 			if (\count($values['values']) === 0) {
 				return;
 			}
-			
+
 			foreach ($ids as $id) {
-				$this->getSource()->where($this->getSourceIdName(), $id)->setGroupBy([])->update($values['values']);
+				$this->getSource()->where($this->getSource()->getPrefix() . $this->getSourceIdName(), $id)->setGroupBy([])->update($values['values']);
 			}
-			
+
 			$this->getPresenter()->flashMessage('Uloženo', 'success');
 			$this->getPresenter()->redirect($this->bulkFormDefaultLink ?? 'this');
 		};
@@ -753,11 +759,11 @@ class AdminGrid extends \Grid\Datagrid
 			return $textInput;
 		}, $setValueExpression, $defaultValue, $orderExpression, $wrapperAttributes);
 	}
-	
+
 	public function render(): void
 	{
 		$this->template->setTranslator($this->translator);
-		
+
 		parent::render();
 	}
 }

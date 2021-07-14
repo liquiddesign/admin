@@ -242,7 +242,7 @@ class RolePresenter extends BackendPresenter
 		];
 		$this->template->displayButtons = [
 			$this->createBackButton('default'),
-			$this->createButtonWithClass('resetOrder!', $this->translator->translate('admin.cancelOrder', 'Zrušit řazení'), 'btn btn-sm btn-secondary')
+//			$this->createButtonWithClass('resetOrder!', $this->translator->translate('admin.cancelOrder', 'Zrušit řazení'), 'btn btn-sm btn-secondary')
 		];
 		$this->template->displayControls = [$this->getComponent('permissionGrid')];
 	}
