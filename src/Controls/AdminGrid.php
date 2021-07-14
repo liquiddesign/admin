@@ -727,10 +727,18 @@ class AdminGrid extends \Grid\Datagrid
 				unset($values['values'][$name]);
 			}
 
-			foreach ($values['values'] as $key => $value) {
-				$values['values'][$this->getSource()->getPrefix() . $key] = $value;
+			$structure = $source instanceof Collection ? $source->getRepository()->getStructure() : null;
 
-				unset($values['values'][$key]);
+			foreach ($values['values'] as $key => $value) {
+				if ($structure) {
+					if ($structure->getRelation($key)) {
+						//@TODO ošetřit pokud má základní tabulka a join tabulky relaci stejného názvu
+					} else {
+						$values['values'][$this->getSource()->getPrefix() . $key] = $value;
+
+						unset($values['values'][$key]);
+					}
+				}
 			}
 
 			if (\count($values['values']) === 0) {
