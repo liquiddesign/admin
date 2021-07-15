@@ -189,8 +189,10 @@ class BootstrapRenderer extends DefaultRenderer
 		} elseif ($control instanceof UploadImage || $control instanceof UploadFile) {
 			$el->addHtml($control->getControl());
 			if (isset($el[0][1]->value)) {
-				$el[0][2]->class('btn btn-danger btn-sm ml-2');
-				$el[0][2][0] = 'Smazat';
+				if (isset($el[0][2])) {
+					$el[0][2]->class('btn btn-danger btn-sm ml-2');
+					$el[0][2][0] = 'Smazat';
+				}
 			} else {
 				$el = Html::el();
 				$el->addHtml('<div class="input-group col-label m-0 p-0">');
