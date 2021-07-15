@@ -185,15 +185,11 @@ class RolePresenter extends BackendPresenter
 		$grid->setItemCountCallback(function ($row) use ($resources) {
 			return \count($resources);
 		});
-		$grid->addColumnText($this->_('name', 'Název'), 'name', '%s', 'name')->onRenderCell[] = function (Html $td, $object): void {
+		$grid->addColumnText($this->_('name', 'Název'), 'name', '%s')->onRenderCell[] = function (Html $td, $object): void {
 			$td->setHtml($object->root ? '<strong>' . $td->getHtml() . '</strong>' : '---- ' . $td->getHtml());
 		};
 
-		$input = $grid->addColumnInputCheckbox($this->_('allow', 'Povolit'), 'allow', '', '', null, ['class' => 'rowSelector']);
-
-		$input->onRender[] = function (Html $th): void {
-			$th->addHtml(Html::fromHtml(" ( <input type='checkbox' id='check-all-permissions' style='vertical-align: middle;'> )"));
-		};
+		$input = $grid->addColumnInputCheckbox("<input type='checkbox' id='check-all-permissions' style='vertical-align: middle;'>", 'allow', '', '', null, ['class' => 'rowSelector']);
 
 		$input->onRenderCell[] = function (Html $td, $object): void {
 			if (!$object->resource) {
