@@ -3,388 +3,337 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>⋆ Admin - {@$headerLabel}</title>
+    <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="author" content="Liquid Design s.r.o.">
-    <meta name="developer" content="Liquid Design s.r.o."/>
-    <meta property="og:type" content="website"/>
-    <meta name=”robots” content=”noindex,nofollow” />
+    <meta name="robots" content="noindex, nofollow">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{$basePath}/public/admin/plugins/fontawesome-free/css/all.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- overlayScrollbars -->
+    <link rel="stylesheet" href="{$basePath}/public/admin/css/adminlte.min.css">
+    <link rel="shortcut icon" href="https://www.lqd.cz/public/favicon.ico?v=2"/>
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,600,700" rel="stylesheet">
 
-    <meta name="viewport" content="width=device-width, maximum-scale=1, initial-scale=1, user-scalable=0"/>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
-    <title>Liquid Admin | Ramissio.com</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" type="text/css">
 
-    <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="{$pubUrl}/admin/favicon/favicon.ico"> <!-- IE -->
-    <link rel="apple-touch-icon" type="image/png" href="{$pubUrl}/admin/favicon/favicon-32x32.png"> <!-- iPhone -->
-    <link rel="apple-touch-icon" type="image/png" sizes="16x16" href="{$pubUrl}/admin/favicon/favicon-16x16.png"> <!-- iPad -->
-    <link rel="apple-touch-icon" type="image/png" sizes="32x32" href="{$pubUrl}/admin/favicon/favicon-32x32.png"> <!-- iPhone4 -->
-    <link rel="icon" type="image/png" href="{$pubUrl}/admin/favicon/favicon-32x32.png"> <!-- Opera Speed Dial, at least 144×114 px -->
+    {*    <link rel="stylesheet" href="{$nodeUrl}/bootstrap-fileinput/css/fileinput.css" type="text/css">*}
+    {do $allPolyfills = []}
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"/>
-    <link href="{$nodeUrl}/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-    <link href="{$nodeUrl}/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet" type="text/css"/>
-    <link href="{$nodeUrl}/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css"/>
-    <link href="{$nodeUrl}/tail.select/css/bootstrap4/tail.select-default.min.css" rel="stylesheet" type="text/css"/>
-    <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
-    <link href="{$pubUrl}/admin/css/admin.min.css?{$ts}" rel="stylesheet" type="text/css"/>
-    <link href="{$nodeUrl}/lightbox2/dist/css/lightbox.min.css" rel="stylesheet"/>
+	{foreach $control->getComponents() as $key => $value}
+        {do $value = $value['filterForm'] ?? $value['form'] ?? $value}
 
+        {if $value instanceOf Forms\Form}
+            {do $polyfills = $value->getPolyfills()}
+            {* Place here custom global configs for polyfills *}
+            {ifset $polyfills['flatpickr']}
+                {foreach $polyfills['flatpickr'] as $flatpickrKey => $flatpickrValue}
+                    {* Global config for flatpickr *}
+                    {do $polyfills['flatpickr'][$flatpickrKey]['locale'] = 'cs'}
+                    {do $polyfills['flatpickr'][$flatpickrKey]['allowInput'] = false}
+                    {do $polyfills['flatpickr'][$flatpickrKey]['altInput'] = true}
+                    {do $polyfills['flatpickr'][$flatpickrKey]['altFormat'] = 'd.m.Y H:i'}
+                    {do $polyfills['flatpickr'][$flatpickrKey]['enableTime'] = true}
+                {/foreach}
+            {/ifset}
+            {ifset $polyfills['tail.select']}
+                {foreach $polyfills['tail.select'] as $tailselectKey => $tailselectValue}
+                    {* Global config for tail.select *}
+                    {do $polyfills['tail.select'][$tailselectKey]['locale'] = 'cs'}
+                    {do $polyfills['tail.select'][$tailselectKey]['multiLimit'] = '99999'}
+                {/foreach}
+            {/ifset}
+            {ifset $polyfills['tinymce']}
+                {foreach $polyfills['tinymce'] as $tinymceKey => $tinymceValue}
+                    {* Global config for tinymce *}
+                    {do $polyfills['tinymce'][$tinymceKey]['body_class'] = 'mt-4 mb-4'}
+                    {do $polyfills['tinymce'][$tinymceKey]['width'] = '100%'}
+                    {*do $polyfills['tinymce'][$tinymceKey]['extended_valid_elements '] = 'tbody[caption|tr],thead[caption|tr]'*}
+                    {*                    {do $polyfills['tinymce'][$tinymceKey]['valid_children'] = '+tbody[caption],thead[caption]'}*}
+                {/foreach}
+            {/ifset}
+            {foreach $polyfills as $pKey => $pValue}
+                {ifset $allPolyfills[$pKey]}
+                    {do $allPolyfills[$pKey] += $polyfills[$pKey]}
+                {else}
+                    {do $allPolyfills[$pKey] = $polyfills[$pKey]}
+                {/ifset}
+            {/foreach}
+        {/if}
+    {/foreach}
 
-    {var $openSans = 'open-sans-v17-latin-ext_latin-'}
-    {var $lora = 'lora-v14-latin-ext_latin-'}
-    <link rel="preload" as="font" type="font/woff2"  href="{$pubUrl}/fonts/{$openSans}300.woff2" crossorigin>
-    <link rel="preload" as="font" type="font/woff2"  href="{$pubUrl}/fonts/{$openSans}regular.woff2" crossorigin>
-    <link rel="preload" as="font" type="font/woff2"  href="{$pubUrl}/fonts/{$openSans}600.woff2" crossorigin>
-    <link rel="preload" as="font" type="font/woff2"  href="{$pubUrl}/fonts/{$openSans}700.woff2" crossorigin>
-    <link rel="preload" as="font" type="font/woff2"  href="{$pubUrl}/fonts/{$lora}regular.woff2" crossorigin>
-    <link rel="preload" as="font" type="font/woff2"  href="{$pubUrl}/fonts/{$lora}700.woff2" crossorigin>
+	{include '../../vendor/liquiddesign/forms/src/templates/css.latte', polyfills: $allPolyfills}
 
-    {block #header}{/block}
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="{$basePath}/public/admin/css/style.css?p=2" type="text/css">
+
+    <script src="{$nodeUrl}/jquery/dist/jquery.min.js"></script>
+    <script src="{$nodeUrl}/nette-forms/src/assets/netteForms.min.js"></script>
+    <script src="{$nodeUrl}/nette.ajax.js/nette.ajax.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script src="{$baseUrl}/vendor/liquiddesign/forms/src/assets/lqdForm.js?{time()}"></script>
+    {include '../../vendor/liquiddesign/forms/src/templates/js.latte', polyfills: $allPolyfills}
+    <script src="{$baseUrl}/vendor/liquiddesign/grid/src/assets/lqdGrid.js"></script>
+    <script src="{$pubUrl}/js/flatpickr_cs.js" type="text/javascript"></script>
 </head>
+<body class="hold-transition sidebar-mini">
+<!-- Site wrapper -->
+<div class="wrapper">
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <!-- Left navbar links -->
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+            </li>
+        </ul>
 
-<body>
+        <!-- Right navbar links -->
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="{$baseUrl}" target="_blank"
+                   role="button">
+                    <i class="fas fa-external-link-alt"></i> &nbsp;ESHOP
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-widget="control-sidebar"
+                   data-slide="true" n:href=":Admin:Admin:Profile:default" role="button">
+                    <i class="fas fa-user-cog"></i> &nbsp; {$admin->getIdentity()->fullName ?: 'Můj profil'}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link logoutClick" data-widget="control-sidebar" data-slide="true" href="{plink logout!}" role="button">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <!-- /.navbar -->
 
-<!-- ADMIN MENU -->
-<div class="admin-menu d-flex">
-    <!-- MENU ITEMS -->
-    <div class="d-flex">
-        <div class="admin-menu-item">
-            <a class="admin-menu-link {ifCurrent :Web:Admin:Page:*}origin active{/ifCurrent}" href="{plink :Web:Admin:Page:default}" role="tab" aria-controls="item-menu-a-obsah" aria-selected="{ifCurrent :Web:Admin:Page:*}true{/ifCurrent}">Menu a obsah</a>
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a n:href=":Eshop:Admin:Dashboard:default" class="brand-link py-3">
+            <img src="{$pubUrl}/admin/img/lqd-logo-white.png" class="logo-long pl-4" height="35">
+            <img src="{$pubUrl}/admin/img/lqd-logo-short-white.png" class="logo-short" height="35" alt="">
+        </a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+
+            <!-- Sidebar Menu -->
+            <nav class="mt-2">
+                {control menu}
+            </nav>
+            <!-- /.sidebar-menu -->
         </div>
-        <div class="admin-menu-item">
-            <a class="admin-menu-link {ifCurrent :Web:Admin:Slider:*}origin active{/ifCurrent}" href="{plink :Web:Admin:Slider:default}" role="tab" aria-controls="item-slider" aria-selected="{ifCurrent :Web:Admin:Slider:*}true{/ifCurrent}">Slidery</a>
-        </div>
-        <div class="admin-menu-item">
-            <a class="admin-menu-link {ifCurrent :Web:Admin:Faq:*}origin active{/ifCurrent}" href="{plink :Web:Admin:Faq:default}" role="tab" aria-controls="item-faq" aria-selected="{ifCurrent :Web:Admin:Faq:*}true{/ifCurrent}">FAQs</a>
-        </div>
-        <div class="admin-menu-item">
-            <a class="admin-menu-link {ifCurrent :Eshop:Admin:Product:*}origin active{/ifCurrent}" href="{plink :Eshop:Admin:Product:default}" role="tab" aria-controls="item-faq" aria-selected="{ifCurrent :Eshop:Admin:Product:*}true{/ifCurrent}">Eshop</a>
-        </div>
-        <div n:if="0" class="admin-menu-item">
-            <a class="admin-menu-link {ifCurrent :Web:Admin:Form:*}origin active{/ifCurrent}" href="{plink :Web:Admin:Form:default}" role="tab" aria-controls="item-form" aria-selected="{ifCurrent :Web:Admin:Form:*}true{/ifCurrent}">Formuláře</a>
-        </div>
+        <!-- /.sidebar -->
+    </aside>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        {snippetArea wrapper}
+            {ifset content}
+                {include content}
+            {else}
+                {include 'templates/content.latte'}
+            {/ifset}
+        {/snippetArea}
     </div>
+    <!-- /.content-wrapper -->
 
-    <!-- USER PANEL -->
-    <div class="admin-user-wrapper d-flex align-items-center ml-auto">
-
-        <!-- USER AVATAR -->
-        <span class="admin-user-avatar rounded-circle mr-4" style="background-image: url('http://cms3.juno01.vas-server.cz/public/img/admin/dinosaur.svg');"></span>
-
-        <div class="admin-user-info">
-            <div class="admin-user-name">{$admin->name}</div>
-            <div class="admin-user-role">{$admin->email}</div>
+    <footer class="main-footer">
+        <div class="float-right d-none d-sm-block">
+            <b>Roiwell</b> 2021
         </div>
-    </div>
+        <strong></strong>
+    </footer>
 
-    <!-- LOGOUT BUTTON -->
-    <a href="{plink logout!}" class="admin-user-logout d-flex align-items-center justify-content-center">
-        <i class="fas fa-sign-out-alt"></i>
-    </a>
 </div>
-
-<div class="admin-secondary-menu tab-content d-flex" id="secondaryMenu">
-    <!-- SUBMENU ITEMS -->
-    <div class="tab-pane  {ifCurrent :Web:Admin:Page:*}active{/ifCurrent}" id="item-menu-a-obsah" aria-labelledby="item-menu-a-obsah-tab" role="tabpanel">
-        <div class="d-flex">
-
-            <div class="admin-menu-item">
-                <a href="{plink :Web:Admin:Page:default}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Page:default}active{/ifCurrent}">Hlavní menu</a>
-            </div>
-            <div class="admin-menu-item">
-                <a href="{plink :Web:Admin:Page:bottom}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Page:bottom}active{/ifCurrent}">Menu v patičce</a>
-            </div>
-
-            <div class="admin-menu-item">
-                <a href="{plink :Web:Admin:Page:pages}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Page:pages}active{/ifCurrent}">Volné stránky</a>
-            </div>
-
-            <div class="admin-menu-item">
-                <a href="{plink :Web:Admin:Page:translates}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Page:translates}active{/ifCurrent}">Krátké texty</a>
-            </div>
-
-            <div class="admin-menu-item">
-                <a href="{plink :Web:Admin:Page:homeslide}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Page:homeslide}active{/ifCurrent}">Úvodní slider</a>
-            </div>
-        </div>
-    </div>
-    <div class="tab-pane  {ifCurrent :Web:Admin:Slider:*}active{/ifCurrent}" id="item-slider" aria-labelledby="item-slider-tab" role="tabpanel">
-        <div class="d-flex">
-
-            <div class="admin-menu-item">
-                <a href="{plink :Web:Admin:Slider:default}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Slider:*}active{/ifCurrent}">Seznam sliderů</a>
-            </div>
-        </div>
-    </div>
-    <div class="tab-pane  {ifCurrent :Eshop:Admin:Product:*}active{/ifCurrent}" id="item-fag" aria-labelledby="item-fag-tab" role="tabpanel">
-        <div class="d-flex">
-
-            <div class="admin-menu-item">
-                <a href="{plink :Eshop:Admin:Product:default}" class="admin-secondary-menu-link {ifCurrent :Eshop:Admin:Product:default}active{/ifCurrent}">Produkty</a>
-            </div>
-
-            <div class="admin-menu-item">
-                <a href="{plink :Eshop:Admin:Product:categories}" class="admin-secondary-menu-link {ifCurrent :Eshop:Admin:Product:categories}active{/ifCurrent}">Kategorie</a>
-            </div>
-
-            <div class="admin-menu-item">
-                <a href="{plink :Eshop:Admin:Product:tags}" class="admin-secondary-menu-link {ifCurrent :Eshop:Admin:Product:tags}active{/ifCurrent}">Tagy</a>
-            </div>
-        </div>
-    </div>
-    <div class="tab-pane  {ifCurrent :Web:Admin:Faq:*}active{/ifCurrent}" id="item-fag" aria-labelledby="item-fag-tab" role="tabpanel">
-        <div class="d-flex">
-
-            <div class="admin-menu-item">
-                <a href="{plink :Web:Admin:Faq:default}" class="admin-secondary-menu-link {ifCurrent :Web:Admin:Faq:*}active{/ifCurrent}">Seznam FAQs</a>
-            </div>
-        </div>
-    </div>
-    {*<div class="tab-pane " id="item-form" aria-labelledby="item-form-tab" role="tabpanel">
-        <div class="d-flex">
-
-            <div class="admin-menu-item">
-                <a href="{plink :Web:Admin:Form:default}" class="admin-secondary-menu-link active">Seznam formulářů</a>
-            </div>
-        </div>
-    </div>*}
-
-    <div class="tab-pane  " id="item-profil" aria-labelledby="item-profil-tab" role="tabpanel">
-        <div class="d-flex">
-
-            <div class="admin-menu-item">
-                <a href="/admin/admin/profile/default" class="admin-secondary-menu-link ">Profil</a>
-            </div>
-            <div class="admin-menu-item">
-                <a href="/admin/admin/profile/change-password" class="admin-secondary-menu-link ">Změna hesla</a>
-            </div>
-        </div>
-    </div>
-
-    <a class="admin-project-wrapper d-flex flex-column justify-content-center ml-auto" href="https://www.ramissio.com" target="_blank">
-        <div class="admin-project-name">Ramissio</div>
-        <div class="admin-project-link">https://www.ramissio.com</div>
-    </a>
-
-    <a href="https://insys.ramissio.com" target="_blank" class="admin-user-setting d-flex align-items-center justify-content-center">
-        <i class="fas fa-cog"></i>
-    </a>
-</div>
-
-<div class="admin-menu d-flex">
-    <!-- ADMIN MENU -->
-</div>
-
-{block afterbody}{/block}
-
-{foreach $flashes as $flash}
-    <div class="alert alert--{$flash->type} position-fixed text-uppercase d-flex align-items-center alert-dissmisable">
-        <i n:if="$flash->type === 'success'" class="fa fa-check"></i>
-        <i n:if="$flash->type === 'danger'" class="fas fa-times"></i>
-        <i n:if="$flash->type === 'info'" class="fas fa-info"></i>
-        <i n:if="$flash->type === 'warning'" class="fas fa-exclamation"></i>
-        {$flash->message}
-    </div>
-{/foreach}
-<main>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <br>
-                {block content}{/block}
-            </div>
-        </div>
-    </div>
-</main>
-
-<div class="support-wrapper position-fixed d-flex">
-    <div class="support-text">
-        <i class="fas fa-shield-alt"></i> &nbsp; LQD Podpora
-    </div>
-
-    <a href="mailto:servis@lqd.cz" class="support-link d-flex align-items-center justify-content-center">
-        <i class="far fa-envelope"></i>
-    </a>
-</div>
+<!-- ./wrapper -->
 
 <script type="text/javascript">
-    var absolute_url = '{$basePath|noescape}';
-    var plugin_path = '{$pubUrl|noescape}/plugins/';
-    var base_url = '{$baseUrl|noescape}';
-    var pub_url = '{$pubUrl|noescape}';
-    var node_url = '{$nodeUrl|noescape}';
-    var user_url = '{$userUrl|noescape}';
-    var lqd_url = '{$pubUrl|noescape}';
-    var lqd_admin_url = lqd_url + '/admin';
-    var locale = 'cs';
-    var locale_format = 'dd.mm.yyyy';
-    var cssTimestamp = {@$ts};
-    var tinyTemplates = [];
-    var defaultLang = {$defaultLang};
-    var allLanguages = {$languages};
+    $(function () {
+        $.nette.init();
 
-    var isEditArticle = {$presenter->isEditArticle()};
-    var saveContentAsyncLink = {plink saveContentAsync!};
-    var isMultiLang = {$presenter->isMultiLang()};
+        // We can attach the `fileselect` event to all file inputs on the page
+        $(document).on('change', ':file', function () {
+            var input = $(this),
+                    numFiles = input.get(0).files ? input.get(0).files.length : 1,
+                    label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+            input.trigger('fileselect', [numFiles, label]);
+        });
 
-    {block #jsfoot}{/block}
+        // We can watch for our custom `fileselect` event like this
+        $(document).ready(function () {
+            $(':file').on('fileselect', function (event, numFiles, label) {
+
+                var input = $(this).parents('.input-group').find(':text'),
+                        log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+                if (input.length) {
+                    input.val(log);
+                } else {
+                    if (log) alert(log);
+                }
+
+            });
+        });
+
+        $('.rowSelector').on('click', function () {
+            $(this).parents('tr').first().toggleClass('active');
+        });
+    });
 </script>
-<script type="text/javascript" src="{$nodeUrl}/jquery/dist/jquery.min.js"></script>
-<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-<script type="text/javascript" src="{$nodeUrl}/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script type="text/javascript" src="{$nodeUrl}/toastr/toastr.js"></script>
-<script type="text/javascript" src="{$nodeUrl}/nette.ajax.js/nette.ajax.js"></script>
-<script type="text/javascript" src="{$nodeUrl}/nette-forms/src/assets/netteForms.min.js"></script>
-<script type="text/javascript" src="{$nodeUrl}/live-form-validation/live-form-validation.js"></script>
-<script type="text/javascript" src="{$pubUrl}/admin/js/bootstrap-editable.js"></script>
-<script type="text/javascript" src="{$pubUrl}/admin/js/tinymce/tinymce.js?{@$ts}"></script>
-<script type="text/javascript" src="{$pubUrl}/admin/js/stickyRows.js"></script>
-<script type="text/javascript" src="{$pubUrl}/admin/js/select2/js/select2.full.js"></script>
-<script type="text/javascript" src="{$pubUrl}/admin/js/sparkline/jquery.sparkline.js"></script>
-<script type="text/javascript" src="{$nodeUrl}/lightbox2/dist/js/lightbox.min.js"></script>
-<script type="text/javascript" src="{$nodeUrl}/flatpickr/dist/flatpickr.min.js"></script>
-<script type="text/javascript" src="{$nodeUrl}/flatpickr/dist/l10n/cs.js"></script>
-<script type="text/javascript" src="{$nodeUrl}/jscolor-picker/jscolor.min.js"></script>
-
 
 <script>
-    // Load tiny templates
-    $.ajax({
-        url: {plink getTinyTemplates!},
-        success: function (payload) {
-            result = payload.result;
-
-            result.forEach(function (value, i) {
-                tinyTemplates.push(value);
-            });
-        },
+    $('.nav-link-category').click(function (e) {
+        e.preventDefault();
+        $(this).parent('.nav-item').toggleClass('menu-open');
     });
 
-    Nette.validators.LqdAdminControlForm_validateUrl = function(elem, args, val) {
-        $.nette.ajax({
-            type: "GET",
-            url: {plink validateUrl!},
-            data: {
-                value: val,
-                template: args[1],
-                lang: args[2],
-                pk: args[3],
-                urlPrefix: args[4],
-            },
-            async: false,
-            success: function (payload) {
-                result = payload.result;
-            }
-        });
-
-        return result;
-    };
+    $('[data-widget="pushmenu"]').click(function (e) {
+        e.preventDefault();
+        $('body').toggleClass('sidebar-collapse');
+    });
 </script>
-<script type="text/javascript" src="{$nodeUrl}/tail.select/js/tail.select.min.js"></script>
-<script type="text/javascript" src="{$pubUrl}/js/tail.select-cs.js"></script>
-<script type="text/javascript" src="{$pubUrl}/admin/js/admin.js?{@$ts}"></script>
-<script type="text/javascript" src="{$pubUrl}/admin/js/elements.js?{@$ts}"></script>
-<script type="text/javascript" src="{$pubUrl}/admin/js/scripts.js?{@$ts}"></script>
+
 <script type="text/javascript">
-    disableFirstSectionUpButton();
-
-    var sectionWrappers = $('.section-wrapper');
-
-    if (!!sectionWrappers.length) {
-        sectionWrappers.each(function () {
-            var sectionTr = $(this).closest('tr');
-
-            var originalTd = sectionTr.find('td');
-            originalTd.slideUp(0);
-            sectionTr.append('<td></td>');
+    $(document).ready(function () {
+        $("#toogleAll").click(function () {
+            var checkBoxes = $("input[type='checkbox'][id!='toogleAll']");
+            checkBoxes.prop("checked", $("#toogleAll").prop('checked'));
         });
+
+        if ($("input[type='radio'][name='type']:checked").val() == 'video') {
+            $("#frm-form-image-toogle").hide();
+            $("#frm-form-imageMobile-toogle").hide();
+            $("#frm-form-video-toogle").show();
+        } else {
+            $("#frm-form-image-toogle").show();
+            $("#frm-form-imageMobile-toogle").show();
+            $("#frm-form-video-toogle").hide();
+        }
+
+        $("input[type='radio'][name='type'][value='image']").click(function () {
+            $("#frm-form-image-toogle").show();
+            $("#frm-form-imageMobile-toogle").show();
+            $("#frm-form-video-toogle").hide();
+        });
+
+        $("input[type='radio'][name='type'][value='video']").click(function () {
+            $("#frm-form-image-toogle").hide();
+            $("#frm-form-imageMobile-toogle").hide();
+            $("#frm-form-video-toogle").show();
+        });
+
+    });
+
+    // SEO Character counter
+    $('*[data-characters]').on('keyup', function () {
+        var characters = $(this).data('characters');
+        characterCounter($(this), 'Doporučená délka textu pro Google: ' + characters + ' znaků', characters);
+    });
+
+    $('.seo_url').blur(function () {
+        $(this).val(solve_seo_link($(this).val()));
+    });
+
+    // handle fill URL
+    $("*[data-copy]").blur(function () {
+        var targets = $(this).data('copy').split(',');
+        var mutation = $(this).data('mutation');
+        if (typeof mutation === 'undefined') {
+            mutation = '';
+        } else {
+            mutation = '[' + mutation + ']';
+        }
+
+        for (i in targets) {
+            var target = $('input[name="' + targets[i] + mutation + '"');
+
+            if (typeof target !== 'undefined' && target.val() === '' && !target.is('[readonly]')) {
+                target.val(target.hasClass('seo_url') ? solve_seo_link($(this).val()) : $(this).val());
+            }
+        }
+
+    });
+
+    function characterCounter(el, title, maxChars) {
+        maxChars = maxChars ? maxChars : 80;
+        let len = el.val().length;
+        let div = el.next('div');
+
+        if (div.length < 1) {
+            el.after('<div class="text-sm mt-1"></div>');
+            div = el.next('div');
+        }
+
+        div.html('Zbývá <output class="" title="' + title + '" style="text-decoration: underline dotted;">' + (maxChars - len) + ' </output> znaků');
+        let output = div.find('output');
+
+        if (len == maxChars) {
+            output.removeClass('text-danger');
+            output.addClass('text-success');
+        } else if (len > maxChars) {
+            output.removeClass('text-success');
+            output.addClass('text-danger');
+        } else {
+            output.removeClass('text-danger');
+            output.removeClass('text-success');
+        }
+    };
+
+    function solve_seo_link(newstr) {
+        newstr = newstr.toLowerCase();
+        newstr = translate_chars(newstr, 'ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ', 'acdeeinorstuuyz');
+        newstr = translate_chars(newstr, 'áčďéěíňóřšťúůýž', 'acdeeinorstuuyz');
+
+        //nahradit nepovolene znaky pomlckama
+        newstr = newstr.replace(/[^a-z0-9_/-]+/g, '-');
+        newstr = newstr.replace(/-+/g, '-');
+        newstr = newstr.replace(/^-/g, '');
+        newstr = newstr.replace(/-$/g, '');
+
+        return newstr;
     }
 
-
-    $('.section-toggler').on('click', function () {
-        var sectionTr = $(this).closest('tr');
-        var originalTd = sectionTr.find('td').first();
-        var fakeTd = sectionTr.find('td').last();
-
-        if (originalTd.is(':visible')) {
-            originalTd.hide();
-            fakeTd.show();
-        } else {
-            fakeTd.hide();
-            originalTd.show();
+    function translate_chars(str, originals, translations) {
+        if (originals.length != translations.length) {
+            alert('Originals have not the same length as translations');
         }
-    });
 
-    $('.section-delete').click(function (e) {
-        e.preventDefault();
-        var confirmed = confirm('Skutečně chcete smazat tuto sekci?');
-
-        if (confirmed) {
-            $(this).closest('tr').remove();
-        }
-    });
-
-    $('.section-toggler').click(function (e) {
-        e.preventDefault();
-        $($(this).attr('href')).toggleClass('d-none');
-    });
-
-    $('.section-up, .section-down').click(function (e) {
-        e.preventDefault();
-        var sectionTr = $(this).parents('tr');
-        var language = sectionTr.attr('data-lang');
-
-
-        if ($(this).is('.section-up')) {
-            var previousTr = $('tr[data-lang="' + language +'"]').eq($('tr[data-lang="' + language +'"]').index(sectionTr) - 1);
-            if (!!previousTr.length) {
-                sectionTr.insertBefore(previousTr);
-            }
-        } else {
-            var nextTr = $('tr[data-lang="' + language +'"]').eq($('tr[data-lang="' + language +'"]').index(sectionTr) + 1);
-            if (!!nextTr.length) {
-                sectionTr.insertAfter(nextTr);
+        for (var i = 0; i < str.length; i++) {
+            for (var j = 0; j < originals.length; j++) {
+                if (str.charAt(i) == originals.charAt(j)) {
+                    str = "".concat(str.substring(0, i), translations.charAt(j), str.substring(i + 1));
+                    break;
+                }
             }
         }
 
-        disableFirstSectionUpButton();
-    });
-
-    $.fn.editableform.buttons  = '<button type="submit" class="btn btn-primary btn-sm editable-submit" style="margin-top: 3px;"><i class="fas fa-check"></i></button>' +
-        '<button type="button" class="btn btn-secondary btn-sm editable-cancel" style="margin-top: 3px; margin-left: 2px; margin-right: 7px;"><i class="fas fa-times"></i></button>';
-
-
-    $('.section-edit').click(function (e) {
-        e.preventDefault();
-        var sectionName = $(this).closest('.section-wrapper').find('.section-name');
-        sectionName.editable({
-            mode: 'inline',
-            toggle: 'manual',
-            onblur: 'ignore'
-        }).editable('show');
-    });
-
-    $.each(allLanguages, function (i, val) {
-        $('.section-wrapper[data-lang="'+ val +'"]').first().find('.section-toggler').trigger('click');
-    });
-
-
-    function disableFirstSectionUpButton() {
-        $('form').find('tr:visible .section-up').removeClass('disabled');
-        var sectionUpButton =$('form').find('tr:visible .section-up').first();
-        sectionUpButton.addClass('disabled');
-        $('form').find('tr:visible .section-down').removeClass('disabled');
-        var sectionDownButton = $('form').find('tr:visible .section-down').last();
-        sectionDownButton.addClass('disabled');
+        return str;
     }
 
     $('#check-all-permissions').click(function (e) {
-        $("input[id^=frm-permissionGrid-form-allow-]").click();
+        $("input[id^=frm-permissionGrid-form-allow-]").prop("checked", e.target.checked)
     });
 
 </script>
 
-{block scripts}
-{/block}
-</body>
+<script>
+    const componentFooter = $('.table-footer-components');
 
+    if (componentFooter) {
+        const pagination = $('.pagination');
+        componentFooter.append(pagination);
+    }
+</script>
+{block scripts}{/block}
+</body>
 </html>
