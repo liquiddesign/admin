@@ -81,7 +81,7 @@ class RolePresenter extends BackendPresenter
 			/** @var MenuItem $menuItem */
 			foreach ($menu->getItems() as $menuItem) {
 				$convertedLabel = \str_replace(' ', '_', Strings::toAscii($menuItem->label));
-				$data = $menuItemsContainer->addCheckbox($convertedLabel, $menuItem->label);
+				$menuItemsContainer->addCheckbox($convertedLabel, $menuItem->label)->setDefaultValue(true);
 				
 				$realMenuItems[$convertedLabel] = $menuItem;
 			}
