@@ -56,14 +56,14 @@ class AdministratorPresenter extends BackendPresenter
 		$grid = $this->gridFactory->create($source, 20, 'fullName', 'ASC', true);
 		$grid->addColumnSelector();
 		
-		$grid->addColumnText($this->_('fullname', 'Jméno a Příjmení'), 'fullName', '%s', 'fullName');
+		$grid->addColumnText($this->_('fullname', 'Jméno a příjmení'), 'fullName', '%s', 'fullName');
 		$grid->addColumnText($this->_('role', 'Role'), 'role.name', '%s');
 		$grid->addColumnLinkDetail('Detail');
 		
 		$grid->addColumnActionDelete([$this->accountFormFactory, 'deleteAccountHolder'], true);
 		$grid->addButtonDeleteSelected([$this->accountFormFactory, 'deleteAccountHolder'], true);
 		
-		$grid->addFilterTextInput('search', ['fullName'], null, $this->_('fullname', 'Jméno a Příjmení'));
+		$grid->addFilterTextInput('search', ['fullName'], null, $this->_('fullname', 'Jméno a příjmení'));
 		$grid->addFilterButtons();
 		
 		return $grid;
