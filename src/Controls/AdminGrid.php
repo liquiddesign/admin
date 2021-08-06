@@ -772,11 +772,6 @@ class AdminGrid extends \Grid\Datagrid
 								$object->$key = NumbersHelper::strtoFloat($value);
 								$updateKeys[] = $key;
 							} catch (\TypeError $e) {
-								try {
-									$object->$key = \intval($value);
-									$updateKeys[] = $key;
-								} catch (\TypeError $e) {
-								}
 							}
 						}
 					}
