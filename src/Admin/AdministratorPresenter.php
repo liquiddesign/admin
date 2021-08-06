@@ -56,14 +56,14 @@ class AdministratorPresenter extends BackendPresenter
 		$grid = $this->gridFactory->create($source, 20, 'fullName', 'ASC', true);
 		$grid->addColumnSelector();
 		
-		$grid->addColumnText($this->_('fullname', 'Jméno a Příjmení'), 'fullName', '%s', 'fullName');
+		$grid->addColumnText($this->_('fullname', 'Jméno a příjmení'), 'fullName', '%s', 'fullName');
 		$grid->addColumnText($this->_('role', 'Role'), 'role.name', '%s');
 		$grid->addColumnLinkDetail('Detail');
 		
 		$grid->addColumnActionDelete([$this->accountFormFactory, 'deleteAccountHolder'], true);
 		$grid->addButtonDeleteSelected([$this->accountFormFactory, 'deleteAccountHolder'], true);
 		
-		$grid->addFilterTextInput('search', ['fullName'], null, $this->_('fullname', 'Jméno a Příjmení'));
+		$grid->addFilterTextInput('search', ['fullName'], null, $this->_('fullname', 'Jméno a příjmení'));
 		$grid->addFilterButtons();
 		
 		return $grid;
@@ -75,7 +75,7 @@ class AdministratorPresenter extends BackendPresenter
 		
 		$form->addText('fullName', $this->_('fullname', 'Jméno a Příjmení'))->setRequired();
 		
-		$form->addSelect('role', $this->_('role', 'Role'), $this->roleRepo->many()->whereNot('uuid', 'servis')->toArrayOf('name'))->setPrompt('Žádná');
+		$form->addSelect('role', $this->_('role', 'Role'), $this->roleRepo->many()->whereNot('uuid', 'servis')->toArrayOf('name'))->setPrompt($this->_('prompt', 'Žádná'));
 		
 		
 		$this->accountFormFactory->addContainer($form, true, !$this->getParameter('administrator'));

@@ -62,11 +62,11 @@ class RolePresenter extends BackendPresenter
 	{
 		$form = $this->formFactory->create();
 		$mutations = $this->formFactory->getMutations();
-		$form->addText('name', 'Název')->setRequired();
-		
+		$form->addText('name', $this->_('name', 'Název'))->setRequired();
+
 		if (\count($mutations) > 1) {
-			$form->addDataMultiSelect('mutationsList', 'Povolené mutace', $form->getTranslatedMutations())
-				->setHtmlAttribute('data-info', '<br>Pokud necháte prázdné, povolené budou všechny.');
+			$form->addMultiSelect2('mutationsList', $this->_('allowedMutations', 'Povolené mutace'), $form->getTranslatedMutations())
+				->setHtmlAttribute('data-info', '<br>'. $this->_('allowedMutationsInfo', 'Pokud necháte prázdné, povolené budou všechny.'));
 		}
 		
 		/** @var \Admin\Controls\Menu $menu */
@@ -75,14 +75,13 @@ class RolePresenter extends BackendPresenter
 		$realMenuItems = [];
 		
 		if (!$this->getParameter('role')) {
-			$form->addGroup('Oprávnění');
+			$form->addGroup($this->_('permissions', 'Oprávnění'));
 			$menuItemsContainer = $form->addContainer('menuItems');
 			
 			/** @var MenuItem $menuItem */
 			foreach ($menu->getItems() as $menuItem) {
 				$convertedLabel = \str_replace(' ', '_', Strings::toAscii($menuItem->label));
-				$menuItemsContainer->addCheckbox($convertedLabel, $menuItem->label)->setDefaultValue(true);
-				
+				$menuItemsContainer->addCheckbox($convertedLabel, isset($menuItem->itemName) && \array_key_exists($this->lang, $menuItem->itemName) ? $menuItem->itemName[$this->lang] :$menuItem->label);
 				$realMenuItems[$convertedLabel] = $menuItem;
 			}
 		}
