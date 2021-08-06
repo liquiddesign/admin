@@ -206,16 +206,23 @@ class BootstrapRenderer extends DefaultRenderer
 				$el->addHtml('</div>');
 			}
 		} elseif ($control instanceof Nette\Forms\Controls\UploadControl) {
-			$el = Html::el();
-			$el->addHtml('<div class="input-group col-label m-0 p-0">');
-			$el->addHtml('<label class="input-group-btn">');
-			$el->addHtml(' <span class="btn btn-outline-primary btn-sm">Procházet');
-			$el->addHtml($control->getControl());
-			$el[3]->style('display: none;');
-			$el->addHtml('</span>');
-			$el->addHtml('</label>');
-			$el->addHtml('<input type="text" class="form-control form-control-sm" readonly="">');
-			$el->addHtml('</div>');
+			if($control->getControlPrototype()->class == 'dropzone'){
+				$el = Html::el();
+				$el->addHtml('<div id="' . $control->getHtmlId() . '">
+<div class="dz-default dz-message"><button class="dz-button" type="button">Přetáhněte soubory do tohoto pole</button></div>
+</div>');
+			}else{
+				$el = Html::el();
+				$el->addHtml('<div class="input-group col-label m-0 p-0">');
+				$el->addHtml('<label class="input-group-btn">');
+				$el->addHtml(' <span class="btn btn-outline-primary btn-sm">Procházet');
+				$el->addHtml($control->getControl());
+				$el[3]->style('display: none;');
+				$el->addHtml('</span>');
+				$el->addHtml('</label>');
+				$el->addHtml('<input type="text" class="form-control form-control-sm" readonly="">');
+				$el->addHtml('</div>');
+			}
 		} else {
 			$el = $control->getControl();
 		}
