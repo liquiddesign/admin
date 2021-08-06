@@ -10,6 +10,7 @@ use Grid\Column;
 use Grid\Datalist;
 use Nette\Application\ApplicationException;
 use Nette\Forms\Controls\Checkbox;
+use Nette\Forms\Controls\MultiSelectBox;
 use Nette\Forms\Controls\SelectBox;
 use Nette\Forms\Controls\TextInput;
 use Nette\Http\Session;
@@ -20,6 +21,7 @@ use StORM\Entity;
 use StORM\ICollection;
 use StORM\Meta\RelationNxN;
 use StORM\RelationCollection;
+use Common\NumbersHelper;
 
 /**
  * @method onDelete(Entity $object)
@@ -727,17 +729,26 @@ class AdminGrid extends \Grid\Datagrid
 				unset($values['values'][$name]);
 			}
 
-			$structure = $source instanceof Collection ? $source->getRepository()->getStructure() : null;
+//			$structure = $source instanceof Collection ? $source->getRepository()->getStructure() : null;
+
+//			foreach ($values['values'] as $key => $value) {
+//				if ($structure) {
+//					if ($structure->getRelation($key)) {
+//						//@TODO ošetřit pokud má základní tabulka a join tabulky relaci stejného názvu
+//					} else {
+//						$values['values'][$this->getSource()->getPrefix() . $key] = $value;
+//
+//						unset($values['values'][$key]);
+//					}
+//				}
+//			}
+
+			$relations = [];
 
 			foreach ($values['values'] as $key => $value) {
-				if ($structure) {
-					if ($structure->getRelation($key)) {
-						//@TODO ošetřit pokud má základní tabulka a join tabulky relaci stejného názvu
-					} else {
-						$values['values'][$this->getSource()->getPrefix() . $key] = $value;
-
-						unset($values['values'][$key]);
-					}
+				if (isset($form['values'][$key]) && $form['values'][$key] instanceof MultiSelectBox) {
+					$relations[$key] = $values['values'][$key];
+					unset($values['values'][$key]);
 				}
 			}
 
@@ -746,7 +757,41 @@ class AdminGrid extends \Grid\Datagrid
 			}
 
 			foreach ($ids as $id) {
-				$this->getSource()->where($this->getSource()->getPrefix() . $this->getSourceIdName(), $id)->setGroupBy([])->update($values['values']);
+				/** @var Entity $object */
+				$object = $this->getSource()->where($this->getSource()->getPrefix() . $this->getSourceIdName(), $id)->setGroupBy([])->first();
+
+				if ($object) {
+					$updateKeys = [];
+
+					foreach ($values['values'] as $key => $value) {
+						try {
+							$object->$key = $value;
+							$updateKeys[] = $key;
+						} catch (\TypeError $e) {
+							try {
+								$object->$key = NumbersHelper::strtoFloat($value);
+								$updateKeys[] = $key;
+							} catch (\TypeError $e) {
+								try {
+									$object->$key = \intval($value);
+									$updateKeys[] = $key;
+								} catch (\TypeError $e) {
+								}
+							}
+						}
+					}
+
+					$object->updateAll($updateKeys);
+
+					foreach ($relations as $key => $value) {
+						try {
+							$object->$key->unrelateAll();
+							$object->$key->relate($value);
+						} catch (\Exception $e) {
+
+						}
+					}
+				}
 			}
 
 			$this->getPresenter()->flashMessage('Uloženo', 'success');
