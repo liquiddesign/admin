@@ -781,7 +781,9 @@ class AdminGrid extends \Grid\Datagrid
 						}
 					}
 
-					$object->updateAll($updateKeys);
+					if (\count($updateKeys) > 0) {
+						$object->updateAll($updateKeys);
+					}
 
 					foreach ($relations as $key => $value) {
 						try {
