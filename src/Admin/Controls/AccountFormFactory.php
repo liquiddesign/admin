@@ -53,7 +53,7 @@ class AccountFormFactory
 	private AdminFormFactory $adminFormFactory;
 
 	private RoleRepository $roleRepository;
-	
+
 	private Translator $translator;
 
 	public function __construct(
@@ -63,7 +63,8 @@ class AccountFormFactory
 		RoleRepository $roleRepository,
 		Mailer $mailer,
 		Translator $translator
-	) {
+	)
+	{
 		$this->adminFormFactory = $adminFormFactory;
 		$this->accountRepository = $accountRepository;
 		$this->templateRepository = $templateRepository;
@@ -72,15 +73,15 @@ class AccountFormFactory
 		$this->translator = $translator;
 	}
 
-	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true, bool $fullname = false): void
+	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true, bool $fullname = false, bool $activeFromTo = false): void
 	{
 		$accountContainer = $form->addContainer('account');
 		$accountContainer->addHidden('uuid')->setNullable();
-		
+
 		if ($fullname) {
 			$accountContainer->addText('fullname', $this->translator->translate('adminAdminAdministrator.fullName', 'Jméno a příjmení'));
 		}
-		
+
 		$accountContainer->addText('login', 'Login')
 			->setRequired()
 			->addRule(
@@ -108,7 +109,12 @@ class AccountFormFactory
 //		}
 
 		$accountContainer->addCheckbox('active', $this->translator->translate('adminAdminAdministrator.active', 'Aktivní'))->setDefaultValue(true);
-		
+
+		if ($activeFromTo) {
+			$accountContainer->addDatetime('activeFrom', 'Aktivní od')->setNullable();
+			$accountContainer->addDatetime('activeTo', 'Aktivní do')->setNullable();
+		}
+
 		$accountContainer->addHidden('email');
 
 		if ($sendEmail) {
@@ -116,13 +122,13 @@ class AccountFormFactory
 			//$accountContainer->addCheckbox('sendEmail', 'Odeslat e-mail o vytvoření');
 		}
 	}
-	
-	public function create(bool $delete = true, ?callable $beforeSubmits = null, bool $fullname = false): AdminForm
+
+	public function create(bool $delete = true, ?callable $beforeSubmits = null, bool $fullname = false, bool $activeFromTo = false): AdminForm
 	{
 		$form = $this->adminFormFactory->create();
-		
-		$this->addContainer($form, false, true, $fullname);
-		
+
+		$this->addContainer($form, false, true, $fullname, $activeFromTo);
+
 		if ($beforeSubmits) {
 			\call_user_func_array($beforeSubmits, [$form]);
 		}
@@ -179,7 +185,7 @@ class AccountFormFactory
 			$this->onUpdateAccount($account, $form->getValues('array'), $oldData);
 		}
 	}
-	
+
 	public function deleteAccountHolder(IUser $holder): void
 	{
 		try {
@@ -187,7 +193,7 @@ class AccountFormFactory
 		} catch (\Exception $e) {
 			throw new \Exception($e);
 		}
-		
+
 		$holder->delete();
 	}
 
@@ -196,7 +202,7 @@ class AccountFormFactory
 		/** @var \Security\DB\AccountRepository $repository */
 		$repository = $args[0];
 		$collection = $repository->many()->where('login', (string)$input->getValue());
-		
+
 		if (isset($args[1]) && $args[1]) {
 			$collection->whereNot('this.uuid', $args[1]);
 		}
