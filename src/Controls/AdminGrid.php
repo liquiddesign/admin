@@ -425,7 +425,7 @@ class AdminGrid extends \Grid\Datagrid
 
 				// filter data
 				if ($diff && isset($array[$id])) {
-					$data = \array_diff($data, $array[$id]);
+					$data = \array_diff_assoc($data, $array[$id]);
 
 					if (!$data) {
 						continue;
