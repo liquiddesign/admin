@@ -181,7 +181,8 @@ class AdminForm extends \Forms\Form
 		bool $isOffline = false,
 		bool $required = true,
 		bool $content = false,
-		string $title = 'URL a SEO'
+		string $title = 'URL a SEO',
+		bool $opengraph = false
 	): Container
 	{
 		if (!$this->prettyPages) {
@@ -237,19 +238,21 @@ class AdminForm extends \Forms\Form
 					->setHtmlAttribute('data-characters', 150);
 			});
 		
-		$opengraphImage = $pageContainer->addImagePicker('opengraph', $this->translator->translate('admin.image', 'Obrázek'), [
-			'page/opengraph' => static function (Image $image): void {
-				$image->resize(1200, 628, Image::EXACT);
-			}]);
-	
-		$opengraphImage->setOption('description', $this->translator->translate('admin.imageSizeInfo','Obrázek vkládejte o minimální velikosti %dx%d px', [1200, 628]));
-	
-		$opengraphImage->onDelete[] = function () use ($page): void {
-			if ($page) {
-				$page->update(['opengraph' => null]);
-				$this->getPresenter()->redirect('this');
-			}
-		};
+		if ($opengraph) {
+			$opengraphImage = $pageContainer->addImagePicker('opengraph', $this->translator->translate('admin.image', 'Obrázek'), [
+				'page/opengraph' => static function (Image $image): void {
+					$image->resize(1200, 628, Image::EXACT);
+				}]);
+		
+			$opengraphImage->setOption('description', $this->translator->translate('admin.imageSizeInfo','Obrázek vkládejte o minimální velikosti %dx%d px', [1200, 628]));
+		
+			$opengraphImage->onDelete[] = function () use ($page): void {
+				if ($page) {
+					$page->update(['opengraph' => null]);
+					$this->getPresenter()->redirect('this');
+				}
+			};
+		}
 
 		if ($content) {
 			$pageContainer->addLocaleTextArea('content', $this->translator->translate('admin.content', 'Obsah'))
