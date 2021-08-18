@@ -14,6 +14,7 @@ use Nette\Forms\Controls\TextInput;
 use Nette\Forms\Form;
 use Nette\Http\FileUpload;
 use Nette\Localization\Translator;
+use Nette\Utils\Image;
 use Pages\DB\IPageRepository;
 use StORM\DIConnection;
 use StORM\Meta\Structure;
@@ -235,6 +236,20 @@ class AdminForm extends \Forms\Form
 				$text->setHtmlAttribute('style', 'width: 862px !important;')
 					->setHtmlAttribute('data-characters', 150);
 			});
+		
+		$opengraphImage = $pageContainer->addImagePicker('opengraph', $this->translator->translate('admin.image', 'Obrázek'), [
+			'page/opengraph' => static function (Image $image): void {
+				$image->resize(1200, 628, Image::EXACT);
+			}]);
+	
+		$opengraphImage->setOption('description', $this->translator->translate('admin.imageSizeInfo','Obrázek vkládejte o minimální velikosti %dx%d px', [1200, 628]));
+	
+		$opengraphImage->onDelete[] = function () use ($page): void {
+			if ($page) {
+				$page->update(['opengraph' => null]);
+				$this->redirect('this');
+			}
+		};
 
 		if ($content) {
 			$pageContainer->addLocaleTextArea('content', $this->translator->translate('admin.content', 'Obsah'))
