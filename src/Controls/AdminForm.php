@@ -16,6 +16,7 @@ use Nette\Http\FileUpload;
 use Nette\Localization\Translator;
 use Nette\Utils\Image;
 use Pages\DB\IPageRepository;
+use Pages\DB\Page;
 use StORM\DIConnection;
 use StORM\Meta\Structure;
 
@@ -240,7 +241,7 @@ class AdminForm extends \Forms\Form
 		
 		if ($opengraph) {
 			$opengraphImage = $pageContainer->addImagePicker('opengraph', $this->translator->translate('admin.image', 'Obrázek'), [
-				'page/opengraph' => static function (Image $image): void {
+				Page::IMAGE_DIR . '/opengraph' => static function (Image $image): void {
 					$image->resize(1200, 628, Image::EXACT);
 				}]);
 		
