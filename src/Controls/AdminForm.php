@@ -247,7 +247,7 @@ class AdminForm extends \Forms\Form
 		$opengraphImage->onDelete[] = function () use ($page): void {
 			if ($page) {
 				$page->update(['opengraph' => null]);
-				$this->redirect('this');
+				$this->getPresenter()->redirect('this');
 			}
 		};
 
