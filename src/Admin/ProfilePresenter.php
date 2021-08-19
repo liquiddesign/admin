@@ -27,7 +27,7 @@ class ProfilePresenter extends BackendPresenter
 		
 		$account = $form->addContainer('account');
 		$account->addText('login', 'Login')->setDisabled();
-		$account->addText('role', 'Role')->setDisabled();
+		$form->addText('role', 'Role')->setDisabled();
 		$account->addPassword('oldPassword', $this->_('oldPassword', 'Staré heslo'))
 			->addRule([FormValidators::class, 'checkOldPassword'], $this->_('oldPasswordCheck', 'Staré heslo není správné!'), $this->admin->getIdentity()->getAccount());
 		$account->addPassword('newPassword', $this->_('newPassword', 'Nové heslo'));
@@ -64,6 +64,7 @@ class ProfilePresenter extends BackendPresenter
 			$form->setDefaults([
 				'account' => $administrator->getAccount()->toArray(),
 				'profile' => $administrator->toArray(),
+				'role' => $administrator->role->name ?? '',
 			]);
 			
 			$form->onSuccess[] = function (AdminForm $form) use ($administrator): void {
