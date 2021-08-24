@@ -33,6 +33,14 @@ class AdminForm extends \Forms\Form
 	private Administrator $administrator;
 
 	private bool $prettyPages = false;
+	
+	public function renderNoHeader(): void
+	{
+		$groups = $this->getGroups();
+		\reset($groups)->setOption('label', null);
+		
+		$this->render();
+	}
 
 	public function getChangedProperties(?string $containerName = null): ?array
 	{
