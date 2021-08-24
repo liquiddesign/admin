@@ -404,8 +404,9 @@ class AdminGrid extends \Grid\Datagrid
 	 * @param callable|null $onProcessType Callback called for every column in $processTypes to do custom processing
 	 * @param callable|null $onRowUpdate Called on every row update with new data
 	 * @param bool $diff Check diff on every row
+	 * @param callable|null $overrideCallback If set, all other options is ingored and this callback must process data
 	 */
-	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null, bool $ignore = false, ?callable $onProcessType = null, ?callable $onRowUpdate = null, bool $diff = true)
+	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null, bool $ignore = false, ?callable $onProcessType = null, ?callable $onRowUpdate = null, bool $diff = true, ?callable $overrideCallback = null)
 	{
 		$grid = $this;
 		$defaults = $this->getForm()->addHidden('_defaults')->setNullable(true)->setOmitted(true);
@@ -417,58 +418,63 @@ class AdminGrid extends \Grid\Datagrid
 			$defaults->setDefaultValue(\json_encode($grid->inputsValues));
 		};
 
-		$submit->onClick[] = function ($button) use ($grid, $defaults, $processNullColumns, $processTypes, $sourceIdName, $ignore, $onProcessType, $onRowUpdate, $diff) {
-			$array = \json_decode($defaults->getValue(), true);
+		$submit->onClick[] = function ($button) use ($grid, $defaults, $processNullColumns, $processTypes, $sourceIdName, $ignore, $onProcessType, $onRowUpdate, $diff, $overrideCallback) {
+			if ($overrideCallback) {
+				$overrideCallback();
+			} else {
+				$array = \json_decode($defaults->getValue(), true);
 
-			foreach ($grid->getInputData() as $id => $data) {
-				$object = $grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->first();
+				foreach ($grid->getInputData() as $id => $data) {
+					$object = $grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->first();
 
-				// filter data
-				if ($diff && isset($array[$id])) {
-					$data = \array_diff_assoc($data, $array[$id]);
+					// filter data
+					if ($diff && isset($array[$id])) {
+						$data = \array_diff_assoc($data, $array[$id]);
 
-					if (!$data) {
-						continue;
-					}
-				}
-
-				foreach ($processNullColumns as $column) {
-					$data[$column] = $data[$column] ?? null;
-				}
-
-				foreach ($processTypes as $key => $value) {
-					if (\array_search($key, $processNullColumns) !== false && $data[$key] === null) {
-						continue;
+						if (!$data) {
+							continue;
+						}
 					}
 
-					if ($onProcessType) {
-						$onProcessType($key, $data, $value, $object);
-					} else {
-						$newValue = $data[$key] ?? null;
+					foreach ($processNullColumns as $column) {
+						$data[$column] = $data[$column] ?? null;
+					}
 
-						if ($value == 'float') {
-							$data[$key] = \floatval(\str_replace(',', '.', $newValue));
+					foreach ($processTypes as $key => $value) {
+						if (\array_search($key, $processNullColumns) !== false && $data[$key] === null) {
 							continue;
 						}
 
-						$data[$key] = \settype($newValue, $value) ? $newValue : null;
+						if ($onProcessType) {
+							$onProcessType($key, $data, $value, $object);
+						} else {
+							$newValue = $data[$key] ?? null;
+
+							if ($value == 'float') {
+								$data[$key] = \floatval(\str_replace(',', '.', $newValue));
+								continue;
+							}
+
+							$data[$key] = \settype($newValue, $value) ? $newValue : null;
+						}
 					}
+
+					if ($onRowUpdate) {
+						$onRowUpdate($id, $data);
+					}
+
+					$this->onUpdateRow($id, $data);
+
+					/*$this->changelogRepository->createOne([
+						'user' => $grid->getPresenter()->admin->getIdentity()->getAccount()->login,
+						'entity' => $grid->entityName,
+						'objectId' => $id,
+						'type' => 'grid-edit',
+					]);*/
+
+					$grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->setGroupBy([])->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
 				}
 
-				if ($onRowUpdate) {
-					$onRowUpdate($id, $data);
-				}
-
-				$this->onUpdateRow($id, $data);
-
-				/*$this->changelogRepository->createOne([
-					'user' => $grid->getPresenter()->admin->getIdentity()->getAccount()->login,
-					'entity' => $grid->entityName,
-					'objectId' => $id,
-					'type' => 'grid-edit',
-				]);*/
-
-				$grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->setGroupBy([])->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
 			}
 
 			$grid->getPresenter()->flashMessage($this->translator->translate('admin.saved', 'Uloženo'), 'success');
