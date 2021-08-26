@@ -497,7 +497,7 @@ class AdminGrid extends \Grid\Datagrid
 		$submit->onClick[] = function ($button) use ($grid, $beforeDeleteCallback, $override, $condition, $sourceIdName) {
 			$warning = false;
 			foreach ($grid->getSelectedIds() as $id) {
-				$object = $grid->getSource()->where($sourceIdName ?? $grid->getSourceIdName(), $id)->first();
+				$object = $grid->getSource()->setGroupBy([])->where($sourceIdName ?? $grid->getSourceIdName(), $id)->first();
 
 				if ($condition) {
 					$allowed = $condition($object);
