@@ -472,6 +472,10 @@ class AdminGrid extends \Grid\Datagrid
 						'type' => 'grid-edit',
 					]);*/
 
+					if (\count($data) == 0) {
+						continue;
+					}
+
 					$grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->setGroupBy([])->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
 				}
 
