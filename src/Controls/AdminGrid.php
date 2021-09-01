@@ -405,8 +405,9 @@ class AdminGrid extends \Grid\Datagrid
 	 * @param callable|null $onRowUpdate Called on every row update with new data
 	 * @param bool $diff Check diff on every row
 	 * @param callable|null $overrideCallback If set, all other options is ingored and this callback must process data
+	 * @param callable|null $oneTimeBeforeCallback Callback called once before any processing on submit click. No data passed. Good for e.g. cache clearing.
 	 */
-	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null, bool $ignore = false, ?callable $onProcessType = null, ?callable $onRowUpdate = null, bool $diff = true, ?callable $overrideCallback = null)
+	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null, bool $ignore = false, ?callable $onProcessType = null, ?callable $onRowUpdate = null, bool $diff = true, ?callable $overrideCallback = null, ?callable $oneTimeBeforeCallback = null)
 	{
 		$grid = $this;
 		$defaults = $this->getForm()->addHidden('_defaults')->setNullable(true)->setOmitted(true);
@@ -418,7 +419,11 @@ class AdminGrid extends \Grid\Datagrid
 			$defaults->setDefaultValue(\json_encode($grid->inputsValues));
 		};
 
-		$submit->onClick[] = function ($button) use ($grid, $defaults, $processNullColumns, $processTypes, $sourceIdName, $ignore, $onProcessType, $onRowUpdate, $diff, $overrideCallback) {
+		$submit->onClick[] = function ($button) use ($grid, $defaults, $processNullColumns, $processTypes, $sourceIdName, $ignore, $onProcessType, $onRowUpdate, $diff, $overrideCallback, $oneTimeBeforeCallback) {
+			if ($oneTimeBeforeCallback) {
+				$oneTimeBeforeCallback();
+			}
+
 			if ($overrideCallback) {
 				$overrideCallback();
 			} else {
