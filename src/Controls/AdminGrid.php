@@ -9,6 +9,7 @@ use Forms\Form;
 use Grid\Column;
 use Grid\Datalist;
 use Nette\Application\ApplicationException;
+use Nette\Forms\Controls\BaseControl;
 use Nette\Forms\Controls\Checkbox;
 use Nette\Forms\Controls\MultiSelectBox;
 use Nette\Forms\Controls\SelectBox;
@@ -701,22 +702,24 @@ class AdminGrid extends \Grid\Datagrid
 				}
 
 				$container->removeComponent($component);
-
-				$keep->addCheckbox($nameParsed, 'Původní')->setDefaultValue(true);
-
-				//$rules = clone $component->getRules();
-				$component->getRules()->reset();
-				$component->setRequired(false);
-				/*$newRules = $component->addConditionOn($keep[$nameParsed], $form::EQUAL, false);
-
-				foreach ($rules->getIterator() as $rule) {
-					try {
-						$newRules->addRule($rule->validator, $rule->message, $rule->arg);
-					} catch (\Exception $e) {
-					}
-				}*/
-
-				$values->addComponent($component, $nameParsed);
+				
+				if ($component instanceof BaseControl) {
+					$keep->addCheckbox($nameParsed, 'Původní')->setDefaultValue(true);
+					
+					//$rules = clone $component->getRules();
+					$component->getRules()->reset();
+					$component->setRequired(false);
+					/*$newRules = $component->addConditionOn($keep[$nameParsed], $form::EQUAL, false);
+	
+					foreach ($rules->getIterator() as $rule) {
+						try {
+							$newRules->addRule($rule->validator, $rule->message, $rule->arg);
+						} catch (\Exception $e) {
+						}
+					}*/
+					
+					$values->addComponent($component, $nameParsed);
+				}
 			}
 		}
 
