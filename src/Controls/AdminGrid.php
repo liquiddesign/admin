@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Admin\Controls;
 
 use Admin\DB\ChangelogRepository;
+use Forms\Container;
 use Forms\Form;
 use Grid\Column;
 use Grid\Datalist;
@@ -43,6 +44,16 @@ class AdminGrid extends \Grid\Datagrid
 	private ?array $bulkFormInputs = null;
 
 	private ?string $bulkFormDefaultLink = null;
+
+	/**
+	 * @var callable
+	 */
+	private $bulkFormOnBeforeProcess = null;
+
+	/**
+	 * @var callable
+	 */
+	private $bulkFormOnProcess = null;
 
 	private AdminFormFactory $formFactory;
 
@@ -638,9 +649,9 @@ class AdminGrid extends \Grid\Datagrid
 		$input->getLabelPrototype()->setAttribute('class', 'form-check-label');
 	}
 
-	public function addButtonBulkEdit(string $bulkFormId, array $inputs, string $gridId = 'grid', string $name = 'bulkEdit', string $label = 'Hromadná úprava', string $link = 'bulkEdit', string $defaultLink = 'default')
+	public function addButtonBulkEdit(string $bulkFormId, array $inputs, string $gridId = 'grid', string $name = 'bulkEdit', string $label = 'Hromadná úprava', string $link = 'bulkEdit', string $defaultLink = 'default', ?callable $onBeforeProcess = null, ?callable $onProcess = null)
 	{
-		$this->setBulkForm($bulkFormId, $inputs, $defaultLink);
+		$this->setBulkForm($bulkFormId, $inputs, $defaultLink, $onBeforeProcess, $onProcess);
 
 		$submit = $this->getForm()->addSubmit($name, $label)->setHtmlAttribute('class', 'btn btn-outline-primary btn-sm');
 		$submit->onClick[] = function ($button) use ($link, $defaultLink, $gridId) {
@@ -655,11 +666,13 @@ class AdminGrid extends \Grid\Datagrid
 		};
 	}
 
-	public function setBulkForm(string $bulkFormId, array $input, string $defaultLink)
+	public function setBulkForm(string $bulkFormId, array $input, string $defaultLink, ?callable $onBeforeProcess = null, ?callable $onProcess = null)
 	{
 		$this->bulkFormId = $bulkFormId;
 		$this->bulkFormInputs = $input;
 		$this->bulkFormDefaultLink = $defaultLink;
+		$this->bulkFormOnBeforeProcess = $onBeforeProcess;
+		$this->bulkFormOnProcess = $onProcess;
 	}
 
 	public function createComponentBulkForm(): Form
@@ -702,23 +715,24 @@ class AdminGrid extends \Grid\Datagrid
 				}
 
 				$container->removeComponent($component);
-				
+
 				if ($component instanceof BaseControl) {
 					$keep->addCheckbox($nameParsed, 'Původní')->setDefaultValue(true);
-					
-					//$rules = clone $component->getRules();
+
 					$component->getRules()->reset();
 					$component->setRequired(false);
-					/*$newRules = $component->addConditionOn($keep[$nameParsed], $form::EQUAL, false);
-	
-					foreach ($rules->getIterator() as $rule) {
-						try {
-							$newRules->addRule($rule->validator, $rule->message, $rule->arg);
-						} catch (\Exception $e) {
-						}
-					}*/
-					
+
 					$values->addComponent($component, $nameParsed);
+				} elseif ($component instanceof Container) {
+					foreach ($component->getControls() as $input) {
+						$keep->addCheckbox($nameParsed . '_' . $input->getName(), 'Původní')->setDefaultValue(true);
+
+						$input->getRules()->reset();
+						$input->setRequired(false);
+						$input->setParent(null);
+
+						$values->addComponent($input, $nameParsed . '_' . $input->getName());
+					}
 				}
 			}
 		}
@@ -747,20 +761,6 @@ class AdminGrid extends \Grid\Datagrid
 				unset($values['values'][$name]);
 			}
 
-//			$structure = $source instanceof Collection ? $source->getRepository()->getStructure() : null;
-
-//			foreach ($values['values'] as $key => $value) {
-//				if ($structure) {
-//					if ($structure->getRelation($key)) {
-//						//@TODO ošetřit pokud má základní tabulka a join tabulky relaci stejného názvu
-//					} else {
-//						$values['values'][$this->getSource()->getPrefix() . $key] = $value;
-//
-//						unset($values['values'][$key]);
-//					}
-//				}
-//			}
-
 			$relations = [];
 
 			foreach ($values['values'] as $key => $value) {
@@ -770,8 +770,12 @@ class AdminGrid extends \Grid\Datagrid
 				}
 			}
 
-			if (\count($values['values']) === 0) {
+			if (\count($values['values']) === 0 && \count($relations) === 0) {
 				return;
+			}
+
+			if ($this->bulkFormOnBeforeProcess) {
+				[$values, $relations] = \call_user_func($this->bulkFormOnBeforeProcess, $values, $relations);
 			}
 
 			foreach ($ids as $id) {
@@ -779,9 +783,16 @@ class AdminGrid extends \Grid\Datagrid
 				$object = $this->getSource()->where($this->getSource()->getPrefix() . $this->getSourceIdName(), $id)->setGroupBy([])->first();
 
 				if ($object) {
+					$localValues = $values;
+					$localRelations = $relations;
+
+					if($this->bulkFormOnProcess){
+						[$localValues, $localRelations] = \call_user_func($this->bulkFormOnProcess, $id, $object, $localValues, $localRelations);
+					}
+
 					$updateKeys = [];
 
-					foreach ($values['values'] as $key => $value) {
+					foreach ($localValues['values'] as $key => $value) {
 						try {
 							$object->$key = $value;
 							$updateKeys[] = $key;
@@ -803,7 +814,7 @@ class AdminGrid extends \Grid\Datagrid
 						$object->updateAll($updateKeys);
 					}
 
-					foreach ($relations as $key => $value) {
+					foreach ($localRelations as $key => $value) {
 						try {
 							$object->$key->unrelateAll();
 							$object->$key->relate($value);
