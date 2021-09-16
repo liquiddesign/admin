@@ -224,6 +224,9 @@ class AdminForm extends \Forms\Form
 			if (!$this->administrator->getIdentity()->urlEditor && $page) {
 				$text->setHtmlAttribute('readonly', 'readonly');
 			}
+
+			$text->setHtmlAttribute('data-copy-url-targets', 'page[url]');
+			$text->setHtmlAttribute('data-copy-url-source', 'name');
 		})->forPrimary(function (TextInput $text, $mutation) use ($pageType, $required): void {
 			if ($pageType !== 'index' && $required) {
 				$text->setRequired(true);

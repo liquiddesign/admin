@@ -1,0 +1,24 @@
+<script>
+    // handle fill URL
+    $("*[data-copy-url-source]").blur(function () {
+        var targets = $(this).data('copy-url-targets').split(',');
+        var mutation = $(this).data('mutation');
+        if (typeof mutation === 'undefined') {
+            mutation = '';
+        } else {
+            mutation = '[' + mutation + ']';
+        }
+
+        const source = $('input[name="' +  $(this).data('copy-url-source') + mutation + '"');
+
+        if (targets.length > 0) {
+            for (let i = 0; i < targets.length; i++) {
+                var target = $('input[name="' + targets[i] + mutation + '"');
+
+                if (typeof target !== 'undefined' && target.val() === '' && !target.is('[readonly]')) {
+                    target.val(target.hasClass('seo_url') ? solve_seo_link(source.val()) : source.val());
+                }
+            }
+        }
+    });
+</script>
