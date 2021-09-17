@@ -1,6 +1,6 @@
 <script>
     // handle fill URL
-    $("*[data-copy-url-source]").blur(function () {
+    $("*[data-copy-url-source]").on('click', function () {
         var targets = $(this).data('copy-url-targets').split(',');
         var mutation = $(this).data('mutation');
         if (typeof mutation === 'undefined') {
