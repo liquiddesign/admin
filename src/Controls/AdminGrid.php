@@ -538,7 +538,11 @@ class AdminGrid extends \Grid\Datagrid
 					}
 
 					if (!$override && $object) {
-						$object->delete();
+						try {
+							$object->delete();
+						} catch (\Throwable $exception) {
+							$warning = true;
+						}
 					}
 				}
 			}
