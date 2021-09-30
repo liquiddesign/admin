@@ -77,6 +77,11 @@ class BootstrapRenderer extends DefaultRenderer
 			} elseif ($control instanceof Wysiwyg) {
 				$pair[1]->addHtml('<span id="data-info" class="text-sm"><a href="https://paper.dropbox.com/doc/Navod-k-ovladani-obsahoveho-editoru-administrace-TinyMCE-editor--BDmzygnD1pN7ynfuDf5UtU1iAg-JVo4q5xWIEdUqOhWL1EYY" target="_blank">Návod k ovládání obsahového editoru administrace (TinyMCE editor)</a></span>');
 			}
+
+			$dataUrlLink = $control->getControlPrototype()->getAttribute('data-url-link');
+			if ($dataUrlLink) {
+				$pair[1]->addHtml($dataUrlLink);
+			}
 		}
 		
 		return $pair->render(0);

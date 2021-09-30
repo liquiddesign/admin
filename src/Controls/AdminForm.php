@@ -7,6 +7,7 @@ namespace Admin\Controls;
 use Admin\Administrator;
 use Forms\Container;
 use Forms\LocaleContainer;
+use Nette\Application\UI\Presenter;
 use Nette\Forms\Controls\BaseControl;
 use Nette\Forms\Controls\TextArea;
 use Nette\Forms\Controls\TextBase;
@@ -33,12 +34,12 @@ class AdminForm extends \Forms\Form
 	private Administrator $administrator;
 
 	private bool $prettyPages = false;
-	
+
 	public function renderNoHeader(): void
 	{
 		$groups = $this->getGroups();
 		\reset($groups)->setOption('label', null);
-		
+
 		$this->render();
 	}
 
@@ -154,11 +155,11 @@ class AdminForm extends \Forms\Form
 	}
 
 	public function processRedirect(
-		string $detailLink,
+		string  $detailLink,
 		?string $backLink = null,
-		array $detailArguments = [],
-		array $backLinkArguments = [],
-		array $continueArguments = []
+		array   $detailArguments = [],
+		array   $backLinkArguments = [],
+		array   $continueArguments = []
 	): void
 	{
 		/** @var \Nette\Forms\Controls\Button $submitter */
@@ -184,14 +185,15 @@ class AdminForm extends \Forms\Form
 	}
 
 	public function addPageContainer(
-		?string $pageType = null,
-		array $params = [],
+		?string          $pageType = null,
+		array            $params = [],
 		?LocaleContainer $copyControls = null,
-		bool $isOffline = false,
-		bool $required = true,
-		bool $content = false,
-		string $title = 'URL a SEO',
-		bool $opengraph = false
+		bool             $isOffline = false,
+		bool             $required = true,
+		bool             $content = false,
+		string           $title = 'URL a SEO',
+		bool             $opengraph = false,
+		bool             $linkToDetail = false
 	): Container
 	{
 		if (!$this->prettyPages) {
@@ -208,7 +210,7 @@ class AdminForm extends \Forms\Form
 		$pageContainer->setCurrentGroup($group);
 
 		$pageContainer->addHidden('uuid')->setNullable();
-		$pageContainer->addLocaleText('url', 'URL')->forAll(function (TextInput $text, $mutation) use ($page, $pageType): void {
+		$pageContainer->addLocaleText('url', 'URL')->forAll(function (TextInput $text, $mutation) use ($page, $pageType, $linkToDetail): void {
 			$text->setHtmlAttribute('class', 'seo_url')
 				->addRule(
 					[$this, 'validateUrl'],
@@ -227,6 +229,12 @@ class AdminForm extends \Forms\Form
 
 			$text->setHtmlAttribute('data-copy-url-targets', 'page[url]');
 			$text->setHtmlAttribute('data-copy-url-source', 'name');
+
+			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text) {
+				if ($linkToDetail && $page) {
+					$text->setHtmlAttribute('data-url-link', "<a class='ml-2' href='" . $this->getPresenter()->link(':Web:Admin:Page:detail', $page) . "'><i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . "</a>");
+				}
+			});
 		})->forPrimary(function (TextInput $text, $mutation) use ($pageType, $required): void {
 			if ($pageType !== 'index' && $required) {
 				$text->setRequired(true);
@@ -249,15 +257,15 @@ class AdminForm extends \Forms\Form
 				$text->setHtmlAttribute('style', 'width: 862px !important;')
 					->setHtmlAttribute('data-characters', 150);
 			});
-		
+
 		if ($opengraph) {
 			$opengraphImage = $pageContainer->addImagePicker('opengraph', $this->translator->translate('admin.image', 'Obrázek'), [
 				Page::IMAGE_DIR . '/opengraph' => static function (Image $image): void {
 					$image->resize(1200, 628, Image::EXACT);
 				}]);
-		
-			$opengraphImage->setOption('description', $this->translator->translate('admin.imageSizeInfo','Obrázek vkládejte o minimální velikosti %dx%d px', [1200, 628]));
-		
+
+			$opengraphImage->setOption('description', $this->translator->translate('admin.imageSizeInfo', 'Obrázek vkládejte o minimální velikosti %dx%d px', [1200, 628]));
+
 			$opengraphImage->onDelete[] = function () use ($page): void {
 				if ($page) {
 					$page->update(['opengraph' => null]);
@@ -302,8 +310,8 @@ class AdminForm extends \Forms\Form
 
 	public function bind(
 		?Structure $mainStructure,
-		array $containerStructures = [],
-		bool $setDefaultValues = true
+		array      $containerStructures = [],
+		bool       $setDefaultValues = true
 	): void
 	{
 		foreach ($this->getComponents(true, BaseControl::class) as $control) {
