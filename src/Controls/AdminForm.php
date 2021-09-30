@@ -229,6 +229,7 @@ class AdminForm extends \Forms\Form
 
 			$text->setHtmlAttribute('data-copy-url-targets', 'page[url]');
 			$text->setHtmlAttribute('data-copy-url-source', 'name');
+			$text->setHtmlAttribute('class', 'd-inline');
 
 			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text) {
 				if ($linkToDetail && $page) {
