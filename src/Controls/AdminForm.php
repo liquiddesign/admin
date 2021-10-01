@@ -232,8 +232,8 @@ class AdminForm extends \Forms\Form
 			$text->setHtmlAttribute('class', 'd-inline');
 
 			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text) {
-				if ($linkToDetail && $page) {
-					$text->setHtmlAttribute('data-url-link', "<a class='ml-2' href='" . $this->getPresenter()->link(':Web:Admin:Page:detail', $page) . "'><i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . "</a>");
+				if ($linkToDetail && $page && $page->url) {
+					$text->setHtmlAttribute('data-url-link', "<a class='ml-2' href='" . $presenter->getHttpRequest()->getUrl()->getBaseUrl() . $page->url . "' target='_blank'><i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . "</a>");
 				}
 			});
 		})->forPrimary(function (TextInput $text, $mutation) use ($pageType, $required): void {
