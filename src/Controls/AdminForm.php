@@ -231,15 +231,23 @@ class AdminForm extends \Forms\Form
 			$text->setHtmlAttribute('data-copy-url-source', 'name');
 			$text->setHtmlAttribute('class', 'd-inline');
 
-			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text) {
-				if ($linkToDetail && $page && $page->url) {
-					$text->setHtmlAttribute('data-url-link', "<a class='ml-2' href='" . $presenter->getHttpRequest()->getUrl()->getBaseUrl() . $page->url . "' target='_blank'><i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . "</a>");
-				}
-			});
-		})->forPrimary(function (TextInput $text, $mutation) use ($pageType, $required): void {
+
+		})->forPrimary(function (TextInput $text, $mutation) use ($linkToDetail, $page, $pageType, $required): void {
 			if ($pageType !== 'index' && $required) {
 				$text->setRequired(true);
 			}
+
+			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text, $mutation) {
+				if ($linkToDetail && $page && $page->getValue('url', $mutation)) {
+					$text->setHtmlAttribute("data-url-link-$mutation", "<a data-mutation='$mutation' class='ml-2' href='" . $presenter->getHttpRequest()->getUrl()->getBaseUrl() . $page->getValue('url', $mutation) . "' target='_blank'><i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . "</a>");
+				}
+			});
+		})->forSecondary(function (TextInput $text, $mutation) use ($linkToDetail, $page, $pageType, $required): void {
+			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text, $mutation) {
+				if ($linkToDetail && $page && $page->getValue('url', $mutation)) {
+					$text->setHtmlAttribute("data-url-link-$mutation", "<a data-mutation='$mutation' class='ml-2' href='" . $presenter->getHttpRequest()->getUrl()->getBaseUrl() . "$mutation/" . $page->getValue('url', $mutation) . "' target='_blank'><i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . "</a>");
+				}
+			});
 		});
 
 		if ($isOffline) {
