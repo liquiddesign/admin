@@ -232,22 +232,22 @@ class AdminForm extends \Forms\Form
 			$text->setHtmlAttribute('class', 'd-inline');
 
 
-		})->forPrimary(function (TextInput $text, $mutation) use ($linkToDetail, $page, $pageType, $required): void {
-			if ($pageType !== 'index' && $required) {
+		})->forAll(function (TextInput $text, $mutation) use ($linkToDetail, $page, $pageType, $required): void {
+			if (isset($this[self::MUTATION_TRANSLATOR_NAME]) && $pageType !== 'index' && $required) {
+				$text->addConditionOn($this[self::MUTATION_TRANSLATOR_NAME][$mutation], $this::EQUAL, true);
+			}
+			
+			if (!isset($this[self::MUTATION_TRANSLATOR_NAME]) && $pageType !== 'index' && $required && $mutation === $this->getPrimaryMutation()) {
 				$text->setRequired(true);
 			}
-
+			
 			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text, $mutation) {
 				if ($linkToDetail && $page && $page->getValue('url', $mutation)) {
-					$text->setHtmlAttribute("data-url-link-$mutation", "<a data-mutation='$mutation' class='ml-2' href='" . $presenter->getHttpRequest()->getUrl()->getBaseUrl() . $page->getValue('url', $mutation) . "' target='_blank'><i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . "</a>");
+					$url = $presenter->getHttpRequest()->getUrl()->getBaseUrl() . ($mutation === $this->getPrimaryMutation() ?  $page->getValue('url', $mutation) :  "$mutation/" . $page->getValue('url', $mutation));
+					$text->setHtmlAttribute("data-url-link-$mutation", "<a data-mutation='$mutation' class='ml-2' href='" . $url . "' target='_blank'><i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . "</a>");
 				}
 			});
-		})->forSecondary(function (TextInput $text, $mutation) use ($linkToDetail, $page, $pageType, $required): void {
-			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text, $mutation) {
-				if ($linkToDetail && $page && $page->getValue('url', $mutation)) {
-					$text->setHtmlAttribute("data-url-link-$mutation", "<a data-mutation='$mutation' class='ml-2' href='" . $presenter->getHttpRequest()->getUrl()->getBaseUrl() . "$mutation/" . $page->getValue('url', $mutation) . "' target='_blank'><i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . "</a>");
-				}
-			});
+			
 		});
 
 		if ($isOffline) {

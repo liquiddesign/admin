@@ -6,6 +6,7 @@ namespace Admin\Controls;
 
 use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
+use Forms\Form;
 use Forms\FormFactory;
 use Nette\Localization\Translator;
 use Pages\DB\IPageRepository;
@@ -79,7 +80,7 @@ class AdminFormFactory
 		$this->defaultMutation = $defaultMutation;
 	}
 
-	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false, bool $generateUuid = false, bool $defaultsField = false, bool $defaultGroup = true): AdminForm
+	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false, bool $generateUuid = false, bool $defaultsField = false, bool $defaultGroup = true, bool $forcePrimary = true): AdminForm
 	{
 		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->formFactory->create(AdminForm::class);
@@ -114,9 +115,9 @@ class AdminFormFactory
 
 		if ($mutationSelector && \count($form->getMutations()) > 1) {
 			$form->addMutationSelector($this->translator->translate('admin.selectMutatiom', 'Zvolte mutaci'));
-
+			
 			if ($translatedCheckbox) {
-				$form->addTranslatedCheckbox($this->translator->translate('admin.activeMutation', 'Mutace je aktivní'));
+				$form->addTranslatedCheckbox($this->translator->translate('admin.activeMutation', 'Mutace je aktivní'), Form::MUTATION_TRANSLATOR_NAME, false, $forcePrimary);
 			}
 
 			$form->addGroup();
