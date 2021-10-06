@@ -211,8 +211,7 @@ class AdminForm extends \Forms\Form
 
 		$pageContainer->addHidden('uuid')->setNullable();
 		$pageContainer->addLocaleText('url', 'URL')->forAll(function (TextInput $text, $mutation) use ($page, $pageType, $linkToDetail): void {
-			$text->setHtmlAttribute('class', 'seo_url')
-				->addRule(
+			$text->addRule(
 					[$this, 'validateUrl'],
 					$this->translator->translate('admin.urlError', 'URL již existuje'),
 					[$this->pageRepository, $mutation, $page ? $page->getPK() : null],
@@ -229,7 +228,7 @@ class AdminForm extends \Forms\Form
 
 			$text->setHtmlAttribute('data-copy-url-targets', 'page[url]');
 			$text->setHtmlAttribute('data-copy-url-source', 'name');
-			$text->setHtmlAttribute('class', 'd-inline');
+			$text->setHtmlAttribute('class', 'd-inline seo_url');
 
 
 		})->forAll(function (TextInput $text, $mutation) use ($linkToDetail, $page, $pageType, $required): void {
