@@ -29,6 +29,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			'defaultMutation' => Expect::list(null),
 			'superRole' => Expect::string(null),
 			'prettyPages' => Expect::bool(false),
+			'serviceMode' => Expect::bool(false),
 			'adminGrid' => Expect::array([]),
 		]);
 	}
@@ -64,9 +65,11 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			$routerListDef->addSetup('add', [new \Nette\DI\Definitions\Statement(Route::class, [$config->mutations[0] ?? null])]);
 		}
 		
-		// add authorizator
 		$authorizator = $builder->addDefinition('authorizator')->setType(Authorizator::class);
-		$authorizator->addSetup('setSuperRole', [$config->superRole]);
+		
+		if ($config->serviceMode) {
+			$authorizator->addSetup('setSuperRole', [$config->superRole]);
+		}
 		
 		$formDef = $builder->addDefinition($this->prefix('adminFormFactory'))->setFactory(AdminFormFactory::class, [$administratorDef]);
 		$formDef->addSetup('setPrettyPages', [$config->prettyPages]);
