@@ -10,6 +10,7 @@ use Messages\DB\TemplateRepository;
 use Nette\Forms\Controls\Button;
 use Nette\Localization\Translator;
 use Nette\Mail\Mailer;
+use Nette\Security\Passwords;
 use Nette\SmartObject;
 use Security\Authenticator;
 use Security\DB\AccountRepository;
@@ -55,14 +56,17 @@ class AccountFormFactory
 	private RoleRepository $roleRepository;
 
 	private Translator $translator;
-
+	
+	private Passwords $passwords;
+	
 	public function __construct(
 		AdminFormFactory $adminFormFactory,
 		AccountRepository $accountRepository,
 		TemplateRepository $templateRepository,
 		RoleRepository $roleRepository,
 		Mailer $mailer,
-		Translator $translator
+		Translator $translator,
+		Passwords $passwords
 	)
 	{
 		$this->adminFormFactory = $adminFormFactory;
@@ -71,6 +75,7 @@ class AccountFormFactory
 		$this->roleRepository = $roleRepository;
 		$this->mailer = $mailer;
 		$this->translator = $translator;
+		$this->passwords = $passwords;
 	}
 
 	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true, bool $fullname = false, bool $activeFromTo = false): void
@@ -160,7 +165,7 @@ class AccountFormFactory
 
 		if ($values['password']) {
 			$password = $values['password'];
-			$values['password'] = Authenticator::setCredentialTreatment($values['password']);
+			$values['password'] = $this->passwords->hash($values['password']);
 		} else {
 			unset($values['password']);
 		}
