@@ -92,14 +92,7 @@ abstract class BackendPresenter extends Presenter
 	
 	public function generateDirectories($dirs = [], $subDirs = []): void
 	{
-		foreach ($dirs as $dir) {
-			$rootDir = $this->wwwDir . '/userfiles/' . $dir;
-			FileSystem::createDir($rootDir);
-			
-			foreach ($subDirs as $subDir) {
-				FileSystem::createDir($rootDir . '/' . $subDir);
-			}
-		}
+		Helpers::generateUserDirectories($this->wwwDir, $dirs, $subDirs);
 	}
 	
 	public function _($message, ...$parameters): string
