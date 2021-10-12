@@ -24,7 +24,6 @@ use StORM\ICollection;
 use StORM\Meta\RelationNxN;
 use StORM\RelationCollection;
 use Common\NumbersHelper;
-use Tracy\Debugger;
 
 /**
  * @method onDelete(Entity $object)
@@ -388,7 +387,6 @@ class AdminGrid extends \Grid\Datagrid
 						$this->getPresenter()->redirect('this');
 					}
 				} catch (\Exception $e) {
-					bdump($e);
 					$this->getPresenter()->flashMessage($this->translator->translate('admin.unableToRemove', 'Chyba: Nelze smazat.'), 'error');
 				}
 				$this->getPresenter()->redirect('this');
