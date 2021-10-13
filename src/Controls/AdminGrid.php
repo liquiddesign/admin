@@ -50,6 +50,8 @@ class AdminGrid extends \Grid\Datagrid
 	 */
 	private $bulkFormOnBeforeProcess = null;
 
+	private array $bulkFormCopyRawValues = [];
+
 	/**
 	 * @var callable
 	 */
@@ -653,9 +655,9 @@ class AdminGrid extends \Grid\Datagrid
 		$input->getLabelPrototype()->setAttribute('class', 'form-check-label');
 	}
 
-	public function addButtonBulkEdit(string $bulkFormId, array $inputs, string $gridId = 'grid', string $name = 'bulkEdit', string $label = 'Hromadná úprava', string $link = 'bulkEdit', string $defaultLink = 'default', ?callable $onBeforeProcess = null, ?callable $onProcess = null)
+	public function addButtonBulkEdit(string $bulkFormId, array $inputs, string $gridId = 'grid', string $name = 'bulkEdit', string $label = 'Hromadná úprava', string $link = 'bulkEdit', string $defaultLink = 'default', ?callable $onBeforeProcess = null, ?callable $onProcess = null, array $copyRawValues = [])
 	{
-		$this->setBulkForm($bulkFormId, $inputs, $defaultLink, $onBeforeProcess, $onProcess);
+		$this->setBulkForm($bulkFormId, $inputs, $defaultLink, $onBeforeProcess, $onProcess, $copyRawValues);
 
 		$submit = $this->getForm()->addSubmit($name, $label)->setHtmlAttribute('class', 'btn btn-outline-primary btn-sm');
 		$submit->onClick[] = function ($button) use ($link, $defaultLink, $gridId) {
@@ -670,13 +672,14 @@ class AdminGrid extends \Grid\Datagrid
 		};
 	}
 
-	public function setBulkForm(string $bulkFormId, array $input, string $defaultLink, ?callable $onBeforeProcess = null, ?callable $onProcess = null)
+	public function setBulkForm(string $bulkFormId, array $input, string $defaultLink, ?callable $onBeforeProcess = null, ?callable $onProcess = null, array $copyRawValues = [])
 	{
 		$this->bulkFormId = $bulkFormId;
 		$this->bulkFormInputs = $input;
 		$this->bulkFormDefaultLink = $defaultLink;
 		$this->bulkFormOnBeforeProcess = $onBeforeProcess;
 		$this->bulkFormOnProcess = $onProcess;
+		$this->bulkFormCopyRawValues = $copyRawValues;
 	}
 
 	public function createComponentBulkForm(): Form
@@ -745,6 +748,14 @@ class AdminGrid extends \Grid\Datagrid
 
 		$form->onSuccess[] = function (AdminForm $form) use ($ids) {
 			$values = $form->getValues('array');
+			$rawValues = $form->getPresenter()->getHttpRequest()->getPost();
+
+			foreach ($this->bulkFormCopyRawValues as $from => $to) {
+				if (isset($rawValues['values'][$from])) {
+					$values['values'][$to] = $rawValues['values'][$from];
+				}
+			}
+
 			$source = $this->getSource(false);
 			$ids = $values['bulkType'] === 'selected' ? $ids : $this->getFilteredSource()->toArrayOf($this->getSourceIdName());
 
