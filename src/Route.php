@@ -7,9 +7,11 @@ use Pages\Pages;
 
 class Route extends Routers\Route
 {
+	public const MASK = 'admin[/<module>/<presenter>[/<action=default>][/<id>]]?lang=<lang>';
+	
 	public function __construct(?string $defaultMutation, Pages $pages)
 	{
-		parent::__construct('admin[/<module>/<presenter>[/<action=default>][/<id>]]?lang=<lang>', [
+		parent::__construct(static::MASK, [
 			'module' => [
 				\Nette\Routing\Route::VALUE => 'Admin',
 				\Nette\Routing\Route::FILTER_IN => static function ($str) {
