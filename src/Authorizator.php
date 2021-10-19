@@ -9,7 +9,7 @@ use Admin\DB\PermissionRepository;
 
 class Authorizator implements IAuthorizator
 {
-	private ?string $superRole;
+	private ?string $superRole = null;
 	
 	/**
 	 * @var bool[]
