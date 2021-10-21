@@ -510,15 +510,21 @@ class AdminGrid extends \Grid\Datagrid
 	 * @param bool $override If true, object will not be automatically delete. You can delete it manually in callback.
 	 * @param callable|null $condition Condition callback, must return boolean
 	 * @param string|null $sourceIdName Name of source primary key
+	 * @param callable|null $oneTimeBeforeCallback Callback called once before any processing on submit click. No data passed. Good for e.g. cache clearing.
 	 */
-	public function addButtonDeleteSelected(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null, ?string $sourceIdName = null)
+	public function addButtonDeleteSelected(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null, ?string $sourceIdName = null, ?callable $oneTimeBeforeCallback = null)
 	{
 		$grid = $this;
 		$submit = $this->getForm()->addSubmit('deleteAll', $this->translator->translate('admin.remove', 'Smazat'));
 		$submit->setHtmlAttribute('class', 'btn btn-sm btn-danger');
 		$submit->setHtmlAttribute('onClick', 'return confirm("' . $this->translator->translate('admin.really', 'Opravdu?') . '")');
-		$submit->onClick[] = function ($button) use ($grid, $beforeDeleteCallback, $override, $condition, $sourceIdName) {
+		$submit->onClick[] = function ($button) use ($grid, $beforeDeleteCallback, $override, $condition, $sourceIdName, $oneTimeBeforeCallback) {
+			if ($oneTimeBeforeCallback) {
+				$oneTimeBeforeCallback();
+			}
+
 			$warning = false;
+
 			foreach ($grid->getSelectedIds() as $id) {
 				$object = $grid->getSource()->setGroupBy([])->where($sourceIdName ?? $grid->getSourceIdName(), $id)->first();
 

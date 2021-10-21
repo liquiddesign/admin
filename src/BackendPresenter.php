@@ -160,7 +160,7 @@ abstract class BackendPresenter extends Presenter
 		}
 	}
 	
-	protected function onDeleteImage(Entity $object, string $propertyName = 'imageFileName')
+	public function onDeleteImage(Entity $object, string $propertyName = 'imageFileName')
 	{
 		if ($object->$propertyName) {
 			$subDirs = ['origin', 'detail', 'thumb'];
