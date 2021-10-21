@@ -175,7 +175,7 @@ abstract class BackendPresenter extends Presenter
 		}
 	}
 	
-	protected function onDeletePage(Entity $object)
+	public function onDeletePage(Entity $object)
 	{
 		//@TODO
 		if ($page = $this->pageRepository->getPageByTypeAndParams('product_list', null, ['producer' => $object])) {
