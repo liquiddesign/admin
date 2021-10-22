@@ -23,6 +23,12 @@ use StORM\Meta\Structure;
 
 class AdminForm extends \Forms\Form
 {
+	/**
+	 * Occurs when the form is submitted and successfully validated
+	 * @var array<callable(self, array|object): void|callable(array|object): void>
+	 */
+	public $onSuccess = [];
+
 	public ?string $entityName = null;
 
 	private IPageRepository $pageRepository;
