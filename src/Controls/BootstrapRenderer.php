@@ -37,9 +37,6 @@ class BootstrapRenderer extends DefaultRenderer
 	{
 		$pair = $this->getWrapper('pair container');
 		
-		/** @var \Nette\Utils\Html $controlPair */
-		$controlPair = $pair[1];
-		
 		if ($control instanceof BaseControl) {
 			$pair->addHtml($this->renderLabel($control));
 			$pair->addHtml($this->renderControl($control));
@@ -64,7 +61,7 @@ class BootstrapRenderer extends DefaultRenderer
 					$pair->setAttribute('data-mutation', $controlMutation);
 					$tmpClasses = \is_array($pair->getAttribute('class')) ? \implode(' ', $pair->getAttribute('class')) : $pair->getAttribute('class');
 					
-					if (\strpos($control->getHtmlId(), Form::MUTATION_TRANSLATOR_NAME) !== false) {
+					if (strpos($control->getHtmlId(), Form::MUTATION_TRANSLATOR_NAME) !== false) {
 						$pair->setAttribute('class', $tmpClasses . ' translated');
 					}
 					
@@ -75,22 +72,42 @@ class BootstrapRenderer extends DefaultRenderer
 			}
 			
 			$dataInfo = $control->getControlPrototype()->getAttribute('data-info');
-
 			if ($dataInfo) {
-				$controlPair->addHtml('<span id="data-info" class="text-gray text-sm">' . $dataInfo . '</span>');
+				$pair[1]->addHtml('<span id="data-info" class="text-gray text-sm">' . $dataInfo . '</span>');
 			} elseif ($control instanceof Wysiwyg) {
-				$link = 'https://paper.dropbox.com/doc/Navod-k-ovladani-obsahoveho-editoru-administrace-TinyMCE-editor--BDmzygnD1pN7ynfuDf5UtU1iAg-JVo4q5xWIEdUqOhWL1EYY';
-				$controlPair->addHtml('<span id="data-info" class="text-sm"><a href="' . $link . '" target="_blank">Návod k ovládání obsahového editoru administrace (TinyMCE editor)</a></span>');
+				$pair[1]->addHtml('<span id="data-info" class="text-sm"><a href="https://paper.dropbox.com/doc/Navod-k-ovladani-obsahoveho-editoru-administrace-TinyMCE-editor--BDmzygnD1pN7ynfuDf5UtU1iAg-JVo4q5xWIEdUqOhWL1EYY" target="_blank">Návod k ovládání obsahového editoru administrace (TinyMCE editor)</a></span>');
 			}
-
+			
 			$dataUrlLink = $control->getControlPrototype()->getAttribute(isset($controlMutation) ? "data-url-link-$controlMutation" : 'data-url-link-');
-
 			if ($dataUrlLink) {
-				$controlPair->addHtml($dataUrlLink);
+				$pair[1]->addHtml($dataUrlLink);
 			}
 		}
 		
 		return $pair->render(0);
+	}
+	
+	private function doRenderErrors(array $errors, bool $control): string
+	{
+		if (!$errors) {
+			return '';
+		}
+		$container = $this->getWrapper($control ? 'control errorcontainer' : 'error container');
+		$item = $this->getWrapper($control ? 'control erroritem' : 'error item');
+		
+		foreach ($errors as $error) {
+			$item = clone $item;
+			if ($error instanceof IHtmlString) {
+				$item->addHtml($error);
+			} else {
+				$item->setText($error);
+			}
+			$container->addHtml($item);
+		}
+		
+		return $control
+			? "\n\t" . $container->render()
+			: "\n" . $container->render(0);
 	}
 	
 	/**
@@ -98,32 +115,25 @@ class BootstrapRenderer extends DefaultRenderer
 	 */
 	public function renderControl(Nette\Forms\IControl $control): Html
 	{
-		if (!$control instanceof BaseControl) {
-			throw new \Exception('Control is not Base Control');
-		}
-		
 		$body = $this->getWrapper('control container');
-
 		if ($this->counter % 2) {
 			$body->class($this->getValue('control .odd'), true);
 		}
-
 		if (!$this->getWrapper('pair container')->getName()) {
 			$body->class($control->getOption('class'), true);
 			$body->id = $control->getOption('id');
 		}
 		
 		$description = $control->getOption('description');
-
 		if ($description instanceof IHtmlString) {
 			$description = ' ' . $description;
-		} elseif ($description !== null) {
-			// intentionally ==
+			
+		} elseif ($description != null) { // intentionally ==
 			if ($control instanceof Nette\Forms\Controls\BaseControl) {
 				$description = $control->translate($description);
 			}
-
 			$description = ' ' . $this->getWrapper('control description')->setText($description);
+			
 		} else {
 			$description = '';
 		}
@@ -137,84 +147,82 @@ class BootstrapRenderer extends DefaultRenderer
 		$control->setOption('rendered', true);
 		
 		$el = Html::el();
-		
-		/** @var \Nette\Utils\Html $inputEl */
-		$inputEl = $el[1] ?? null;
-		/** @var \Nette\Utils\Html $labelEl */
-		$labelEl = $el[2] ?? null;
-
 		if ($control instanceof Nette\Forms\Controls\RadioList) {
-			foreach (\array_keys($control->getItems()) as $key) {
+			foreach ($control->getItems() as $key => $item) {
 				$el->addHtml('<div class="form-check" style="display: inline-block; margin-right: 10px;">');
 				$el->addHtml($control->getControlPart($key)->class('form-check-input'));
 				$el->addHtml($control->getLabelPart($key)->class('form-check-label'));
 				$el->addHtml('</div>');
 			}
 		} elseif ($control instanceof Nette\Forms\Controls\Checkbox) {
+			$items = $control->getControl();
 			$el->addHtml('<div class="form-check">');
-
-			foreach (\array_keys((array) $control->getControl()) as $key) {
-				unset($key);
-				
-				$el->addHtml($control->getControlPart());
-				$inputEl->class('form-check-input');
-				$el->addHtml($control->getLabelPart());
-				$labelEl->class('form-check-label');
+			foreach ($items as $key => $item) {
+				$el->addHtml($control->getControlPart($key));
+				$el[1]->class('form-check-input');
+				$el->addHtml($control->getLabelPart($key));
+				$el[2]->class('form-check-label');
 			}
-
 			$el->addHtml('</div>');
+			
 		} elseif ($control instanceof Wysiwyg) {
 			$el->addHtml($control->getControl());
+			
 		} elseif ($control instanceof Nette\Forms\Controls\Button) {
 			$el->addHtml($control->getControl());
+			
 		} elseif ($control instanceof Nette\Forms\Controls\TextArea) {
 			$el->addHtml($control->getControl());
-			$inputEl->class('form-control form-control-sm');
+			$el[0]->class('form-control form-control-sm');
+			
 		} elseif ($control instanceof Nette\Forms\Controls\SelectBox) {
 			$el->addHtml($control->getControl());
-			$inputEl->class('form-control form-control-sm col-label');
+			$el[0]->class('form-control form-control-sm col-label');
+			
 		} elseif ($control instanceof Nette\Forms\Controls\TextInput) {
-			$inputEl->addHtml($control->getControl());
-
-			if ($control->getControlPrototype()->type === 'number') {
-				$inputEl->class('form-control form-control-sm max-number ' . $inputEl->class);
-			} else {
-				$inputEl->class('form-control form-control-sm col-label ' . $inputEl->class);
-			}
-		} elseif (isset($control->getControl()->attrs['class']) && $control->getControl()->attrs['class'] === 'flatpicker') {
 			$el->addHtml($control->getControl());
-			$inputEl->class('form-control form-control-sm');
+			if ($control->getControlPrototype()->type == 'number') {
+				$el[0]->class('form-control form-control-sm max-number ' . $el[0]->class);
+			} else {
+				$el[0]->class('form-control form-control-sm col-label ' . $el[0]->class);
+			}
+			
+		} elseif (isset($control->getControl()->attrs['class']) && $control->getControl()->attrs['class'] == 'flatpicker') {
+			$el->addHtml($control->getControl());
+			$el[0]->class('form-control form-control-sm');
+			
 		} elseif ($control instanceof UploadImage || $control instanceof UploadFile) {
 			$el->addHtml($control->getControl());
-
-			if (isset($inputEl[1]->value)) {
-				if ($inputEl[2] instanceof Html && isset($el[0][2])) {
-					$inputEl[2]->class('btn btn-danger btn-sm ml-2');
-					$inputEl[2][0] = 'Smazat';
+			if (isset($el[0][1]->value)) {
+				if (isset($el[0][2])) {
+					$el[0][2]->class('btn btn-danger btn-sm ml-2');
+					$el[0][2][0] = 'Smazat';
 				}
 			} else {
 				$el = Html::el();
 				$el->addHtml('<div class="input-group col-label m-0 p-0">');
 				$el->addHtml('<label class="input-group-btn">');
-				$el->addHtml(' <span class="btn btn-outline-primary btn-sm">Procházet')->style('display: none;');
+				$el->addHtml(' <span class="btn btn-outline-primary btn-sm">Procházet');
 				$el->addHtml($control->getControl());
+				$el[3]->style('display: none;');
 				$el->addHtml('</span>');
 				$el->addHtml('</label>');
 				$el->addHtml('<input type="text" class="form-control form-control-sm" readonly="">');
 				$el->addHtml('</div>');
 			}
 		} elseif ($control instanceof Nette\Forms\Controls\UploadControl) {
-			if ($control->getControlPrototype()->class === 'dropzone') {
+			if($control->getControlPrototype()->class == 'dropzone'){
 				$el = Html::el();
 				$el->addHtml('<div id="' . $control->getHtmlId() . '">
 <div class="dz-default dz-message"><button class="dz-button" type="button">Přetáhněte soubory do tohoto pole</button></div>
 </div>');
-			} else {
+			}else{
 				$el = Html::el();
 				$el->addHtml('<div class="input-group col-label m-0 p-0">');
 				$el->addHtml('<label class="input-group-btn">');
-				$el->addHtml(' <span class="btn btn-outline-primary btn-sm">Procházet')->style('display: none;');
+				$el->addHtml(' <span class="btn btn-outline-primary btn-sm">Procházet');
 				$el->addHtml($control->getControl());
+				$el[3]->style('display: none;');
 				$el->addHtml('</span>');
 				$el->addHtml('</label>');
 				$el->addHtml('<input type="text" class="form-control form-control-sm" readonly="">');
@@ -232,15 +240,15 @@ class BootstrapRenderer extends DefaultRenderer
 			$el->class($this->getValue('control .error'), $control->hasErrors());
 		}
 		
-		$errors = \array_merge($errors, $control->getErrors());
-
+		$errors = array_merge($errors, $control->getErrors());
 		if (\count($errors) > 0) {
 			if ($el[0] instanceof Html) {
-				$inputEl->class($el[0]->class . ' is-invalid');
+				$el[0]->class($el[0]->class . ' is-invalid');
 			} else {
 				try {
 					$el[6] = '<input type="text" class="form-control form-control-sm is-invalid" readonly="">';
 				} catch (\Exception $e) {
+				
 				}
 			}
 		}
@@ -250,34 +258,29 @@ class BootstrapRenderer extends DefaultRenderer
 		if ($nextTo = $control->getOption('nextTo')) {
 			$control = $control->getForm()->getComponent($nextTo);
 			$body->class($this->getValue('control .multi'), true);
-
 			goto renderControl;
 		}
 		
-		return $body->setHtml(\implode('', $els) . $description . $this->doRenderErrors($errors, true));
+		return $body->setHtml(implode('', $els) . $description . $this->doRenderErrors($errors, true));
 	}
 	
 	public function renderPairMulti(array $controls): string
 	{
 		$s = [];
-		
-		/** @var \Nette\Forms\Controls\BaseControl $control */
 		foreach ($controls as $control) {
 			if (!$control instanceof Nette\Forms\IControl) {
 				throw new Nette\InvalidArgumentException('Argument must be array of Nette\Forms\IControl instances.');
 			}
-
 			$description = $control->getOption('description');
-
 			if ($description instanceof IHtmlString) {
 				$description = ' ' . $description;
-			} elseif ($description !== null) {
-				// intentionally ==
+				
+			} elseif ($description != null) { // intentionally ==
 				if ($control instanceof Nette\Forms\Controls\BaseControl) {
 					$description = $control->translate($description);
 				}
-
 				$description = ' ' . $this->getWrapper('control description')->setText($description);
+				
 			} else {
 				$description = '';
 			}
@@ -287,21 +290,20 @@ class BootstrapRenderer extends DefaultRenderer
 			if ($control instanceof Nette\Forms\Controls\SubmitButton) {
 				$el = Html::el();
 				$el->addHtml('<div class="pl-0 m-0">');
-
-				if ($control->getName() === 'submitAndNext') {
-					$el->addHtml(Html::el('button type="submit" name="submitAndNext" class="btn btn-outline-primary btn-sm button m-1"'))
-						->setHtml('<i class="fa fa-sm fa-plus"></i>&nbsp;' . $control->getCaption());
+				
+				if ($control->getName() == 'submitAndNext') {
+					$el->addHtml(Html::el('button type="submit" name="submitAndNext" class="btn btn-outline-primary btn-sm button m-1"'));
+					$el[1]->setHtml('<i class="fa fa-sm fa-plus"></i>&nbsp;' . $control->getCaption());
 					$el->addHtml('</button>');
-				} elseif ($control->getName() === 'submitAndContinue') {
-					$el->addHtml(Html::el('button type="submit" name="submitAndContinue" class="btn btn-outline-primary btn-sm button m-1"'))
-						->setHtml($control->getCaption());
+				} else if ($control->getName() == 'submitAndContinue') {
+					$el->addHtml(Html::el('button type="submit" name="submitAndContinue" class="btn btn-outline-primary btn-sm button m-1"'));
+					$el[1]->setHtml($control->getCaption());
 					$el->addHtml('</button>');
 				} else {
-					/** @var \Nette\Utils\Html $controlEl */
-					$controlEl = $el->addHtml($control->getControl());
-
-					if (!$controlEl->class) {
-						$controlEl->class('btn btn-primary btn-sm ml-0 mt-1 mb-1 mr-1');
+					$el->addHtml($control->getControl());
+					
+					if (!$el[1]->class) {
+						$el[1]->class('btn btn-primary btn-sm ml-0 mt-1 mb-1 mr-1');
 					}
 				}
 				
@@ -314,43 +316,41 @@ class BootstrapRenderer extends DefaultRenderer
 				if ($el->getName() === 'input') {
 					$el->class($this->getValue("control .$el->type"), true);
 				}
-
 				$el->class($this->getValue('control .error'), $control->hasErrors());
 			}
-
 			$s[] = $el . $description;
 		}
-		
-		if (!isset($control)) {
-			return '';
-		}
-
 		$pair = $this->getWrapper('pair container');
 		$pair->addHtml($this->renderLabel($control));
-		$pair->addHtml($this->getWrapper('control container')->setHtml(\implode(' ', $s)))->class('d-inline-flex align-middle');
+		$pair->addHtml($this->getWrapper('control container')->setHtml(implode(' ', $s)));
+		$pair[1]->class('d-inline-flex align-middle');
 		
 		return $pair->render(0);
 	}
 	
 	public function renderControls($parent): string
 	{
+		if (!($parent instanceof Nette\Forms\Container || $parent instanceof Nette\Forms\ControlGroup)) {
+			throw new Nette\InvalidArgumentException('Argument must be Nette\Forms\Container or Nette\Forms\ControlGroup instance.');
+		}
+		
 		$container = $this->getWrapper('controls container');
 		
 		$buttons = null;
-
 		foreach ($parent->getControls() as $control) {
+			
 			if ($control->getOption('rendered') || $control->getOption('type') === 'hidden') {
 				continue;
 			}
 			
 			if ($control->getOption('type') === 'button') {
 				$buttons[] = $control;
+				
 			} else {
 				if ($buttons) {
 					$container->addHtml($this->renderPairMulti($buttons));
 					$buttons = null;
 				}
-
 				$container->addHtml($this->renderPair($control));
 			}
 		}
@@ -360,37 +360,10 @@ class BootstrapRenderer extends DefaultRenderer
 		}
 		
 		$s = '';
-
-		if (\count($container)) {
+		if (count($container)) {
 			$s .= "\n" . $container . "\n";
 		}
 		
 		return $s;
-	}
-
-	private function doRenderErrors(array $errors, bool $control): string
-	{
-		if (!$errors) {
-			return '';
-		}
-
-		$container = $this->getWrapper($control ? 'control errorcontainer' : 'error container');
-		$item = $this->getWrapper($control ? 'control erroritem' : 'error item');
-		
-		foreach ($errors as $error) {
-			$item = clone $item;
-
-			if ($error instanceof IHtmlString) {
-				$item->addHtml($error);
-			} else {
-				$item->setText($error);
-			}
-
-			$container->addHtml($item);
-		}
-		
-		return $control
-			? "\n\t" . $container->render()
-			: "\n" . $container->render(0);
 	}
 }
