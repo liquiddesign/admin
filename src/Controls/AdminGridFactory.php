@@ -8,6 +8,7 @@ use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
+use Security\DB\IUser;
 use StORM\ICollection;
 
 class AdminGridFactory
@@ -21,7 +22,10 @@ class AdminGridFactory
 	private Session $session;
 
 	private Translator $translator;
-
+	
+	/**
+	 * @var int[]
+	 */
 	private array $itemsPerPage;
 
 	private bool $showItemsPerPage;
@@ -67,7 +71,7 @@ class AdminGridFactory
 		$grid->setTranslator($this->translator);
 		
 		$grid->onUpdateRow[] = function ($object) use ($grid): void {
-			if ($grid->entityName) {
+			if ($grid->entityName && $this->administrator->getIdentity() instanceof IUser) {
 				$this->changelogRepository->createOne([
 					'user' => $this->administrator->getIdentity()->getAccount()->login,
 					'entity' => $grid->entityName,
@@ -78,7 +82,7 @@ class AdminGridFactory
 		};
 		
 		$grid->onDeleteRow[] = function ($object) use ($grid): void {
-			if ($grid->entityName) {
+			if ($grid->entityName && $this->administrator->getIdentity() instanceof IUser) {
 				$this->changelogRepository->createOne([
 					'user' => $this->administrator->getIdentity()->getAccount()->login,
 					'entity' => $grid->entityName,

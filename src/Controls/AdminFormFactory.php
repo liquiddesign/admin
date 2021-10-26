@@ -8,6 +8,7 @@ use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
 use Forms\Form;
 use Forms\FormFactory;
+use Nette\Forms\Controls\BaseControl;
 use Nette\Localization\Translator;
 use Pages\DB\IPageRepository;
 use StORM\DIConnection;
@@ -27,7 +28,10 @@ class AdminFormFactory
 	private DIConnection $connection;
 
 	private bool $prettyPages;
-
+	
+	/**
+	 * @var string[]
+	 */
 	private array $mutations;
 
 	private ?string $defaultMutation = null;
@@ -39,8 +43,7 @@ class AdminFormFactory
 		IPageRepository $pageRepository,
 		Translator $translator,
 		ChangelogRepository $changelogRepository
-	)
-	{
+	) {
 		$this->formFactory = $formFactory;
 		$this->pageRepository = $pageRepository;
 		$this->administrator = $administrator;
@@ -59,7 +62,10 @@ class AdminFormFactory
 	{
 		return $this->prettyPages;
 	}
-
+	
+	/**
+	 * @return string[]
+	 */
 	public function getMutations(): array
 	{
 		return $this->mutations;
@@ -80,12 +86,18 @@ class AdminFormFactory
 		$this->defaultMutation = $defaultMutation;
 	}
 
-	public function create(bool $mutationSelector = false, bool $translatedCheckbox = false, bool $generateUuid = false, bool $defaultsField = false, bool $defaultGroup = true, bool $forcePrimary = true): AdminForm
-	{
+	public function create(
+		bool $mutationSelector = false,
+		bool $translatedCheckbox = false,
+		bool $generateUuid = false,
+		bool $defaultsField = false,
+		bool $defaultGroup = true,
+		bool $forcePrimary = true
+	): AdminForm {
 		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->formFactory->create(AdminForm::class);
 
-		if ($this->administrator->getIdentity() && $this->administrator->getIdentity()->role) {
+		if ($this->administrator->getIdentity() instanceof \Admin\DB\Administrator && $this->administrator->getIdentity()->role) {
 			$mutations = $this->administrator->getIdentity()->role->getMutations() === null ? $this->getMutations() : $this->administrator->getIdentity()->role->getMutations();
 			$form->setMutations($mutations);
 			$form->setPrimaryMutation($this->getDefaultMutation() ?? $mutations[0]);
@@ -104,7 +116,7 @@ class AdminFormFactory
 		}
 
 		$form->onAnchor[] = function (AdminForm $form): void {
-			if ($lang = $form->getPresenter()->getParameter('selectedLang')) {
+			if ($form->getComponent(AdminForm::MUTATION_SELECTOR_NAME) instanceof BaseControl && $lang = $form->getPresenter()->getParameter('selectedLang')) {
 				$form->getComponent(AdminForm::MUTATION_SELECTOR_NAME)->setDefaultValue($lang);
 			}
 		};
@@ -128,7 +140,7 @@ class AdminFormFactory
 		};
 
 		$form->onSuccess[] = function (AdminForm $form): void {
-			if ($form->entityName) {
+			if ($form->entityName && $this->administrator->getIdentity() instanceof \Admin\DB\Administrator) {
 				$this->changelogRepository->createOne([
 					'user' => $this->administrator->getIdentity()->getAccount()->login,
 					'entity' => $form->entityName,

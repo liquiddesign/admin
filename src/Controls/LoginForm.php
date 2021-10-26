@@ -14,14 +14,14 @@ use Nette;
 class LoginForm extends \Nette\Application\UI\Form
 {
 	/**
-	 * @var callable[]&callable(\App\User\Controls\LoginForm): void; Occurs after login
+	 * @var array<callable(static): void> Occurs after login
 	 */
-	public $onLogin;
+	public array $onLogin;
 	
 	/**
-	 * @var callable[]&callable(\App\User\Controls\LoginForm): void; Occurs after login fail
+	 * @var array<callable(static): void> Occurs after login fail
 	 */
-	public $onLoginFail;
+	public array $onLoginFail;
 	
 	private Administrator $admin;
 	
@@ -40,14 +40,11 @@ class LoginForm extends \Nette\Application\UI\Form
 	protected function submit(): void
 	{
 		try {
-			$values = $this->getValues();
-			$this->admin->login($values->login, $values->password, \Admin\DB\Administrator::class);
+			$values = $this->getValues('array');
+			$this->admin->login($values['login'], $values['password'], \Admin\DB\Administrator::class);
 			$this->onLogin($this);
 		} catch (Nette\Security\AuthenticationException $exception) {
 			$this->onLoginFail($this, $exception->getCode());
 		}
 	}
-	
-	
-	
 }

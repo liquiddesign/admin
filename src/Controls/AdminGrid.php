@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Admin\Controls;
 
 use Admin\DB\ChangelogRepository;
+use Common\NumbersHelper;
 use Forms\Container;
 use Forms\Form;
 use Grid\Column;
@@ -23,10 +24,9 @@ use StORM\Entity;
 use StORM\ICollection;
 use StORM\Meta\RelationNxN;
 use StORM\RelationCollection;
-use Common\NumbersHelper;
 
 /**
- * @method onDelete(Entity $object)
+ * @method onDelete(\StORM\Entity $object)
  */
 class AdminGrid extends \Grid\Datagrid
 {
@@ -37,30 +37,37 @@ class AdminGrid extends \Grid\Datagrid
 
 	public Translator $translator;
 
-	private ChangelogRepository $changelogRepository;
-
+	public ?string $entityName = null;
+	
 	private ?string $bulkFormId = null;
-
+	
+	/**
+	 * @var string[]|null
+	 */
 	private ?array $bulkFormInputs = null;
 
 	private ?string $bulkFormDefaultLink = null;
 
 	/**
-	 * @var callable
+	 * @var callable|null
 	 */
 	private $bulkFormOnBeforeProcess = null;
-
+	
+	/**
+	 * @var string[]
+	 */
 	private array $bulkFormCopyRawValues = [];
 
 	/**
-	 * @var callable
+	 * @var callable|null
 	 */
 	private $bulkFormOnProcess = null;
 
 	private AdminFormFactory $formFactory;
-
-	private ?Session $session;
-
+	
+	/**
+	 * @var int[]
+	 */
 	private array $itemsPerPage;
 
 	private bool $showItemsPerPage;
@@ -69,16 +76,21 @@ class AdminGrid extends \Grid\Datagrid
 
 	private string $appendClass = '';
 
-	public ?string $entityName = null;
-
-	public function __construct(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false, ?Session $session = null)
-	{
+	public function __construct(
+		ICollection $source,
+		?int $defaultOnPage = null,
+		?string $defaultOrderExpression = null,
+		?string $defaultOrderDir = null,
+		bool $encodeId = false,
+		?Session $session = null
+	) {
 		parent::__construct($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId);
 
 		$this->onRender[] = function (\Nette\Utils\Html $tbody, array $columns): void {
 			if (\count($tbody) === 0) {
 				$tNoResult = $this->translator->translate('admin.gridNoResult', 'Žádný výsledek. Zkuste změnit nebo vymazat filtry.');
-				$tbody->addHtml((\Nette\Utils\Html::el('tr')->addHtml(\Nette\Utils\Html::el('td', ['colspan' => \count($columns)])->setHtml('<i>' . $tNoResult . '</i>')->class('text-center p-2'))));
+				$td = \Nette\Utils\Html::el('td', ['colspan' => \count($columns)])->setHtml('<i>' . $tNoResult . '</i>')->class('text-center p-2');
+				$tbody->addHtml((\Nette\Utils\Html::el('tr')->addHtml($td)));
 			}
 		};
 
@@ -113,25 +125,28 @@ class AdminGrid extends \Grid\Datagrid
 
 			foreach ($this->columns as $column) {
 				$column->onRender[] = function (\Nette\Utils\Html $th) use ($orderColumn, $orderDirection, $column): void {
-					if ($column->getOrderExpression() && $orderColumn == $column->getOrderExpression()) {
-						$th->setHtml('<i class="mr-1 ' . (\strpos($orderColumn, 'DESC') !== false ? 'fa fa-sort-amount-down' : ($orderDirection == 'ASC' ? 'fa fa-sort-amount-up-alt' : 'fa fa-sort-amount-down')) . '"></i>' . $th->getHtml());
+					if ($column->getOrderExpression() && $orderColumn === $column->getOrderExpression()) {
+						$sortClass = \strpos($orderColumn, 'DESC') !== false ? 'fa fa-sort-amount-down' : ($orderDirection === 'ASC' ? 'fa fa-sort-amount-up-alt' : 'fa fa-sort-amount-down');
+						$th->setHtml('<i class="mr-1 ' . $sortClass . '"></i>' . $th->getHtml());
 					}
 				};
 
-				$column->onRenderCell[] = function (Html $td, $object) {
+				$column->onRenderCell[] = function (Html $td, $object): void {
 					if (\strpos($td[0], 'btn-sm') !== false) {
 						$td->class('fit');
 					}
 				};
 			}
 		};
-
-		$this->session = $session;
 	}
-
+	
+	/**
+	 * @deprecated not working
+	 */
 	public function setChangelogRepository(ChangelogRepository $changelogRepository): void
 	{
-		$this->changelogRepository = $changelogRepository;
+		unset($changelogRepository);
+		// removed for rework
 	}
 
 	public function setItemsPerPage(array $items): void
@@ -177,14 +192,6 @@ class AdminGrid extends \Grid\Datagrid
 		return $this->addColumnSelector($wrapperAttributes);
 	}
 
-	protected function createComponentFilterForm(): \Nette\Application\UI\Form
-	{
-		$form = $this->formFactory->create();
-		$this->makeFilterForm($form);
-
-		return $form;
-	}
-
 	public function addColumnSelector(array $wrapperAttributes = []): Column
 	{
 		return parent::addColumnSelector($wrapperAttributes + ['class' => 'fit']);
@@ -198,7 +205,7 @@ class AdminGrid extends \Grid\Datagrid
 		return $column;
 	}
 
-	public function addColumnImage(string $expression, string $dir, string $subDir = 'thumb', string $th = '')
+	public function addColumnImage(string $expression, string $dir, string $subDir = 'thumb', string $th = ''): Column
 	{
 		return $this->addColumn($th, function ($entity) use ($dir, $expression, $subDir) {
 			$baseUrl = $this->getPresenter()->getHttpRequest()->getUrl()->getBaseUrl();
@@ -221,11 +228,12 @@ class AdminGrid extends \Grid\Datagrid
 		}, '%s', null, ['class' => 'fit']);
 	}
 
-	public function addColumnInputText($th, string $name, $setValueExpression = '', $defaultValue = '', ?string $orderExpression = null, array $wrapperAttributes = [], bool $required = false)
+	public function addColumnInputText($th, string $name, $setValueExpression = '', $defaultValue = '', ?string $orderExpression = null, array $wrapperAttributes = [], bool $required = false): Column
 	{
-		$this->addColumnInput($th, $name, function () use ($required) {
+		return $this->addColumnInput($th, $name, function () use ($required) {
 			$textbox = new TextInput();
 			$textbox->setHtmlAttribute('class', 'form-control form-control-sm');
+
 			if ($required) {
 				$textbox->setRequired();
 			}
@@ -234,12 +242,20 @@ class AdminGrid extends \Grid\Datagrid
 		}, $setValueExpression, $defaultValue, $orderExpression, ['class' => 'minimal'] + $wrapperAttributes);
 	}
 
-	public function addColumnInputInteger($th, string $name, $setValueExpression = '', $defaultValue = '', ?string $orderExpression = null, array $wrapperAttributes = [], bool $required = false)
-	{
-		$this->addColumnInput($th, $name, function () use ($required) {
+	public function addColumnInputInteger(
+		$th,
+		string $name,
+		$setValueExpression = '',
+		$defaultValue = '',
+		?string $orderExpression = null,
+		array $wrapperAttributes = [],
+		bool $required = false
+	): Column {
+		return $this->addColumnInput($th, $name, function () use ($required) {
 			$textbox = new TextInput();
 			$textbox->setHtmlAttribute('class', 'form-control form-control-sm');
 			$textbox->addRule(Form::INTEGER);
+
 			if ($required) {
 				$textbox->setRequired();
 			}
@@ -248,8 +264,15 @@ class AdminGrid extends \Grid\Datagrid
 		}, $setValueExpression, $defaultValue, $orderExpression, ['class' => 'minimal'] + $wrapperAttributes);
 	}
 
-	public function addColumnInputFloat($th, string $name, $setValueExpression = '', $defaultValue = '', ?string $orderExpression = null, array $wrapperAttributes = ['class' => 'minimal'], bool $required = false)
-	{
+	public function addColumnInputFloat(
+		$th,
+		string $name,
+		$setValueExpression = '',
+		$defaultValue = '',
+		?string $orderExpression = null,
+		array $wrapperAttributes = ['class' => 'minimal'],
+		bool $required = false
+	): void {
 		$this->addColumnInput($th, $name, function () use ($required) {
 			$textbox = new TextInput();
 			$textbox->setHtmlAttribute('class', 'form-control form-control-sm');
@@ -297,7 +320,7 @@ class AdminGrid extends \Grid\Datagrid
 		}, $setValueExpression, $defaultValue, $orderExpression, ['class' => 'minimal'] + $wrapperAttributes);
 	}
 
-	public function addColumnInputSelect($th, string $name, $setValueExpression = '', $defaultValue = '', ?string $orderExpression = null, array $wrapperAttributes = [], $items = null)
+	public function addColumnInputSelect($th, string $name, $setValueExpression = '', $defaultValue = '', ?string $orderExpression = null, array $wrapperAttributes = [], $items = null): void
 	{
 		$this->addColumnInput($th, $name, function () use ($items) {
 			$selectBox = new SelectBox(null, $items);
@@ -307,7 +330,7 @@ class AdminGrid extends \Grid\Datagrid
 		}, $setValueExpression, $defaultValue, $orderExpression, $wrapperAttributes);
 	}
 
-	public function addColumnPriority()
+	public function addColumnPriority(): Column
 	{
 		return $this->addColumnInputInteger($this->translator->translate('admin.priority', 'Pořadí'), 'priority', '', '', 'priority', [], true);
 	}
@@ -326,12 +349,12 @@ class AdminGrid extends \Grid\Datagrid
 
 	public function addColumnLink(string $destination, string $label = '', ?string $th = null, $wrappers = ['class' => 'minimal']): Column
 	{
-		return $this->addColumn($th, function ($object, $datagrid) use ($destination, $label) {
+		return $this->addColumn($th, function ($object, $datagrid) use ($destination) {
 			return $datagrid->getPresenter()->link($destination, $object instanceof Entity ? $object : \call_user_func($this->idCallback, $object));
 		}, '<a class="btn btn-outline-primary btn-sm text-xs" style="white-space: nowrap" href="%s">' . $label . '</a>', null, $wrappers);
 	}
 
-	public function addColumnMutations(string $property, bool $nullable = true)
+	public function addColumnMutations(string $property, bool $nullable = true): void
 	{
 		$this->addColumn($this->translator->translate('admin.mutations', 'Mutace'), function (Entity $object) use ($property, $nullable) {
 			$img = [];
@@ -357,11 +380,15 @@ class AdminGrid extends \Grid\Datagrid
 	 * @param callable|null $beforeDeleteCallback Callback that will be called before object removal. If callback throw exception, it will catch it and object will not be deleted.
 	 * @param bool $override If true, object will not be automatically delete. You can delete it manually in callback.
 	 * @param callable|null $condition Condition callback, must return boolean
-	 * @return \Grid\Column
 	 */
-	public function addColumnActionDelete(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null)
+	public function addColumnActionDelete(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null): Column
 	{
-		return $this->addColumnAction('', "<a href=\"%s\" class='btn btn-danger btn-sm text-xs' title='" . $this->translator->translate('admin.remove', 'Smazat') . "' onclick=\"return confirm('" . $this->translator->translate('admin.really', 'Opravdu?') . "')\"><i class='far fa-trash-alt'></i></a>",
+		$confirmJS = "return confirm('" . $this->translator->translate('admin.really', 'Opravdu?') . "')";
+		$removeLabel = $this->translator->translate('admin.remove', 'Smazat');
+		
+		return $this->addColumnAction(
+			'',
+			"<a href=\"%s\" class='btn btn-danger btn-sm text-xs' title='" . $removeLabel . "' onclick='" . $confirmJS . "'\"><i class='far fa-trash-alt'></i></a>",
 			function ($object) use ($beforeDeleteCallback, $override, $condition): void {
 				try {
 					$this->getPresenter()->flashMessage($this->translator->translate('admin.done', 'Provedeno'), 'success');
@@ -370,7 +397,7 @@ class AdminGrid extends \Grid\Datagrid
 						$allowed = $condition($object);
 					}
 
-					if (!$condition || (isset($allowed) && $allowed == true)) {
+					if (!$condition || (isset($allowed) && $allowed === true)) {
 						if ($beforeDeleteCallback) {
 							$beforeDeleteCallback($object);
 						}
@@ -382,7 +409,11 @@ class AdminGrid extends \Grid\Datagrid
 						$this->onDeleteRow($object);
 
 						if (!$override) {
-							$this->getSource()->setGroupBy([])->where($this->getSource(false)->getPrefix() . $this->getSourceIdName(), \call_user_func($this->idCallback, $object))->setOrderBy([])->delete();
+							$this->getSource()
+								->setGroupBy([])
+								->setOrderBy([])
+								->where($this->getSource(false)->getPrefix() . $this->getSourceIdName(), \call_user_func($this->idCallback, $object))
+								->delete();
 						}
 					} else {
 						$this->getPresenter()->flashMessage($this->translator->translate('admin.unableToRemoveItem', 'Chyba: Je zákázáno tuto položku smazat!'), 'error');
@@ -391,18 +422,23 @@ class AdminGrid extends \Grid\Datagrid
 				} catch (\Exception $e) {
 					$this->getPresenter()->flashMessage($this->translator->translate('admin.unableToRemove', 'Chyba: Nelze smazat.'), 'error');
 				}
+
 				$this->getPresenter()->redirect('this');
-			}, [], null, ['class' => 'minimal']);
+			},
+			[],
+			null,
+			['class' => 'minimal'],
+		);
 	}
 
-	public function addColumnActionDeleteSystemic(?callable $beforeDeleteCallback = null, bool $override = false)
+	public function addColumnActionDeleteSystemic(?callable $beforeDeleteCallback = null, bool $override = false): Column
 	{
 		$column = $this->addColumnActionDelete($beforeDeleteCallback, $override, function (Entity $object) {
-			return !$object->isSystemic();
+			return \method_exists($object, 'isSystemic') && !$object->isSystemic();
 		});
 
-		$column->onRenderCell[] = function (\Nette\Utils\Html $td, Entity $object) {
-			if ($object->isSystemic()) {
+		$column->onRenderCell[] = function (\Nette\Utils\Html $td, Entity $object): void {
+			if (\method_exists($object, 'isSystemic') && $object->isSystemic()) {
 				$td[0] = "<button type='button' class='btn btn-sm btn-danger disabled' title='Systémová stránka'><i class='far fa-trash-alt'></i></button>";
 			}
 		};
@@ -421,19 +457,40 @@ class AdminGrid extends \Grid\Datagrid
 	 * @param callable|null $overrideCallback If set, all other options is ingored and this callback must process data
 	 * @param callable|null $oneTimeBeforeCallback Callback called once before any processing on submit click. No data passed. Good for e.g. cache clearing.
 	 */
-	public function addButtonSaveAll(array $processNullColumns = [], array $processTypes = [], ?string $sourceIdName = null, bool $ignore = false, ?callable $onProcessType = null, ?callable $onRowUpdate = null, bool $diff = true, ?callable $overrideCallback = null, ?callable $oneTimeBeforeCallback = null)
-	{
+	public function addButtonSaveAll(
+		array $processNullColumns = [],
+		array $processTypes = [],
+		?string $sourceIdName = null,
+		bool $ignore = false,
+		?callable $onProcessType = null,
+		?callable $onRowUpdate = null,
+		bool $diff = true,
+		?callable $overrideCallback = null,
+		?callable $oneTimeBeforeCallback = null
+	): void {
 		$grid = $this;
 		$defaults = $this->getForm()->addHidden('_defaults')->setNullable(true)->setOmitted(true);
 
 		$submit = $this->getForm()->addSubmit('submit', $this->translator->translate('admin.save', 'Uložit'));
 		$submit->setHtmlAttribute('class', 'btn btn-sm btn-primary');
 
-		$grid->onRender[] = function () use ($defaults, $grid) {
+		$grid->onRender[] = function () use ($defaults, $grid): void {
 			$defaults->setDefaultValue(\json_encode($grid->inputsValues));
 		};
 
-		$submit->onClick[] = function ($button) use ($grid, $defaults, $processNullColumns, $processTypes, $sourceIdName, $ignore, $onProcessType, $onRowUpdate, $diff, $overrideCallback, $oneTimeBeforeCallback) {
+		$submit->onClick[] = function ($button) use (
+			$grid,
+			$defaults,
+			$processNullColumns,
+			$processTypes,
+			$sourceIdName,
+			$ignore,
+			$onProcessType,
+			$onRowUpdate,
+			$diff,
+			$overrideCallback,
+			$oneTimeBeforeCallback
+		): void {
 			if ($oneTimeBeforeCallback) {
 				$oneTimeBeforeCallback();
 			}
@@ -456,7 +513,7 @@ class AdminGrid extends \Grid\Datagrid
 					}
 
 					foreach ($processNullColumns as $column) {
-						$data[$column] = $data[$column] ?? null;
+						$data[$column] ??= null;
 					}
 
 					foreach ($processTypes as $key => $value) {
@@ -469,8 +526,9 @@ class AdminGrid extends \Grid\Datagrid
 						} else {
 							$newValue = $data[$key] ?? null;
 
-							if ($value == 'float') {
+							if ($value === 'float') {
 								$data[$key] = \floatval(\str_replace(',', '.', $newValue));
+
 								continue;
 							}
 
@@ -491,13 +549,15 @@ class AdminGrid extends \Grid\Datagrid
 						'type' => 'grid-edit',
 					]);*/
 
-					if (\count($data) == 0) {
+					if (\count($data) === 0) {
 						continue;
 					}
 
-					$grid->getSource()->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)->setGroupBy([])->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
+					$grid->getSource()
+						->setGroupBy([])
+						->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)
+						->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
 				}
-
 			}
 
 			$grid->getPresenter()->flashMessage($this->translator->translate('admin.saved', 'Uloženo'), 'success');
@@ -512,13 +572,18 @@ class AdminGrid extends \Grid\Datagrid
 	 * @param string|null $sourceIdName Name of source primary key
 	 * @param callable|null $oneTimeBeforeCallback Callback called once before any processing on submit click. No data passed. Good for e.g. cache clearing.
 	 */
-	public function addButtonDeleteSelected(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null, ?string $sourceIdName = null, ?callable $oneTimeBeforeCallback = null)
-	{
+	public function addButtonDeleteSelected(
+		?callable $beforeDeleteCallback = null,
+		bool $override = false,
+		?callable $condition = null,
+		?string $sourceIdName = null,
+		?callable $oneTimeBeforeCallback = null
+	): void {
 		$grid = $this;
 		$submit = $this->getForm()->addSubmit('deleteAll', $this->translator->translate('admin.remove', 'Smazat'));
 		$submit->setHtmlAttribute('class', 'btn btn-sm btn-danger');
 		$submit->setHtmlAttribute('onClick', 'return confirm("' . $this->translator->translate('admin.really', 'Opravdu?') . '")');
-		$submit->onClick[] = function ($button) use ($grid, $beforeDeleteCallback, $override, $condition, $sourceIdName, $oneTimeBeforeCallback) {
+		$submit->onClick[] = function ($button) use ($grid, $beforeDeleteCallback, $override, $condition, $sourceIdName, $oneTimeBeforeCallback): void {
 			if ($oneTimeBeforeCallback) {
 				$oneTimeBeforeCallback();
 			}
@@ -530,28 +595,34 @@ class AdminGrid extends \Grid\Datagrid
 
 				if ($condition) {
 					$allowed = $condition($object);
+
 					if (!$allowed) {
 						$warning = true;
+
 						continue;
 					}
 				}
 
-				if (!$condition || (isset($allowed) && $allowed == true)) {
-					if ($beforeDeleteCallback) {
-						$beforeDeleteCallback($object);
-					}
+				if ($condition && (!isset($allowed) || $allowed !== true)) {
+					continue;
+				}
 
-					if (isset($this->onDelete)) {
-						$this->onDelete($object);
-					}
+				if ($beforeDeleteCallback) {
+					$beforeDeleteCallback($object);
+				}
 
-					if (!$override && $object) {
-						try {
-							$object->delete();
-						} catch (\Throwable $exception) {
-							$warning = true;
-						}
-					}
+				if (isset($this->onDelete)) {
+					$this->onDelete($object);
+				}
+
+				if ($override || !$object) {
+					continue;
+				}
+
+				try {
+					$object->delete();
+				} catch (\Throwable $exception) {
+					$warning = true;
 				}
 			}
 
@@ -564,37 +635,48 @@ class AdminGrid extends \Grid\Datagrid
 		};
 	}
 
-	public function decoratorEmpty(Html $td, $object)
+	public function decoratorEmpty(Html $td, $object): void
 	{
-		if (!\trim(\strip_tags($td->getHtml()))) {
-			$td->setHtml('');
+		unset($object);
+		
+		if (\trim(\strip_tags($td->getHtml()))) {
+			return;
 		}
+		
+		$td->setHtml('');
 	}
 
-	public function decoratorNowrap(Html $td, $object)
+	public function decoratorNowrap(Html $td, $object): void
 	{
+		unset($object);
+		
 		$td->addAttributes(['style' => 'white-space: nowrap;']);
 	}
 
-	public function decoratorNumber(Html $td, $object)
+	public function decoratorNumber(Html $td, $object): void
 	{
+		unset($object);
+		
 		$td->addAttributes(['style' => 'white-space: nowrap; text-align: right;']);
 	}
 
 	/**
 	 * @param array|string[] $resetLink First item is link as string. Second argument to link.
 	 */
-	public function addFilterButtons(array $resetLink = ['default'])
+	public function addFilterButtons(array $resetLink = ['default']): void
 	{
 		$grid = $this;
-		$grid->getFilterForm()->addSubmit('submit', $this->translator->translate('admin.filter', 'Filtrovat'))->setHtmlAttribute('class', 'btn btn-sm btn-primary form-control-sm');
-
-		$grid->getFilterForm()->onSuccess[] = function (Form $form) {
+		/** @var \Nette\Application\UI\Form $filterForm */
+		$filterForm = $grid->getFilterForm();
+		
+		$filterForm->addSubmit('submit', $this->translator->translate('admin.filter', 'Filtrovat'))->setHtmlAttribute('class', 'btn btn-sm btn-primary form-control-sm');
+		
+		$filterForm->onSuccess[] = function (\Nette\Forms\Form $form): void {
 			$this->setPage(1);
 		};
 
-		$reset = $grid->getFilterForm()->addSubmit('reset', $this->translator->translate('admin.cancelFilter', 'Zrušit'))->setHtmlAttribute('class', 'btn btn-sm btn-secondary form-control-sm');
-		$reset->onClick[] = function () use ($grid, $resetLink) {
+		$reset = $filterForm->addSubmit('reset', $this->translator->translate('admin.cancelFilter', 'Zrušit'))->setHtmlAttribute('class', 'btn btn-sm btn-secondary form-control-sm');
+		$reset->onClick[] = function () use ($grid, $resetLink): void {
 			// for persistance session storage
 			$grid->setFilters(null);
 			$grid->setPage(1);
@@ -604,11 +686,10 @@ class AdminGrid extends \Grid\Datagrid
 			} else {
 				$grid->getPresenter()->redirect($resetLink[0]);
 			}
-
 		};
 	}
 
-	public function addFilterTextInput(string $name, array $columns, ?string $label = null, ?string $placeholder = null, ?string $defaultValue = null, string $likeFormat = '%%%s%%')
+	public function addFilterTextInput(string $name, array $columns, ?string $label = null, ?string $placeholder = null, ?string $defaultValue = null, string $likeFormat = '%%%s%%'): void
 	{
 		$query = '';
 
@@ -618,13 +699,12 @@ class AdminGrid extends \Grid\Datagrid
 
 		$query = \substr($query, 0, -2);
 
-		$input = $this->addFilterText(function (ICollection $source, $value) use ($name, $query, $likeFormat) {
-			if (\strlen($value) == 0) {
+		$input = $this->addFilterText(function (ICollection $source, $value) use ($name, $query, $likeFormat): void {
+			if (\strlen($value) === 0) {
 				return;
 			}
 
 			$source->where($query, [$name => \vsprintf($likeFormat, [$value])]);
-
 		}, $defaultValue, $name, $label);
 
 		if ($placeholder) {
@@ -634,9 +714,16 @@ class AdminGrid extends \Grid\Datagrid
 		$input->setHtmlAttribute('class', 'form-control form-control-sm');
 	}
 
-	public function addFilterSelectInput(string $name, string $query, ?string $label = null, ?string $placeholder = null, ?string $defaultValue = null, ?array $items = null, string $variableName = 'q'): SelectBox
-	{
-		$input = $this->addFilterSelect(function (ICollection $source, $value) use ($query, $variableName) {
+	public function addFilterSelectInput(
+		string $name,
+		string $query,
+		?string $label = null,
+		?string $placeholder = null,
+		?string $defaultValue = null,
+		?array $items = null,
+		string $variableName = 'q'
+	): SelectBox {
+		$input = $this->addFilterSelect(function (ICollection $source, $value) use ($query, $variableName): void {
 			if ($value !== '') {
 				$source->where($query, [$variableName => "$value"]);
 			}
@@ -651,9 +738,9 @@ class AdminGrid extends \Grid\Datagrid
 		return $input;
 	}
 
-	public function addFilterCheckboxInput(string $name, string $query, ?string $label = null)
+	public function addFilterCheckboxInput(string $name, string $query, ?string $label = null): void
 	{
-		$input = $this->addFilterCheckbox(function (ICollection $source, $value) use ($query) {
+		$input = $this->addFilterCheckbox(function (ICollection $source, $value) use ($query): void {
 			$source->where($query);
 		}, null, $name, $label);
 
@@ -661,12 +748,22 @@ class AdminGrid extends \Grid\Datagrid
 		$input->getLabelPrototype()->setAttribute('class', 'form-check-label');
 	}
 
-	public function addButtonBulkEdit(string $bulkFormId, array $inputs, string $gridId = 'grid', string $name = 'bulkEdit', string $label = 'Hromadná úprava', string $link = 'bulkEdit', string $defaultLink = 'default', ?callable $onBeforeProcess = null, ?callable $onProcess = null, array $copyRawValues = [])
-	{
+	public function addButtonBulkEdit(
+		string $bulkFormId,
+		array $inputs,
+		string $gridId = 'grid',
+		string $name = 'bulkEdit',
+		string $label = 'Hromadná úprava',
+		string $link = 'bulkEdit',
+		string $defaultLink = 'default',
+		?callable $onBeforeProcess = null,
+		?callable $onProcess = null,
+		array $copyRawValues = []
+	): void {
 		$this->setBulkForm($bulkFormId, $inputs, $defaultLink, $onBeforeProcess, $onProcess, $copyRawValues);
 
 		$submit = $this->getForm()->addSubmit($name, $label)->setHtmlAttribute('class', 'btn btn-outline-primary btn-sm');
-		$submit->onClick[] = function ($button) use ($link, $defaultLink, $gridId) {
+		$submit->onClick[] = function ($button) use ($link, $gridId): void {
 			$params = [$this->getName() . '-selected' => $this->getSelectedIds()];
 			$params['grid'] = $gridId;
 
@@ -678,7 +775,7 @@ class AdminGrid extends \Grid\Datagrid
 		};
 	}
 
-	public function setBulkForm(string $bulkFormId, array $input, string $defaultLink, ?callable $onBeforeProcess = null, ?callable $onProcess = null, array $copyRawValues = [])
+	public function setBulkForm(string $bulkFormId, array $input, string $defaultLink, ?callable $onBeforeProcess = null, ?callable $onProcess = null, array $copyRawValues = []): void
 	{
 		$this->bulkFormId = $bulkFormId;
 		$this->bulkFormInputs = $input;
@@ -752,7 +849,7 @@ class AdminGrid extends \Grid\Datagrid
 
 		$form->addSubmit('submitAndBack', 'Uložit a zpět');
 
-		$form->onSuccess[] = function (AdminForm $form) use ($ids) {
+		$form->onSuccess[] = function (AdminForm $form) use ($ids): void {
 			$values = $form->getValues('array');
 			$rawValues = $form->getPresenter()->getHttpRequest()->getPost();
 
@@ -770,11 +867,9 @@ class AdminGrid extends \Grid\Datagrid
 					continue;
 				}
 
-				$structure = $source instanceof Collection ? $source->getRepository()->getStructure() : null;
-
-				if ($values['values'][$name] && $structure && $structure->getRelation($name) instanceof RelationNxN) {
+				if ($values['values'][$name] && $source instanceof Collection && $source->getRepository()->getStructure()->getRelation($name) instanceof RelationNxN) {
 					foreach ($ids as $id) {
-						$relation = new RelationCollection($source->getRepository(), $structure->getRelation($name), $id);
+						$relation = new RelationCollection($source->getRepository(), $source->getRepository()->getStructure()->getRelation($name), $id);
 						$relation->relate($values['values'][$name]);
 					}
 				}
@@ -794,54 +889,55 @@ class AdminGrid extends \Grid\Datagrid
 			if (\count($values['values']) === 0 && \count($relations) === 0) {
 				return;
 			}
-
+			
 			if ($this->bulkFormOnBeforeProcess) {
 				[$values, $relations] = \call_user_func($this->bulkFormOnBeforeProcess, $values, $relations);
 			}
 
 			foreach ($ids as $id) {
-				/** @var Entity $object */
+				/** @var \StORM\Entity|null $object */
 				$object = $this->getSource()->where($this->getSource()->getPrefix() . $this->getSourceIdName(), $id)->setGroupBy([])->first();
 
-				if ($object) {
-					$localValues = $values;
-					$localRelations = $relations;
+				if (!$object) {
+					continue;
+				}
 
-					if($this->bulkFormOnProcess){
-						[$localValues, $localRelations] = \call_user_func($this->bulkFormOnProcess, $id, $object, $localValues, $localRelations);
-					}
+				$localValues = $values;
+				$localRelations = $relations;
 
-					$updateKeys = [];
+				if ($this->bulkFormOnProcess) {
+					[$localValues, $localRelations] = \call_user_func($this->bulkFormOnProcess, $id, $object, $localValues, $localRelations);
+				}
 
-					foreach ($localValues['values'] as $key => $value) {
+				$updateKeys = [];
+
+				foreach ($localValues['values'] as $key => $value) {
+					try {
+						$object->$key = $value;
+						$updateKeys[] = $key;
+					} catch (\TypeError $e) {
 						try {
-							$object->$key = $value;
+							$object->$key = NumbersHelper::strtoFloat($value);
 							$updateKeys[] = $key;
 						} catch (\TypeError $e) {
 							try {
-								$object->$key = NumbersHelper::strtoFloat($value);
+								$object->$key = \intval($value);
 								$updateKeys[] = $key;
 							} catch (\TypeError $e) {
-								try {
-									$object->$key = \intval($value);
-									$updateKeys[] = $key;
-								} catch (\TypeError $e) {
-								}
 							}
 						}
 					}
+				}
 
-					if (\count($updateKeys) > 0) {
-						$object->updateAll($updateKeys);
-					}
+				if (\count($updateKeys) > 0) {
+					$object->updateAll($updateKeys);
+				}
 
-					foreach ($localRelations as $key => $value) {
-						try {
-							$object->$key->unrelateAll();
-							$object->$key->relate($value);
-						} catch (\Exception $e) {
-
-						}
+				foreach ($localRelations as $key => $value) {
+					try {
+						$object->$key->unrelateAll();
+						$object->$key->relate($value);
+					} catch (\Exception $e) {
 					}
 				}
 			}
@@ -853,7 +949,7 @@ class AdminGrid extends \Grid\Datagrid
 		return $form;
 	}
 
-	public function addColumnInputTime($th, string $name, $setValueExpression = '', $defaultValue = '', ?string $orderExpression = null, array $wrapperAttributes = [])
+	public function addColumnInputTime($th, string $name, $setValueExpression = '', $defaultValue = '', ?string $orderExpression = null, array $wrapperAttributes = []): void
 	{
 		$this->addColumnInput($th, $name, function ($object) {
 			$textInput = new TextInput();
@@ -870,5 +966,13 @@ class AdminGrid extends \Grid\Datagrid
 		$this->template->setTranslator($this->translator);
 
 		parent::render();
+	}
+
+	protected function createComponentFilterForm(): \Nette\Application\UI\Form
+	{
+		$form = $this->formFactory->create();
+		$this->makeFilterForm($form);
+
+		return $form;
 	}
 }

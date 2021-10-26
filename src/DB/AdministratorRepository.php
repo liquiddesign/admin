@@ -2,7 +2,6 @@
 
 namespace Admin\DB;
 
-use Security\DB\IUser;
 use Security\DB\IUserRepository;
 use Security\DB\UserRepositoryTrait;
 

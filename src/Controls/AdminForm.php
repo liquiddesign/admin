@@ -15,10 +15,12 @@ use Nette\Forms\Controls\TextInput;
 use Nette\Forms\Form;
 use Nette\Http\FileUpload;
 use Nette\Localization\Translator;
+use Nette\NotImplementedException;
 use Nette\Utils\Image;
 use Pages\DB\IPageRepository;
 use Pages\DB\Page;
 use StORM\DIConnection;
+use StORM\Entity;
 use StORM\Meta\Structure;
 
 class AdminForm extends \Forms\Form
@@ -42,10 +44,14 @@ class AdminForm extends \Forms\Form
 
 		$this->render();
 	}
-
+	
+	/**
+	 * @param string|null $containerName
+	 * @return mixed[]|null
+	 */
 	public function getChangedProperties(?string $containerName = null): ?array
 	{
-		if (!isset($this['_defaults'])) {
+		if (!isset($this['_defaults']) || !$this['_defaults'] instanceof BaseControl) {
 			throw new NotImplementedException('"_defaults" input is not set');
 		}
 
@@ -65,17 +71,19 @@ class AdminForm extends \Forms\Form
 
 		$properties = [];
 
+		/** @var \Forms\Container $container */
 		$container = $containerName ? $this[$containerName] : $this;
 
 		$values = $container->getValues('array');
 
 		foreach ($values as $name => $value) {
+			/* @phpstan-ignore-next-line */
 			if ($container[$name] instanceof Container && !$container[$name] instanceof LocaleContainer) {
 				continue;
 			}
 
 			if (\is_scalar($value)) {
-				if ($value != $entityValues[$name]) {
+				if ($value !== $entityValues[$name]) {
 					$properties[$name] = $name;
 				}
 			}
@@ -90,9 +98,11 @@ class AdminForm extends \Forms\Form
 				}
 			}
 
-			if ($value instanceof FileUpload && $value->hasFile()) {
-				$properties[$name] = $name;
+			if (!($value instanceof FileUpload) || !$value->hasFile()) {
+				continue;
 			}
+
+			$properties[$name] = $name;
 		}
 
 		return $properties;
@@ -142,9 +152,11 @@ class AdminForm extends \Forms\Form
 			$this->addSubmit('submitAndContinue', $this->translator->translate('admin.saveAndContinue', 'Uložit a pokračovat'));
 		}
 
-		if ($stayPut) {
-			$this->addSubmit('submitAndNext', $this->translator->translate('admin.saveAndNext', 'Uložit a vložit další'));
+		if (!$stayPut) {
+			return;
 		}
+
+		$this->addSubmit('submitAndNext', $this->translator->translate('admin.saveAndNext', 'Uložit a vložit další'));
 	}
 
 	public function syncPages(callable $callback): void
@@ -155,13 +167,12 @@ class AdminForm extends \Forms\Form
 	}
 
 	public function processRedirect(
-		string  $detailLink,
+		string $detailLink,
 		?string $backLink = null,
-		array   $detailArguments = [],
-		array   $backLinkArguments = [],
-		array   $continueArguments = []
-	): void
-	{
+		array $detailArguments = [],
+		array $backLinkArguments = [],
+		array $continueArguments = []
+	): void {
 		/** @var \Nette\Forms\Controls\Button $submitter */
 		$submitter = $this->isSubmitted();
 		$backLink = $backLink ?: $detailLink;
@@ -173,8 +184,8 @@ class AdminForm extends \Forms\Form
 
 			$this->getPresenter()->redirect($backLink, $backLinkArguments);
 		} elseif ($submitter->getName() === 'submitAndContinue') {
-			if ($this->getComponent(\Forms\Form::MUTATION_SELECTOR_NAME, false)) {
-				$selectedLang = $this->getComponent(\Forms\Form::MUTATION_SELECTOR_NAME)->getValue();
+			if ($this->getComponent(\Forms\Form::MUTATION_SELECTOR_NAME, false) instanceof BaseControl) {
+				$selectedLang = $this->getComponent(\Forms\Form::MUTATION_SELECTOR_NAME, false)->getValue();
 				$detailArguments['selectedLang'] = $selectedLang;
 			}
 
@@ -185,52 +196,49 @@ class AdminForm extends \Forms\Form
 	}
 
 	public function addPageContainer(
-		?string          $pageType = null,
-		array            $params = [],
+		?string $pageType = null,
+		array $params = [],
 		?LocaleContainer $copyControls = null,
-		bool             $isOffline = false,
-		bool             $required = true,
-		bool             $content = false,
-		string           $title = 'URL a SEO',
-		bool             $opengraph = false,
-		bool             $linkToDetail = false
-	): Container
-	{
+		bool $isOffline = false,
+		bool $required = true,
+		bool $content = false,
+		string $title = 'URL a SEO',
+		bool $opengraph = false,
+		bool $linkToDetail = false
+	): Container {
 		if (!$this->prettyPages) {
 			return $this->addContainer('page');
 		}
 
-		/** @var \Pages\DB\IPage|null $page */
+		/** @var \Pages\DB\Page|null $page */
 		$page = $pageType ? $this->pageRepository->getPageByTypeAndParams($pageType, null, $params, true) : null;
 
-		/** @var Container $pageContainer */
+		/** @var \Forms\Container $pageContainer */
 		$pageContainer = $this->getComponent('page', false) ?: $this->addContainer('page');
 
 		$group = $this->addGroup($title, true);
 		$pageContainer->setCurrentGroup($group);
 
 		$pageContainer->addHidden('uuid')->setNullable();
-		$pageContainer->addLocaleText('url', 'URL')->forAll(function (TextInput $text, $mutation) use ($page, $pageType, $linkToDetail): void {
+		$pageContainer->addLocaleText('url', 'URL')->forAll(function (TextInput $text, $mutation) use ($page, $pageType): void {
 			$text->addRule(
-					[$this, 'validateUrl'],
-					$this->translator->translate('admin.urlError', 'URL již existuje'),
-					[$this->pageRepository, $mutation, $page ? $page->getPK() : null],
-				)->setNullable($pageType !== 'index');
+				[$this, 'validateUrl'],
+				$this->translator->translate('admin.urlError', 'URL již existuje'),
+				[$this->pageRepository, $mutation, $page ? $page->getPK() : null],
+			)->setNullable($pageType !== 'index');
 
 			if ($pageType === 'index') {
 				$text->setRequired(false);
 				$text->setHtmlAttribute('readonly', 'readonly');
 			}
 
-			if (!$this->administrator->getIdentity()->urlEditor && $page) {
+			if ($this->administrator->getIdentity() instanceof \Admin\DB\Administrator && !$this->administrator->getIdentity()->urlEditor && $page) {
 				$text->setHtmlAttribute('readonly', 'readonly');
 			}
 
 			$text->setHtmlAttribute('data-copy-url-targets', 'page[url]');
 			$text->setHtmlAttribute('data-copy-url-source', 'name');
 			$text->setHtmlAttribute('class', 'd-inline seo_url');
-
-
 		})->forAll(function (TextInput $text, $mutation) use ($linkToDetail, $page, $pageType, $required): void {
 			if (isset($this[self::MUTATION_TRANSLATOR_NAME]) && $pageType !== 'index' && $required) {
 				$text->addConditionOn($this[self::MUTATION_TRANSLATOR_NAME][$mutation], $this::EQUAL, true);
@@ -240,13 +248,18 @@ class AdminForm extends \Forms\Form
 				$text->setRequired(true);
 			}
 			
-			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text, $mutation) {
-				if ($linkToDetail && $page && $page->getValue('url', $mutation)) {
-					$url = $presenter->getHttpRequest()->getUrl()->getBaseUrl() . ($mutation === $this->getPrimaryMutation() ?  $page->getValue('url', $mutation) :  "$mutation/" . $page->getValue('url', $mutation));
-					$text->setHtmlAttribute("data-url-link-$mutation", "<a data-mutation='$mutation' class='ml-2' href='" . $url . "' target='_blank'><i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . "</a>");
+			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text, $mutation): void {
+				if ($linkToDetail && $page instanceof Entity && $page->getValue('url', $mutation)) {
+					$mutatedUrl = $page->getValue('url', $mutation);
+					$url = $presenter->getHttpRequest()->getUrl()->getBaseUrl() . ($mutation === $this->getPrimaryMutation() ? $mutatedUrl : "$mutation/" . $mutatedUrl);
+				
+					$text->setHtmlAttribute("data-url-link-$mutation", "
+						<a data-mutation='$mutation' class='ml-2' href='" . $url . "' target='_blank'>
+						<i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . "
+						</a>
+					");
 				}
 			});
-			
 		});
 
 		if ($isOffline) {
@@ -318,10 +331,10 @@ class AdminForm extends \Forms\Form
 
 	public function bind(
 		?Structure $mainStructure,
-		array      $containerStructures = [],
-		bool       $setDefaultValues = true
-	): void
-	{
+		array $containerStructures = [],
+		bool $setDefaultValues = true
+	): void {
+		/** @var \Nette\Forms\Controls\BaseControl $control */
 		foreach ($this->getComponents(true, BaseControl::class) as $control) {
 			$structure = $mainStructure;
 			$name = $control->getName();
@@ -344,29 +357,32 @@ class AdminForm extends \Forms\Form
 				$control->setNullable($structure->getColumn($name)->isNullable());
 			}
 
-			if ($setDefaultValues) {
-				$defaultValue = (new \ReflectionClass($structure->getColumn($name)->getEntityClass()))->getDefaultProperties()[$structure->getColumn($name)->getPropertyName()] ?? null;
-				$control->setDefaultValue($structure->getColumn($name)->getDefault() ?? $defaultValue);
+			if (!$setDefaultValues) {
+				continue;
 			}
+
+			$defaultValue = (new \ReflectionClass($structure->getColumn($name)->getEntityClass()))->getDefaultProperties()[$structure->getColumn($name)->getPropertyName()] ?? null;
+			$control->setDefaultValue($structure->getColumn($name)->getDefault() ?? $defaultValue);
 		}
 	}
-
+	
+	/**
+	 * @param mixed[]|object $data
+	 * @param bool $erase
+	 * @return static
+	 */
 	public function setDefaults($data, bool $erase = false)
 	{
-		if (isset($this['_defaults'])) {
+		if (isset($this['_defaults']) && $this['_defaults'] instanceof BaseControl) {
 			$this['_defaults']->setDefaultValue(\json_encode($data));
 		}
 
 		return parent::setDefaults($data, $erase);
 	}
-
-	public static function validateUrl(\Nette\Forms\Controls\TextInput $input, array $args): bool
-	{
-		[$repository, $mutation, $uuid] = $args;
-
-		return (bool )$repository->isUrlAvailable((string)$input->getValue(), $mutation, $uuid);
-	}
-
+	
+	/**
+	 * @return string[]
+	 */
 	public function getTranslatedMutations(): array
 	{
 		$mut = [];
@@ -376,5 +392,12 @@ class AdminForm extends \Forms\Form
 		}
 
 		return $mut;
+	}
+
+	public static function validateUrl(\Nette\Forms\Controls\TextInput $input, array $args): bool
+	{
+		[$repository, $mutation, $uuid] = $args;
+
+		return (bool )$repository->isUrlAvailable((string)$input->getValue(), $mutation, $uuid);
 	}
 }

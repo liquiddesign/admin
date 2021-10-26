@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Admin;
 
-use Nette\Security\IAuthorizator;
 use Admin\DB\PermissionRepository;
+use Nette\Security\IAuthorizator;
 
 class Authorizator implements IAuthorizator
 {
@@ -29,7 +29,7 @@ class Authorizator implements IAuthorizator
 			return true;
 		}
 		
-		return $this->allowedCache[$role.  '-' . $resource . '-' . $privilege] ??= $this->permissionRepo->isAllowed($role, $resource, $privilege === null ? null : \intval($privilege));
+		return $this->allowedCache[$role. '-' . $resource . '-' . $privilege] ??= $this->permissionRepo->isAllowed($role, $resource, $privilege === null ? null : \intval($privilege));
 	}
 	
 	public function setSuperRole(?string $role): void

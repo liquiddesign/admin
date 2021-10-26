@@ -4,22 +4,32 @@ declare(strict_types=1);
 
 namespace Admin\Admin;
 
+use _PHPStan_76800bfb5\Nette\Neon\Exception;
 use Admin\BackendPresenter;
-use Admin\DB\AdministratorRepository;
 use Admin\Controls\AdminForm;
+use Admin\DB\AdministratorRepository;
 use Admin\FormValidators;
 use Security\DB\AccountRepository;
+use Security\DB\IUser;
 
 class ProfilePresenter extends BackendPresenter
 {
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public AccountRepository $accountRepo;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public AdministratorRepository $adminRepo;
 	
 	public function createComponentAccountForm(): AdminForm
 	{
+		if (!$this->admin->getIdentity() instanceof IUser) {
+			throw new Exception('Identity is not filled with IUSer');
+		}
+		
 		$form = $this->formFactory->create();
 		
 		$profile = $form->addContainer('profile');
@@ -54,31 +64,33 @@ class ProfilePresenter extends BackendPresenter
 	
 	public function actionDefault(): void
 	{
-		/** @var \Forms\Form $form */
+		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->getComponent('accountForm');
 		
 		/** @var \Admin\DB\Administrator $administrator */
 		$administrator = $this->admin->getIdentity();
 		
-		if ($administrator->getAccount()) {
-			$form->setDefaults([
-				'account' => $administrator->getAccount()->toArray(),
-				'profile' => $administrator->toArray(),
-				'role' => $administrator->role->name ?? '',
-			]);
-			
-			$form->onSuccess[] = function (AdminForm $form) use ($administrator): void {
-				$values = $form->getValues();
-				
-				if ($values['account']->newPassword && $values['account']->oldPassword) {
-					$administrator->getAccount()->changePassword($values['account']->newPassword);
-				}
-				
-				$administrator->update($values['profile']);
-				
-				$this->flashMessage($this->_('.saved', 'Uloženo'), 'success');
-				$this->redirect('this');
-			};
+		if (!$administrator->getAccount()) {
+			return;
 		}
+
+		$form->setDefaults([
+			'account' => $administrator->getAccount()->toArray(),
+			'profile' => $administrator->toArray(),
+			'role' => $administrator->role->name ?? '',
+		]);
+		
+		$form->onSuccess[] = function (AdminForm $form) use ($administrator): void {
+			$values = $form->getValues();
+			
+			if ($values['account']->newPassword && $values['account']->oldPassword) {
+				$administrator->getAccount()->changePassword($values['account']->newPassword);
+			}
+			
+			$administrator->update($values['profile']);
+			
+			$this->flashMessage($this->_('.saved', 'Uloženo'), 'success');
+			$this->redirect('this');
+		};
 	}
 }

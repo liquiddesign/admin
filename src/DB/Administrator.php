@@ -38,12 +38,18 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	
 	protected ?Account $account;
 	
-	function getId()
+	/**
+	 * @return string|int
+	 */
+	public function getId()
 	{
 		return $this->getPK();
 	}
 	
-	function getRoles(): array
+	/**
+	 * @return string[]
+	 */
+	public function getRoles(): array
 	{
 		return $this->getValue('role') ? [$this->getValue('role')] : [];
 	}

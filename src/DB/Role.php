@@ -20,6 +20,9 @@ class Role extends \StORM\Entity
 	 */
 	public ?string $mutations = null;
 	
+	/**
+	 * @return string[]|null
+	 */
 	public function getMutations(): ?array
 	{
 		return $this->mutations === null ? null : ($this->mutations ? \explode(';', $this->mutations) : []);

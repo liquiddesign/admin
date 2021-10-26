@@ -22,22 +22,34 @@ class AdministratorPresenter extends BackendPresenter
 		'groups' => [],
 	];
 
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public AccountFormFactory $accountFormFactory;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public AccountRepository $accountRepository;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public AdministratorRepository $adminRepo;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public RoleRepository $roleRepo;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public TemplateRepository $templateRepository;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public Mailer $mailer;
 	
 	public string $tAdministrators;
@@ -80,7 +92,7 @@ class AdministratorPresenter extends BackendPresenter
 		
 		$this->accountFormFactory->addContainer($form, true, !$this->getParameter('administrator'));
 
-		if (\in_array('editUrl', static::CONFIGURATION['groups'])) {
+		if (\in_array('editUrl', self::CONFIGURATION['groups'])) {
 			$form->addCheckbox('urlEditor', $this->_('canEdit', 'Může editovat URL'));
 		}
 
@@ -91,6 +103,7 @@ class AdministratorPresenter extends BackendPresenter
 			$values = $form->getValues('array');
 			unset($values['account']);
 			
+			/** @var \Admin\DB\Administrator $administrator */
 			$administrator = $this->adminRepo->syncOne($values, null, true);
 			$this->accountFormFactory->onCreateAccount[] = function ($account) use ($administrator): void {
 				$administrator->accounts->relate([$account]);
@@ -148,12 +161,14 @@ class AdministratorPresenter extends BackendPresenter
 	
 	public function actionDetail(Administrator $administrator): void
 	{
-		/** @var \Forms\Form $form */
+		/** @var \Forms\Form|\Nette\Forms\Container[] $form */
 		$form = $this->getComponent('newForm');
 		$form->setDefaults($administrator->toArray());
 		
-		if ($account = $administrator->accounts->first()) {
-			$form['account']->setDefaults($account->toArray());
+		if (!$account = $administrator->accounts->first()) {
+			return;
 		}
+
+		$form['account']->setDefaults($account->toArray());
 	}
 }

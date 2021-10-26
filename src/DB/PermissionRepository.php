@@ -10,7 +10,7 @@ namespace Admin\DB;
  */
 class PermissionRepository extends \StORM\Repository
 {
-	public function isAllowed(string $role, string $resource, ?int $privilege = null)
+	public function isAllowed(string $role, string $resource, ?int $privilege = null): bool
 	{
 		return !$this->many()
 			->where("'$resource' LIKE CONCAT(REPLACE(this.resource, ':*', ''),'%')")

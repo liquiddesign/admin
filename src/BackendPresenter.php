@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Admin;
 
 use Admin\Controls\AdminFormFactory;
+use Admin\Controls\AdminGridFactory;
 use Admin\Controls\IMenuFactory;
 use Admin\Controls\Menu;
-use Admin\Controls\AdminGridFactory;
 use Nette\Application\BadRequestException;
 use Nette\Application\UI\Presenter;
 use Nette\DI\Container;
@@ -27,30 +27,47 @@ abstract class BackendPresenter extends Presenter
 	
 	public Administrator $admin;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public IMenuFactory $menuFactory;
 	
 	public ?string $backLink = null;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public AdminGridFactory $gridFactory;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public Container $container;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public AdminFormFactory $formFactory;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public Translator $translator;
 	
-	/** @persistent */
+	/**
+	 * @persistent
+	 */
 	public string $lang;
 	
+	/**
+	 * @var string[]
+	 */
 	public array $langs = [];
 	
 	public function checkRequirements($element): void
 	{
+		unset($element);
+		
 		if (!$this->admin->isLoggedIn()) {
 			if ($this->admin->logoutReason === \Nette\Security\UserStorage::LOGOUT_INACTIVITY) {
 				$this->flashMessage('You have been signed out due to inactivity. Please sign in again.');
@@ -69,14 +86,14 @@ abstract class BackendPresenter extends Presenter
 		return $this->menuFactory->create();
 	}
 	
-	public function handleLogout()
+	public function handleLogout(): void
 	{
 		$this->admin->logout(true);
 		
 		$this->redirect(':Admin:Login:default');
 	}
 	
-	public function beforeRender()
+	public function beforeRender(): void
 	{
 		if (!$this->template->getFile()) {
 			$this->template->setFile($this->contentTemplate);
@@ -85,6 +102,9 @@ abstract class BackendPresenter extends Presenter
 		$this->template->admin = $this->admin;
 	}
 	
+	/**
+	 * @return string[]
+	 */
 	public function formatLayoutTemplateFiles(): array
 	{
 		return [$this->layoutTemplate];
@@ -111,6 +131,36 @@ abstract class BackendPresenter extends Presenter
 		return $this->translator->translate($message, ...$parameters);
 	}
 	
+	public function handleRestoreBackLink(string $backLink): void
+	{
+		$this->restoreRequest($backLink);
+	}
+
+	public function actionBulkEdit(string $grid = 'grid', string $backLink = 'default', string $label = 'Úprava'): void
+	{
+		unset($backLink);
+		unset($label);
+		
+		$this[$grid]['bulkForm']->onSuccess[] = function (): void {
+			$this->flashMessage($this->translator->translate('admin.saved', 'Uloženo'), 'success');
+			$this->redirect('default');
+		};
+	}
+	
+	public function renderBulkEdit(string $grid = 'grid', string $backLink = 'default', string $label = 'Úprava'): void
+	{
+		$this->template->headerLabel = 'Hromadná úprava';
+		$this->template->headerTree = [
+			[$label, $backLink],
+			['Hromadná úprava'],
+		];
+		$this->template->formName = $formName = "$grid-bulkForm";
+		$this->template->displayButtons = [$this->createBackButton($backLink)];
+		$this->template->displayControls = [$this->getComponent($formName)];
+		
+		$this->template->setFile(__DIR__ . \DIRECTORY_SEPARATOR . 'templates' . \DIRECTORY_SEPARATOR . 'bulkEdit.latte');
+	}
+
 	protected function createBackButton(string $link, ...$arguments): string
 	{
 		if ($this->backLink) {
@@ -121,14 +171,11 @@ abstract class BackendPresenter extends Presenter
 		return $this->createButtonWithClass($link, '<i class="fas fa-arrow-left"></i>&nbsp;' . $this->translator->translate('admin.backButton', 'Zpět'), 'btn btn-sm btn-secondary', ...$arguments);
 	}
 	
-	public function handleRestoreBackLink(string $backLink)
+	protected function createNewItemButton(string $link, array $args = [], ?string $label = null): string
 	{
-		$this->restoreRequest($backLink);
-	}
-	
-	protected function createNewItemButton(string $link, array $args = [], string $label = null): string
-	{
-		return "<a href=\"" . $this->link($link, $args) . "\"><button class='btn btn-success btn-sm'><i class='fa fa-sm fa-plus m-1'></i>" . ($label ?: $this->translator->translate('admin.newItem', 'Nová položka')) . "</button></a>";
+		$defaultLabel = $this->translator->translate('admin.newItem', 'Nová položka');
+		
+		return "<a href=\"" . $this->link($link, $args) . "\"><button class='btn btn-success btn-sm'><i class='fa fa-sm fa-plus m-1'></i>" . ($label ?: $defaultLabel) . "</button></a>";
 	}
 	
 	protected function createButtonWithClass(string $link, string $label, string $class, ...$arguments): string
@@ -149,7 +196,7 @@ abstract class BackendPresenter extends Presenter
 		return "<img class='mutation-flag' src='$baseUrl$flagsPath/$flagsMap[$mutation].$flagsExt' alt='$mutation' title='$mutation'>";
 	}
 	
-	protected function createImageDirs(string $dir)
+	protected function createImageDirs(string $dir): void
 	{
 		$subDirs = ['origin', 'detail', 'thumb'];
 		$rootDir = $this->container->parameters['wwwDir'] . \DIRECTORY_SEPARATOR . 'userfiles' . \DIRECTORY_SEPARATOR . $dir;
@@ -160,10 +207,11 @@ abstract class BackendPresenter extends Presenter
 		}
 	}
 	
-	public function onDeleteImage(Entity $object, string $propertyName = 'imageFileName')
+	protected function onDeleteImage(Entity $object, string $propertyName = 'imageFileName'): void
 	{
-		if ($object->$propertyName) {
+		if ($object->$propertyName && \defined(\get_class($object) . '::IMAGE_DIR')) {
 			$subDirs = ['origin', 'detail', 'thumb'];
+			/* @phpstan-ignore-next-line */
 			$dir = $object::IMAGE_DIR;
 			
 			foreach ($subDirs as $subDir) {
@@ -174,39 +222,9 @@ abstract class BackendPresenter extends Presenter
 			$object->update([$propertyName => null]);
 		}
 	}
-	
-	public function onDeletePage(Entity $object)
-	{
-		//@TODO
-		if ($page = $this->pageRepository->getPageByTypeAndParams('product_list', null, ['producer' => $object])) {
-			$page->delete();
-		}
-	}
-	
-	protected function onDelete(Entity $object)
+
+	protected function onDelete(Entity $object): void
 	{
 		$this->onDeleteImage($object);
-	}
-	
-	public function actionBulkEdit(string $grid = 'grid', string $backLink = 'default', string $label = 'Úprava')
-	{
-		$this[$grid]['bulkForm']->onSuccess[] = function () {
-			$this->flashMessage($this->translator->translate('admin.saved', 'Uloženo'), 'success');
-			$this->redirect('default');
-		};
-	}
-	
-	public function renderBulkEdit(string $grid = 'grid', string $backLink = 'default', string $label = 'Úprava')
-	{
-		$this->template->headerLabel = 'Hromadná úprava';
-		$this->template->headerTree = [
-			[$label, $backLink],
-			['Hromadná úprava'],
-		];
-		$this->template->formName = $formName = "$grid-bulkForm";
-		$this->template->displayButtons = [$this->createBackButton($backLink)];
-		$this->template->displayControls = [$this->getComponent($formName)];
-		
-		$this->template->setFile(__DIR__ . \DIRECTORY_SEPARATOR . 'templates' . \DIRECTORY_SEPARATOR . 'bulkEdit.latte');
 	}
 }

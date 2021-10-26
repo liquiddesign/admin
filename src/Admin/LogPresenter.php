@@ -6,13 +6,13 @@ namespace Admin\Admin;
 
 use Admin\BackendPresenter;
 use Admin\Controls\AdminGrid;
-use Admin\DB\Changelog;
 use Admin\DB\ChangelogRepository;
-use Nette\Utils\DateTime;
 
 class LogPresenter extends BackendPresenter
 {
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public ChangelogRepository $changelogRepository;
 	
 	public function renderDefault(): void

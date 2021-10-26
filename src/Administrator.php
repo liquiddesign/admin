@@ -7,7 +7,6 @@ namespace Admin;
 use Nette\Security\Authorizator;
 use Nette\Security\IAuthenticator;
 use Nette\Security\IUserStorage;
-use Security\DB\PermissionRepository;
 
 class Administrator extends \Nette\Security\User
 {
@@ -15,7 +14,7 @@ class Administrator extends \Nette\Security\User
 
 	private ?string $fallbackLink = null;
 	
-	public function __construct(IAuthenticator $authenticator = null, Authorizator $authorizator = null, IUserStorage $legacyStorage = null)
+	public function __construct(?IAuthenticator $authenticator = null, ?Authorizator $authorizator = null, ?IUserStorage $legacyStorage = null)
 	{
 		parent::__construct(clone $legacyStorage, $authenticator, $authorizator);
 		

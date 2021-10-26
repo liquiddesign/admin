@@ -11,14 +11,13 @@ class Route extends Routers\Route
 	
 	public function __construct(?string $defaultMutation, Pages $pages)
 	{
-		parent::__construct(static::MASK, [
+		parent::__construct(self::MASK, [
 			'module' => [
 				\Nette\Routing\Route::VALUE => 'Admin',
 				\Nette\Routing\Route::FILTER_IN => static function ($str) {
 					return \ucfirst($str) . ':Admin';
 				},
 				\Nette\Routing\Route::FILTER_OUT => static function ($str) {
-					
 					if (\substr($str, -6) === ':Admin') {
 						return \lcfirst(\substr($str, 0, -6));
 					}

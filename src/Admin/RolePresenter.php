@@ -4,34 +4,41 @@ declare(strict_types=1);
 
 namespace Admin\Admin;
 
+use Admin\Authorizator;
 use Admin\BackendPresenter;
+use Admin\Controls\AdminForm;
 use Admin\Controls\AdminGrid;
 use Admin\Controls\Menu;
-use Admin\Controls\AdminForm;
-use Admin\Controls\MenuItem;
-use Forms\Form;
-use Nette\Utils\Arrays;
-use Nette\Utils\Html;
-use Admin\Authorizator;
 use Admin\DB\PermissionRepository;
 use Admin\DB\Role;
 use Admin\DB\RoleRepository;
+use Forms\Form;
+use Nette\Utils\Arrays;
+use Nette\Utils\Html;
 use Nette\Utils\Strings;
 use StORM\DIConnection;
 use StORM\ICollection;
 
 class RolePresenter extends BackendPresenter
 {
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public Authorizator $authorizator;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public RoleRepository $roleRepository;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public PermissionRepository $permissionRepository;
 	
-	/** @inject */
+	/**
+	 * @inject
+	 */
 	public DIConnection $stm;
 	
 	public string $tRole;
@@ -78,10 +85,11 @@ class RolePresenter extends BackendPresenter
 			$form->addGroup($this->_('permissions', 'Oprávnění'));
 			$menuItemsContainer = $form->addContainer('menuItems');
 			
-			/** @var MenuItem $menuItem */
+			/** @var \Admin\Controls\MenuItem $menuItem */
 			foreach ($menu->getItems() as $menuItem) {
 				$convertedLabel = \str_replace(' ', '_', Strings::toAscii($menuItem->label));
-				$menuItemsContainer->addCheckbox($convertedLabel, isset($menuItem->itemName) && \array_key_exists($this->lang, $menuItem->itemName) ? $menuItem->itemName[$this->lang] :$menuItem->label);
+				$realItemName = isset($menuItem->itemName) && \array_key_exists($this->lang, $menuItem->itemName);
+				$menuItemsContainer->addCheckbox($convertedLabel, $realItemName ? $menuItem->itemName[$this->lang] : $menuItem->label);
 				$realMenuItems[$convertedLabel] = $menuItem;
 			}
 		}
@@ -91,7 +99,7 @@ class RolePresenter extends BackendPresenter
 		$form->onSuccess[] = function (AdminForm $form) use ($realMenuItems): void {
 			$values = $form->getValues('array');
 			
-			$values['mutations'] = (isset($values['mutationsList']) && $values['mutationsList']) ? \implode(';', $values['mutationsList']) : null;
+			$values['mutations'] = isset($values['mutationsList']) && $values['mutationsList'] ? \implode(';', $values['mutationsList']) : null;
 			unset($values['mutationsList']);
 			
 			$menuItems = Arrays::pick($values, 'menuItems', []);
@@ -101,7 +109,7 @@ class RolePresenter extends BackendPresenter
 			if ($menuItems) {
 				foreach ($menuItems as $menuItemLabel => $menuItemAllowed) {
 					if (isset($realMenuItems[$menuItemLabel]) && $menuItemAllowed) {
-						/** @var MenuItem $menuItem */
+						/** @var \Admin\Controls\MenuItem $menuItem */
 						$menuItem = $realMenuItems[$menuItemLabel];
 						
 						if ($menuItem->link) {
@@ -109,7 +117,8 @@ class RolePresenter extends BackendPresenter
 						}
 						
 						foreach ($menuItem->items as $subMenuItem) {
-							$this->permissionRepository->syncOne(['resource' => $subMenuItem->link ? \substr($subMenuItem->link, 0, \strrpos($subMenuItem->link, ':')) . ':*' : null, 'privilege' => 777, 'role' => $role->getPK()]);
+							$resource = \substr($subMenuItem->link, 0, \strrpos($subMenuItem->link, ':')) . ':*';
+							$this->permissionRepository->syncOne(['resource' => $subMenuItem->link ? $resource : null, 'privilege' => 777, 'role' => $role->getPK()]);
 						}
 					}
 				}
@@ -134,7 +143,7 @@ class RolePresenter extends BackendPresenter
 		$this->template->displayControls = [$this->getComponent('grid')];
 	}
 	
-	public function renderNew()
+	public function renderNew(): void
 	{
 		$tNew = $this->_('new', 'Nová role');
 		$this->template->headerLabel = $tNew;
@@ -159,18 +168,19 @@ class RolePresenter extends BackendPresenter
 	
 	public function actionDetail(Role $role): void
 	{
-		/** @var \Forms\Form $form */
+		/** @var \Forms\Form|\Nette\Forms\Container[] $form */
 		$form = $this->getComponent('form');
 		$form->setDefaults($role->jsonSerialize());
 		$mutations = $this->formFactory->getMutations();
 		
-		if (\count($mutations) > 1) {
-			$form['mutationsList']->setDefaultValue($role->getMutations());
+		if (\count($mutations) <= 1) {
+			return;
 		}
-		
+
+		$form['mutationsList']->setDefaultValue($role->getMutations());
 	}
 	
-	public function createComponentPermissionGrid()
+	public function createComponentPermissionGrid(): AdminGrid
 	{
 		/** @var \Admin\Controls\Menu $menu */
 		$menu = $this->getComponent('menu');
@@ -223,9 +233,9 @@ class RolePresenter extends BackendPresenter
 		return $grid;
 	}
 	
-	public function handleResetOrder()
+	public function handleResetOrder(): void
 	{
-		/** @var AdminGrid $grid */
+		/** @var \Admin\Controls\AdminGrid $grid */
 		$grid = $this->getComponent('permissionGrid');
 		$grid->setOrder(null);
 		
@@ -234,6 +244,8 @@ class RolePresenter extends BackendPresenter
 	
 	public function renderRolePermissions(Role $role): void
 	{
+		unset($role);
+		
 		$tRolePermissions = $this->_('rolePermissions', 'Oprávnění role');
 		$this->template->headerLabel = $tRolePermissions;
 		$this->template->headerTree = [
@@ -254,7 +266,7 @@ class RolePresenter extends BackendPresenter
 			foreach (\array_merge([$group], $group->items) as $item) {
 				$uuid = $item->link ? \str_replace(':', '_', $item->link) : DIConnection::generateUuid();
 				$root = $group === $item;
-				$allow = $item->link ? $this->authorizator->isAllowed($role->getPK(), $item->link, 777) : false;
+				$allow = $item->link && $this->authorizator->isAllowed($role->getPK(), $item->link, (string) 777);
 				$resources[$uuid] = $item->link ? \substr($item->link, 0, \strrpos($item->link, ':')) . ':*' : null;
 				
 				if ($select === null) {
@@ -269,5 +281,4 @@ class RolePresenter extends BackendPresenter
 		
 		return $this->stm->rows(null, [$select])->setIndex('uuid', false);
 	}
-	
 }

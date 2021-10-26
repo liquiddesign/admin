@@ -12,10 +12,9 @@ use Nette\Localization\Translator;
 use Nette\Mail\Mailer;
 use Nette\Security\Passwords;
 use Nette\SmartObject;
-use Security\Authenticator;
 use Security\DB\AccountRepository;
 use Security\DB\IUser;
-use Security\DB\RoleRepository;
+use StORM\Entity;
 
 /**
  * @method onCreateAccount(\Security\DB\Account $account, array $values)
@@ -25,7 +24,7 @@ use Security\DB\RoleRepository;
 class AccountFormFactory
 {
 	use SmartObject;
-
+	
 	protected const CONFIGURATIONS = [
 		'preferredMutation' => false,
 	];
@@ -53,8 +52,6 @@ class AccountFormFactory
 
 	private AdminFormFactory $adminFormFactory;
 
-	private RoleRepository $roleRepository;
-
 	private Translator $translator;
 	
 	private Passwords $passwords;
@@ -63,16 +60,13 @@ class AccountFormFactory
 		AdminFormFactory $adminFormFactory,
 		AccountRepository $accountRepository,
 		TemplateRepository $templateRepository,
-		RoleRepository $roleRepository,
 		Mailer $mailer,
 		Translator $translator,
 		Passwords $passwords
-	)
-	{
+	) {
 		$this->adminFormFactory = $adminFormFactory;
 		$this->accountRepository = $accountRepository;
 		$this->templateRepository = $templateRepository;
-		$this->roleRepository = $roleRepository;
 		$this->mailer = $mailer;
 		$this->translator = $translator;
 		$this->passwords = $passwords;
@@ -80,6 +74,8 @@ class AccountFormFactory
 
 	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true, bool $fullname = false, bool $activeFromTo = false): void
 	{
+		unset($addRoles);
+		
 		$accountContainer = $form->addContainer('account');
 		$accountContainer->addHidden('uuid')->setNullable();
 
@@ -111,6 +107,7 @@ class AccountFormFactory
 				$form->getTranslatedMutations(),
 			)->setPrompt($this->translator->translate('adminAdminAdministrator.auto', 'Automaticky'));
 		}
+
 //		}
 
 		$accountContainer->addCheckbox('active', $this->translator->translate('adminAdminAdministrator.active', 'Aktivní'))->setDefaultValue(true);
@@ -122,10 +119,12 @@ class AccountFormFactory
 
 		$accountContainer->addHidden('email');
 
-		if ($sendEmail) {
-			// @TODO: otestovat a predelat
-			//$accountContainer->addCheckbox('sendEmail', 'Odeslat e-mail o vytvoření');
+		if (!$sendEmail) {
+			return;
 		}
+
+		// @TODO: otestovat a predelat
+		//$accountContainer->addCheckbox('sendEmail', 'Odeslat e-mail o vytvoření');
 	}
 
 	public function create(bool $delete = true, ?callable $beforeSubmits = null, bool $fullname = false, bool $activeFromTo = false): AdminForm
@@ -172,7 +171,7 @@ class AccountFormFactory
 
 		if ($values['sendEmail'] ?? null) {
 			try {
-				$message = $this->templateRepository->createMessage($emailTemplate, ['password' => $password, 'email' => $values['email']] + $emailParams, $values['email']);
+				$message = $this->templateRepository->createMessage($emailTemplate, ['password' => $password ?? null, 'email' => $values['email']] + $emailParams, $values['email']);
 				$this->mailer->send($message);
 			} catch (\Exception $e) {
 				$form->getPresenter()->flashMessage('Varování: Nelze odeslat email! Účet byl přesto upraven.', 'warning');
@@ -193,12 +192,13 @@ class AccountFormFactory
 
 	public function deleteAccountHolder(IUser $holder): void
 	{
-		try {
-			$holder->accounts->delete();
-		} catch (\Exception $e) {
-			throw new \Exception($e);
+		if (!$holder instanceof Entity) {
+			return;
 		}
-
+		
+		/* @phpstan-ignore-next-line */
+		$holder->accounts->delete();
+		
 		$holder->delete();
 	}
 

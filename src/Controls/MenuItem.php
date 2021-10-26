@@ -10,11 +10,17 @@ class MenuItem
 	
 	public ?string $link = null;
 	
-	public array $items = [];
-	
 	public ?string $icon = null;
 	
 	public bool $active = false;
-
+	
+	/**
+	 * @var \Admin\Controls\MenuItem[]
+	 */
+	public array $items = [];
+	
+	/**
+	 * @var string[]
+	 */
 	public array $itemName = [];
 }

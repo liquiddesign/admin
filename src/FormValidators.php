@@ -11,7 +11,7 @@ class FormValidators
 {
 	public static function checkOldPassword(IControl $control, Account $account): bool
 	{
-		if ($control->getValue() == '') {
+		if ($control->getValue() === '') {
 			return true;
 		}
 		
