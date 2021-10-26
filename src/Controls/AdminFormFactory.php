@@ -116,8 +116,8 @@ class AdminFormFactory
 		}
 
 		$form->onAnchor[] = function (AdminForm $form): void {
-			if ($form->getComponent(AdminForm::MUTATION_SELECTOR_NAME) instanceof BaseControl && $lang = $form->getPresenter()->getParameter('selectedLang')) {
-				$form->getComponent(AdminForm::MUTATION_SELECTOR_NAME)->setDefaultValue($lang);
+			if ($form->getComponent(AdminForm::MUTATION_SELECTOR_NAME, false) instanceof BaseControl && $lang = $form->getPresenter()->getParameter('selectedLang')) {
+				$form->getComponent(AdminForm::MUTATION_SELECTOR_NAME, false)->setDefaultValue($lang);
 			}
 		};
 
