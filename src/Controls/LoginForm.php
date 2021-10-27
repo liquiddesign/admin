@@ -16,12 +16,12 @@ class LoginForm extends \Nette\Application\UI\Form
 	/**
 	 * @var array<callable(static): void> Occurs after login
 	 */
-	public array $onLogin;
+	public array $onLogin = [];
 	
 	/**
 	 * @var array<callable(static): void> Occurs after login fail
 	 */
-	public array $onLoginFail;
+	public array $onLoginFail = [];
 	
 	private Administrator $admin;
 	
