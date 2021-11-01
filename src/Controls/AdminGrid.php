@@ -86,6 +86,7 @@ class AdminGrid extends \Grid\Datagrid
 	) {
 		parent::__construct($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId);
 
+		/* @phpstan-ignore-next-line */
 		$this->onRender[] = function (\Nette\Utils\Html $tbody, array $columns): void {
 			if (\count($tbody) === 0) {
 				$tNoResult = $this->translator->translate('admin.gridNoResult', 'Žádný výsledek. Zkuste změnit nebo vymazat filtry.');
