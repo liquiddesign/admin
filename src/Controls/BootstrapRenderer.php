@@ -161,10 +161,10 @@ class BootstrapRenderer extends DefaultRenderer
 		$el = Html::el();
 		
 		if ($control instanceof Nette\Forms\Controls\RadioList) {
-			for ($i = 0; $i != \count($control->getItems()); $i++) {
+			foreach ($control->getItems() as $key => $item) {
 				$el->addHtml('<div class="form-check" style="display: inline-block; margin-right: 10px;">');
-				$el->addHtml($control->getControlPart()->class('form-check-input'));
-				$el->addHtml($control->getLabelPart()->class('form-check-label'));
+				$el->addHtml($control->getControlPart($key)->class('form-check-input'));
+				$el->addHtml($control->getLabelPart($key)->class('form-check-label'));
 				$el->addHtml('</div>');
 			}
 		} elseif ($control instanceof Nette\Forms\Controls\Checkbox) {
