@@ -89,7 +89,7 @@ class BootstrapRenderer extends DefaultRenderer
 		$container = $this->getWrapper('controls container');
 		
 		$buttons = null;
-
+		
 		foreach ($parent->getControls() as $control) {
 			if ($control->getOption('rendered') || $control->getOption('type') === 'hidden') {
 				continue;
@@ -102,7 +102,7 @@ class BootstrapRenderer extends DefaultRenderer
 					$container->addHtml($this->renderPairMulti($buttons));
 					$buttons = null;
 				}
-
+				
 				$container->addHtml($this->renderPair($control));
 			}
 		}
@@ -112,7 +112,7 @@ class BootstrapRenderer extends DefaultRenderer
 		}
 		
 		$s = '';
-
+		
 		if (\count($container)) {
 			$s .= "\n" . $container . "\n";
 		}
@@ -161,10 +161,10 @@ class BootstrapRenderer extends DefaultRenderer
 		$el = Html::el();
 		
 		if ($control instanceof Nette\Forms\Controls\RadioList) {
-			for ($i = 0; $i !== \count($control->getItems()); $i++) {
+			foreach ($control->getItems() as $key => $item) {
 				$el->addHtml('<div class="form-check" style="display: inline-block; margin-right: 10px;">');
-				$el->addHtml($control->getControlPart()->class('form-check-input'));
-				$el->addHtml($control->getLabelPart()->class('form-check-label'));
+				$el->addHtml($control->getControlPart($key)->class('form-check-input'));
+				$el->addHtml($control->getLabelPart($key)->class('form-check-label'));
 				$el->addHtml('</div>');
 			}
 		} elseif ($control instanceof Nette\Forms\Controls\Checkbox) {
@@ -174,7 +174,7 @@ class BootstrapRenderer extends DefaultRenderer
 				$el->addHtml($control->getControlPart()->class('form-check-input'));
 				$el->addHtml($control->getLabelPart()->class('form-check-label'));
 			}
-
+			
 			$el->addHtml('</div>');
 		} elseif ($control instanceof Wysiwyg) {
 			$el->addHtml($control->getControl());
@@ -191,7 +191,7 @@ class BootstrapRenderer extends DefaultRenderer
 			$el->addHtml($control->getControl()->class('form-control form-control-sm'));
 		} elseif ($control instanceof UploadImage || $control instanceof UploadFile) {
 			$el->addHtml($control->getControl());
-
+			
 			if (isset($el[0][1]->value)) {
 				if (isset($el[0][2])) {
 					$el[0][2]->class('btn btn-danger btn-sm ml-2');
@@ -238,7 +238,7 @@ class BootstrapRenderer extends DefaultRenderer
 		}
 		
 		$errors = \array_merge($errors, $control->getErrors());
-
+		
 		if (\count($errors) > 0) {
 			if ($el[0] instanceof Html) {
 				$el[0]->class($el[0]->class . ' is-invalid');
@@ -255,7 +255,7 @@ class BootstrapRenderer extends DefaultRenderer
 		if ($nextTo = $control->getOption('nextTo')) {
 			$control = $control->getForm()->getComponent($nextTo);
 			$body->class($this->getValue('control .multi'), true);
-
+			
 			goto renderControl;
 		}
 		
