@@ -75,7 +75,7 @@ class BootstrapRenderer extends DefaultRenderer
 					}
 				}
 
-				if ($dataUrlLink = $control->getControlPrototype()->getAttribute('data-url-link-'. $controlMutation)) {
+				if ($dataUrlLink = $control->getControlPrototype()->getAttribute('data-url-link-' . ($controlMutation ?? ''))) {
 					$controlPart->addHtml($dataUrlLink);
 				}
 			}
