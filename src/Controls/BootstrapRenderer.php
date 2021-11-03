@@ -59,10 +59,6 @@ class BootstrapRenderer extends DefaultRenderer
 				$controlPart->addHtml('<span id="data-info" class="text-sm"> ' . $dataInfo . ' </span>');
 			}
 			
-			if ($dataUrlLink = $control->getControlPrototype()->getAttribute('data-url-link-'. ($controlMutation ?? ''))) {
-				$controlPart->addHtml($dataUrlLink);
-			}
-			
 			if ($control->getForm() instanceof Form) {
 				$controlMutation = $control->getControlPrototype()->getAttribute('data-mutation');
 				$pair->setAttribute('id', $control->getHtmlId() . '-toogle');
@@ -77,6 +73,10 @@ class BootstrapRenderer extends DefaultRenderer
 					if ($controlMutation !== $control->getForm()->getActiveMutation() && $control->getForm()->getActiveMutation() !== null) {
 						$pair->appendAttribute('class', 'inactive');
 					}
+				}
+
+				if ($dataUrlLink = $control->getControlPrototype()->getAttribute('data-url-link-'. $controlMutation)) {
+					$controlPart->addHtml($dataUrlLink);
 				}
 			}
 		}
