@@ -241,9 +241,7 @@ class BootstrapRenderer extends DefaultRenderer
 
 		if (\count($errors) > 0) {
 			if ($el[0] instanceof Html) {
-				$el[0]->class((\is_array($el[0]->class) ? \implode(' ', \array_keys(\array_filter($el[0]->class, function ($value) {
-						return $value === true;
-					}))) : $el[0]->class) . ' is-invalid');
+				$el[0]->appendAttribute('class', 'is-invalid');
 			} else {
 				try {
 					$el[6] = '<input type="text" class="form-control form-control-sm is-invalid" readonly="">';
