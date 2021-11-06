@@ -920,10 +920,13 @@ class AdminGrid extends \Grid\Datagrid
 						} elseif ($type === 'float') {
 							$value = NumbersHelper::strtoFloat($value);
 						}
-						
-						$object->$key = \intval($value);
+					} catch (\Exception $e) {
+					}
+					
+					try {
+						$object->$key = $value;
 						$updateKeys[] = $key;
-					} catch (\Throwable $e) {
+					} catch (\Exception $e) {
 					}
 				}
 
