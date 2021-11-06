@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Admin\Admin;
 
-use _PHPStan_76800bfb5\Nette\Neon\Exception;
 use Admin\BackendPresenter;
 use Admin\Controls\AdminForm;
 use Admin\DB\AdministratorRepository;
@@ -27,7 +26,7 @@ class ProfilePresenter extends BackendPresenter
 	public function createComponentAccountForm(): AdminForm
 	{
 		if (!$this->admin->getIdentity() instanceof IUser) {
-			throw new Exception('Identity is not filled with IUSer');
+			throw new \Exception('Identity is not filled with IUSer');
 		}
 		
 		$form = $this->formFactory->create();
