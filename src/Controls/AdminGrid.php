@@ -915,15 +915,15 @@ class AdminGrid extends \Grid\Datagrid
 					try {
 						$object->$key = $value;
 						$updateKeys[] = $key;
-					} catch (\TypeError $e) {
+					} catch (\Throwable $e) {
 						try {
 							$object->$key = NumbersHelper::strtoFloat($value);
 							$updateKeys[] = $key;
-						} catch (\TypeError $e) {
+						} catch (\Throwable $e) {
 							try {
 								$object->$key = \intval($value);
 								$updateKeys[] = $key;
-							} catch (\TypeError $e) {
+							} catch (\Throwable $e) {
 							}
 						}
 					}
