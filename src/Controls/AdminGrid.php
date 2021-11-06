@@ -913,19 +913,17 @@ class AdminGrid extends \Grid\Datagrid
 
 				foreach ($localValues['values'] as $key => $value) {
 					try {
-						$object->$key = $value;
+						$type = (new \ReflectionProperty(\get_class($object), $key))->getType()->getName();
+						
+						if ($type === 'integer') {
+							$value = \intval($value);
+						} elseif ($type === 'float') {
+							$value = NumbersHelper::strtoFloat($value);
+						}
+						
+						$object->$key = \intval($value);
 						$updateKeys[] = $key;
 					} catch (\Throwable $e) {
-						try {
-							$object->$key = NumbersHelper::strtoFloat($value);
-							$updateKeys[] = $key;
-						} catch (\Throwable $e) {
-							try {
-								$object->$key = \intval($value);
-								$updateKeys[] = $key;
-							} catch (\Throwable $e) {
-							}
-						}
 					}
 				}
 
