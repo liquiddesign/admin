@@ -1,4 +1,4 @@
-name: PHP Stan
+name: Analysis
 
 on:
   push:
