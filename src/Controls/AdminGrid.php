@@ -661,7 +661,7 @@ class AdminGrid extends \Grid\Datagrid
 	}
 
 	/**
-	 * @param array|string[] $resetLink First item is link as string. Second argument to link.
+	 * @param string[]|array<string, string[]> $resetLink First item is link as string. Second argument to link.
 	 */
 	public function addFilterButtons(array $resetLink = ['default']): void
 	{
