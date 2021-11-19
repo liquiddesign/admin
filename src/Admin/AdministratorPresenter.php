@@ -92,7 +92,7 @@ class AdministratorPresenter extends BackendPresenter
 		
 		$this->accountFormFactory->addContainer($form, true, !$this->getParameter('administrator'));
 
-		if (\in_array('editUrl', self::CONFIGURATION['groups'])) {
+		if (\in_array('editUrl', $this::CONFIGURATION['groups'])) {
 			$form->addCheckbox('urlEditor', $this->_('canEdit', 'Může editovat URL'));
 		}
 
