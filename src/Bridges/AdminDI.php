@@ -25,7 +25,12 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		return Expect::structure([
 			'defaultLink' => Expect::string()->required(true),
 			'fallbackLink' => Expect::string()->required(true),
-			'menu' => Expect::array([]),
+			'menu' => Expect::arrayOf(Expect::structure([
+				'link' => Expect::string(),
+				'items' => Expect::array([]),
+				'icon' => Expect::string(),
+				'itemName' => Expect::array([]),
+			])),
 			'mutations' => Expect::list([]),
 			'defaultMutation' => Expect::list(null),
 			'superRole' => Expect::string(null),
@@ -34,26 +39,22 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			'adminGrid' => Expect::array([]),
 		]);
 	}
-
+	
 	public function loadConfiguration(): void
 	{
 		/** @var \stdClass $config */
 		$config = $this->getConfig();
-
+		
 		/** @var \Nette\DI\ContainerBuilder $builder */
 		$builder = $this->getContainerBuilder();
-
+		
 		$builder->addDefinition($this->prefix('administrators'), new ServiceDefinition())->setType(AdministratorRepository::class);
-
+		
 		$factory = $builder->addFactoryDefinition($this->prefix('menuFactory'))->setImplement(IMenuFactory::class)->getResultDefinition();
 		
 		foreach ($config->menu as $name => $value) {
-			$link = \is_array($value) && isset($value['link']) ? $value['link'] : (\is_string($value) ? $value : null);
-			$items = \is_array($value) && $value['items'] ? $value['items'] : [];
-			$icon = \is_array($value) && isset($value['icon']) ? $value['icon'] : null;
-			$itemName = \is_array($value) && isset($value['itemName']) ? $value['itemName'] : [];
-
-			$factory->addSetup('addMenuItem', [$name, $link, $items, $icon, $itemName]);
+			/** @var \stdClass $value */
+			$factory->addSetup('addMenuItem', [$name, $value->link, $value->items, $value->icon, $value->itemName]);
 		}
 		
 		$builder->addFactoryDefinition($this->prefix('loginFormFactory'))->setImplement(ILoginFormFactory::class);
@@ -82,13 +83,13 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		$gridDef->addSetup('setShowItemsPerPage', [$config->adminGrid['showItemsPerPage'] ?? true]);
 		$gridDef->addSetup('setDefaultOnPage', [$config->adminGrid['defaulOnPage'] ?? null]);
 	}
-
+	
 	public function beforeCompile(): void
 	{
 		/** @var \stdClass $config */
 		$config = $this->getConfig();
 		$this->getContainerBuilder()->resolve();
-
+		
 		foreach ($this->findByType(BackendPresenter::class) as $def) {
 			if (!$def instanceof ServiceDefinition) {
 				continue;
