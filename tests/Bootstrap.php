@@ -10,7 +10,6 @@ namespace Security\Tests;
 
 use Migrator\Bridges\MigratorDI;
 use Nette\DI\Container;
-use Messages\Bridges\MessagesDI;
 use Security\Bridges\SecurityDI;
 use StORM\Bridges\StormDI;
 
