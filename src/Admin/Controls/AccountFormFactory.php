@@ -111,6 +111,7 @@ class AccountFormFactory
 //		}
 
 		$accountContainer->addCheckbox('active', $this->translator->translate('adminAdminAdministrator.active', 'Aktivní'))->setDefaultValue(true);
+		$accountContainer->addCheckbox('authorized', $this->translator->translate('adminAdminAdministrator.authorized', 'Autorizovaný'))->setDefaultValue(true);
 
 		if ($activeFromTo) {
 			$accountContainer->addDatetime('activeFrom', 'Aktivní od')->setNullable();
