@@ -383,12 +383,12 @@ class AdminGrid extends \Grid\Datagrid
 	 */
 	public function addColumnActionDelete(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null): Column
 	{
-		$confirmJS = "return confirm('" . $this->translator->translate('admin.really', 'Opravdu?') . "')";
+		$confirmJS = "return confirm(\"". $this->translator->translate('admin.really', 'Opravdu?') ."\")";
 		$removeLabel = $this->translator->translate('admin.remove', 'Smazat');
 		
 		return $this->addColumnAction(
 			'',
-			"<a href=\"%s\" class='btn btn-danger btn-sm text-xs' title='" . $removeLabel . "' onclick='" . $confirmJS . "'\"><i class='far fa-trash-alt'></i></a>",
+			"<a href=\"%s\" class='btn btn-danger btn-sm text-xs' title='" . $removeLabel . "' onclick='" . $confirmJS . "'><i class='far fa-trash-alt'></i></a>",
 			function ($object) use ($beforeDeleteCallback, $override, $condition): void {
 				try {
 					$this->getPresenter()->flashMessage($this->translator->translate('admin.done', 'Provedeno'), 'success');
