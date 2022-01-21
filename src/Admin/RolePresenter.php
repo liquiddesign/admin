@@ -73,7 +73,7 @@ class RolePresenter extends BackendPresenter
 
 		if (\count($mutations) > 1) {
 			$form->addMultiSelect2('mutationsList', $this->_('allowedMutations', 'Povolené mutace'), $form->getTranslatedMutations())
-				->setHtmlAttribute('data-info', '<br>'. $this->_('allowedMutationsInfo', 'Pokud necháte prázdné, povolené budou všechny.'));
+				->setHtmlAttribute('data-info', '<br>' . $this->_('allowedMutationsInfo', 'Pokud necháte prázdné, povolené budou všechny.'));
 		}
 		
 		/** @var \Admin\Controls\Menu $menu */

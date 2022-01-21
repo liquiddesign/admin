@@ -175,17 +175,17 @@ abstract class BackendPresenter extends Presenter
 	{
 		$defaultLabel = $this->translator->translate('admin.newItem', 'Nová položka');
 		
-		return "<a href=\"" . $this->link($link, $args) . "\"><button class='btn btn-success btn-sm'><i class='fa fa-sm fa-plus m-1'></i>" . ($label ?: $defaultLabel) . "</button></a>";
+		return '<a href="' . $this->link($link, $args) . "\"><button class='btn btn-success btn-sm'><i class='fa fa-sm fa-plus m-1'></i>" . ($label ?: $defaultLabel) . '</button></a>';
 	}
 	
 	protected function createButtonWithClass(string $link, string $label, string $class, ...$arguments): string
 	{
-		return "<a href=\"" . $this->link($link, ...$arguments) . "\"><button class=\"$class\">$label</button></a>";
+		return '<a href="' . $this->link($link, ...$arguments) . "\"><button class=\"$class\">$label</button></a>";
 	}
 	
 	protected function createButton(string $link, string $label, ...$arguments): string
 	{
-		return "<a href=\"" . $this->link($link, ...$arguments) . "\"><button class='btn btn-sm btn-primary'>$label</button></a>";
+		return '<a href="' . $this->link($link, ...$arguments) . "\"><button class='btn btn-sm btn-primary'>$label</button></a>";
 	}
 	
 	protected function createFlag(string $mutation): string

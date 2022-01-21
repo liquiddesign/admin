@@ -261,9 +261,9 @@ class AdminForm extends \Forms\Form
 				
 					$text->setHtmlAttribute("data-url-link-$mutation", "
 						<a data-mutation='$mutation' class='ml-2' href='" . $url . "' target='_blank'>
-						<i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . "
+						<i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . '
 						</a>
-					");
+					');
 				}
 			});
 		});

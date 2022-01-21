@@ -73,7 +73,7 @@ class Menu extends Control
 						unset($item->items[$key]);
 					}
 					
-					if (!$this->getPresenter()->isLinkCurrent(\substr($subItem->link, 0, \strrpos($subItem->link, ':')). ":*")) {
+					if (!$this->getPresenter()->isLinkCurrent(\substr($subItem->link, 0, \strrpos($subItem->link, ':')) . ':*')) {
 						continue;
 					}
 

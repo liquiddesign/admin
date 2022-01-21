@@ -15,6 +15,6 @@ class PermissionRepository extends \StORM\Repository
 		return !$this->many()
 			->where("'$resource' LIKE CONCAT(REPLACE(this.resource, ':*', ''),'%')")
 			->where('this.privilege IS NULL OR :privilege IS NULL OR this.privilege & :privilege', ['privilege' => $privilege])
-			->where("fk_role", $role)->isEmpty();
+			->where('fk_role', $role)->isEmpty();
 	}
 }

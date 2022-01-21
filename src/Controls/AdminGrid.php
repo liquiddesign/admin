@@ -383,7 +383,7 @@ class AdminGrid extends \Grid\Datagrid
 	 */
 	public function addColumnActionDelete(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null): Column
 	{
-		$confirmJS = "return confirm(\"". $this->translator->translate('admin.really', 'Opravdu?') ."\")";
+		$confirmJS = 'return confirm("' . $this->translator->translate('admin.really', 'Opravdu?') . '")';
 		$removeLabel = $this->translator->translate('admin.remove', 'Smazat');
 		
 		return $this->addColumnAction(

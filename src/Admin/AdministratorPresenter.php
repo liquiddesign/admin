@@ -86,9 +86,12 @@ class AdministratorPresenter extends BackendPresenter
 		$form = $this->formFactory->create();
 		
 		$form->addText('fullName', $this->_('fullname', 'Jméno a Příjmení'))->setRequired();
-		
-		$form->addSelect('role', $this->_('role', 'Role'), $this->roleRepo->many()->whereNot('uuid', 'servis')->toArrayOf('name'))->setPrompt($this->_('prompt', 'Žádná'));
-		
+
+		$form->addSelect(
+			'role',
+			$this->_('role', 'Role'),
+			$this->roleRepo->many()->whereNot('uuid', 'servis')->toArrayOf('name'),
+		)->setRequired();
 		
 		$this->accountFormFactory->addContainer($form, true, !$this->getParameter('administrator'));
 
