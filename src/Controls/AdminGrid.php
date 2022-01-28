@@ -63,6 +63,11 @@ class AdminGrid extends \Grid\Datagrid
 	 */
 	private $bulkFormOnProcess = null;
 
+	/**
+	 * @var callable|null
+	 */
+	private $bulkFormOnFormInit = null;
+
 	private AdminFormFactory $formFactory;
 	
 	/**
@@ -758,9 +763,10 @@ class AdminGrid extends \Grid\Datagrid
 		string $defaultLink = 'default',
 		?callable $onBeforeProcess = null,
 		?callable $onProcess = null,
-		array $copyRawValues = []
+		array $copyRawValues = [],
+		?callable $onFormInit = null
 	): void {
-		$this->setBulkForm($bulkFormId, $inputs, $defaultLink, $onBeforeProcess, $onProcess, $copyRawValues);
+		$this->setBulkForm($bulkFormId, $inputs, $defaultLink, $onBeforeProcess, $onProcess, $copyRawValues, $onFormInit);
 
 		$submit = $this->getForm()->addSubmit($name, $label)->setHtmlAttribute('class', 'btn btn-outline-primary btn-sm');
 		$submit->onClick[] = function ($button) use ($link, $gridId): void {
@@ -775,14 +781,22 @@ class AdminGrid extends \Grid\Datagrid
 		};
 	}
 
-	public function setBulkForm(string $bulkFormId, array $input, string $defaultLink, ?callable $onBeforeProcess = null, ?callable $onProcess = null, array $copyRawValues = []): void
-	{
+	public function setBulkForm(
+		string $bulkFormId,
+		array $input,
+		string $defaultLink,
+		?callable $onBeforeProcess = null,
+		?callable $onProcess = null,
+		array $copyRawValues = [],
+		?callable $onFormInit = null
+	): void {
 		$this->bulkFormId = $bulkFormId;
 		$this->bulkFormInputs = $input;
 		$this->bulkFormDefaultLink = $defaultLink;
 		$this->bulkFormOnBeforeProcess = $onBeforeProcess;
 		$this->bulkFormOnProcess = $onProcess;
 		$this->bulkFormCopyRawValues = $copyRawValues;
+		$this->bulkFormOnFormInit = $onFormInit;
 	}
 
 	public function createComponentBulkForm(): Form
@@ -848,6 +862,10 @@ class AdminGrid extends \Grid\Datagrid
 		}
 
 		$form->addSubmit('submitAndBack', 'Uložit a zpět');
+
+		if ($this->bulkFormOnFormInit) {
+			$form = \call_user_func($this->bulkFormOnFormInit, $form);
+		}
 
 		$form->onSuccess[] = function (AdminForm $form) use ($ids): void {
 			$values = $form->getValues('array');
