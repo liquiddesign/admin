@@ -19,7 +19,7 @@
 		"nette/component-model":"^3.0",
 		"liquiddesign/storm": "~1.0",
 		"liquiddesign/forms": "@dev",
-		"liquiddesign/security": "@dev",
+		"liquiddesign/security": "~1.0",
 		"liquiddesign/messages": "@dev",
 		"liquiddesign/translator": "@dev",
 		"liquiddesign/pages": "@dev",
@@ -30,12 +30,12 @@
 	},
 	"require-dev":
 	{
-		"nette/tester":"*",
-		"tracy/tracy":"*",
-		"composer/composer": "*",
-		"liquiddesign/codestyle": "@dev",
-		"liquiddesign/migrator": "@dev",
-		"phpstan/phpstan": "*"
+		"nette/tester":"^2.0",
+		"tracy/tracy":"^2.0",
+		"composer/composer": "^2.0",
+		"liquiddesign/codestyle": "^1.0",
+		"liquiddesign/migrator": "^1.0",
+		"phpstan/phpstan-nette": "^1.0"
 	},
 	"scripts": {
 		"phpstan": "phpstan analyse --memory-limit 1G -c phpstan.neon",
@@ -44,5 +44,10 @@
 		"tester": "tester tests/Cases/*.phpt  -c tests/php.ini --setup tests/setup.php",
 		"aux-sync-database": "Migrator\\Scripts::syncDatabase",
 		"sync-database": "@aux-sync-database Security\\Tests\\Bootstrap"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
 	}
 }
