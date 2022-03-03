@@ -303,7 +303,7 @@ class AdminGrid extends \Grid\Datagrid
 			if ($id) {
 				$vat = \strpos($name, 'Vat') !== false;
 				$textbox->setHtmlAttribute('data-vat', !$vat ? '0' : '1');
-				$rate = (float)\str_replace(',', '.', $grid->getItemsOnPage()[$id]->$rateProperty);
+				$rate = (float)\str_replace(',', '.', (string) $grid->getItemsOnPage()[$id]->$rateProperty);
 
 				$textbox->setHtmlAttribute('data-vatMultiplier', !$vat ? 100 / (100 + $rate) : (100 + $rate) / 100);
 			}
