@@ -210,7 +210,8 @@ class AdminForm extends \Forms\Form
 		bool $content = false,
 		string $title = 'URL a SEO',
 		bool $opengraph = false,
-		bool $linkToDetail = false
+		bool $linkToDetail = false,
+		bool $richSnippet = false
 	): Container {
 		if (!$this->prettyPages) {
 			return $this->addContainer('page');
@@ -305,6 +306,16 @@ class AdminForm extends \Forms\Form
 			$pageContainer->addLocaleTextArea('content', $this->translator->translate('admin.content', 'Obsah'))
 				->forAll(function (TextArea $text): void {
 					$text->setHtmlAttribute('style', 'width: 862px !important;');
+				});
+		}
+
+		if ($richSnippet) {
+			$pageContainer->addLocaleTextArea('richSnippet', $this->translator->translate('admin.richSnippet', 'Rich snippet'))
+				->forAll(function (TextArea $text): void {
+					$text->setHtmlAttribute('style', 'width: 862px !important; min-height: 300px !important;');
+
+					$text->setHtmlAttribute('data-info', "<a href='https://search.google.com/test/rich-results' target='_blank'><i class='fas fa-external-link-alt'></i> &nbsp;" .
+						$this->translator->translate('admin.richSnippetValidator', 'Validátor') . '</a>');
 				});
 		}
 

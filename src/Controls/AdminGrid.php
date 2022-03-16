@@ -939,7 +939,6 @@ class AdminGrid extends \Grid\Datagrid
 					try {
 						$object->$key = $value;
 						$updateKeys[] = $key;
-						/* @phpstan-ignore-next-line */
 					} catch (\Exception $e) {
 					}
 				}
