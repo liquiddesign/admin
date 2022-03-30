@@ -178,9 +178,9 @@ abstract class BackendPresenter extends Presenter
 		return '<a href="' . $this->link($link, $args) . "\"><button class='btn btn-success btn-sm'><i class='fa fa-sm fa-plus m-1'></i>" . ($label ?: $defaultLabel) . '</button></a>';
 	}
 	
-	protected function createButtonWithClass(string $link, string $label, string $class, ...$arguments): string
+	protected function createButtonWithClass(?string $link, string $label, string $class, ...$arguments): string
 	{
-		return '<a href="' . $this->link($link, ...$arguments) . "\"><button class=\"$class\">$label</button></a>";
+		return '<a href="' . ($link ? $this->link($link, ...$arguments) : '#') . "\"><button class=\"$class\">$label</button></a>";
 	}
 	
 	protected function createButton(string $link, string $label, ...$arguments): string
