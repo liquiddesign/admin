@@ -8,6 +8,7 @@ use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
 use Forms\Form;
 use Forms\FormFactory;
+use Grid\Datagrid;
 use Nette\Forms\Controls\BaseControl;
 use Nette\Localization\Translator;
 use Pages\DB\IPageRepository;
@@ -148,6 +149,42 @@ class AdminFormFactory
 					'type' => $form->getPresenterIfExists()->getParameter('action'),
 				]);
 			}
+		};
+
+		return $form;
+	}
+
+	public function createCsvExport(
+		Datagrid $grid,
+		callable $onProcess,
+		string $actionLink,
+		?array $ids = null
+	): AdminForm {
+		$ids = $ids ?: [];
+		$totalNo = $grid->getPaginator()->getItemCount();
+		$selectedNo = \count($ids);
+
+		$form = $this->create();
+		$form->setAction($actionLink);
+		$form->addRadioList('bulkType', 'Exportovat', [
+			'selected' => "vybrané ($selectedNo)",
+			'all' => "celý výsledek ($totalNo)",
+		])->setDefaultValue('selected');
+
+		$form->addSelect('delimiter', 'Oddělovač', [
+			';' => 'Středník (;)',
+			',' => 'Čárka (,)',
+			'   ' => 'Tab (\t)',
+			' ' => 'Mezera ( )',
+			'|' => 'Pipe (|)',
+		]);
+
+		$form->addSubmit('submit', 'Exportovat');
+
+		$form->onSuccess[] = function (AdminForm $form) use ($onProcess): void {
+			$values = $form->getValues('array');
+
+			$onProcess($values);
 		};
 
 		return $form;
