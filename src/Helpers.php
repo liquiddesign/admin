@@ -19,4 +19,9 @@ class Helpers
 			}
 		}
 	}
+
+	public static function isConfigurationActive(array $configuration, string $key): bool
+	{
+		return isset($configuration[$key]) && $configuration[$key];
+	}
 }

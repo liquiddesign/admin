@@ -12,6 +12,7 @@ use Grid\Datagrid;
 use Nette\Forms\Controls\BaseControl;
 use Nette\Localization\Translator;
 use Pages\DB\IPageRepository;
+use StORM\Collection;
 use StORM\DIConnection;
 
 class AdminFormFactory
@@ -185,6 +186,42 @@ class AdminFormFactory
 			$values = $form->getValues('array');
 
 			$onProcess($values);
+		};
+
+		return $form;
+	}
+
+	public function createBulkActionForm(
+		Datagrid $grid,
+		callable $onProcess,
+		string $actionLink,
+		Collection $collection,
+		?array $ids = null,
+		?callable $onFormCreation = null
+	): AdminForm {
+		$ids = $ids ?: [];
+		$totalNo = $grid->getPaginator()->getItemCount();
+		$selectedNo = \count($ids);
+
+		$form = $this->create();
+		$form->setAction($actionLink);
+		$form->addRadioList('bulkType', 'Výběr položek', [
+			'selected' => "vybrané ($selectedNo)",
+			'all' => "celý výsledek ($totalNo)",
+		])->setDefaultValue('selected');
+
+		if ($onFormCreation) {
+			$onFormCreation($form);
+		}
+
+		$form->addSubmit('submit', 'Provést');
+
+		$form->onSuccess[] = function (AdminForm $form) use ($onProcess, $grid, $ids, $collection): void {
+			$values = $form->getValues('array');
+
+			$collection = $values['bulkType'] === 'selected' ? $collection->where('this.uuid', $ids) : $grid->getFilteredSource();
+
+			$onProcess($values, $collection);
 		};
 
 		return $form;
