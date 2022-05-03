@@ -216,7 +216,11 @@ abstract class BackendPresenter extends Presenter
 			
 			foreach ($subDirs as $subDir) {
 				$rootDir = $this->container->parameters['wwwDir'] . \DIRECTORY_SEPARATOR . 'userfiles' . \DIRECTORY_SEPARATOR . $dir;
-				FileSystem::delete($rootDir . \DIRECTORY_SEPARATOR . $subDir . \DIRECTORY_SEPARATOR . $object->$propertyName);
+
+				try {
+					FileSystem::delete($rootDir . \DIRECTORY_SEPARATOR . $subDir . \DIRECTORY_SEPARATOR . $object->$propertyName);
+				} catch (\Throwable $e) {
+				}
 			}
 			
 			$object->update([$propertyName => null]);
