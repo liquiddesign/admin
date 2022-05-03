@@ -930,10 +930,14 @@ class AdminGrid extends \Grid\Datagrid
 				$updateKeys = [];
 
 				foreach ($localValues['values'] as $key => $value) {
-					if (\gettype($object->$key) === 'integer') {
-						$value = \intval($value);
-					} elseif (\gettype($object->$key) === 'float') {
-						$value = NumbersHelper::strtoFloat($value);
+					$prop = new \ReflectionProperty(\get_class($object), $key);
+					/** @phpstan-ignore-next-line */
+					$type = $prop->getType()->getName();
+
+					if ($type === 'int') {
+						$value = $value ? \intval($value) : $value;
+					} elseif ($type === 'float') {
+						$value = $value ? NumbersHelper::strtoFloat($value) : $value;
 					}
 					
 					try {
