@@ -981,7 +981,7 @@ class AdminGrid extends \Grid\Datagrid
 
 	public function addBulkAction(string $name, string $destination, ?string $caption = null, ?string $buttonClass = 'btn btn-outline-primary btn-sm'): void
 	{
-		$submit = $this->getForm()->addSubmit($name, $caption)->setHtmlAttribute('class', $buttonClass);
+		$submit = $this->getForm()->addSubmit($name, Html::fromHtml($caption))->setHtmlAttribute('class', $buttonClass);
 
 		$submit->onClick[] = function ($button) use ($destination): void {
 			$this->getPresenter()->redirect($destination, [$this->getSelectedIds()]);
