@@ -60,7 +60,7 @@ class Menu extends Control
 	{
 		$this->template->setFile($this->template->getFile() ?: __DIR__ . '/menu.latte');
 		$this->template->menu = [];
-		/** @phpstan-ignore-next-line */
+
 		$this->template->lang = $this->getPresenter()->lang ?? 'cs';
 		$items = $this->items;
 		
