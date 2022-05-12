@@ -231,4 +231,12 @@ abstract class BackendPresenter extends Presenter
 	{
 		$this->onDeleteImage($object);
 	}
+
+	protected function getAdministrator(): ?\Admin\DB\Administrator
+	{
+		/** @var \Admin\DB\Administrator|null $administrator */
+		$administrator = $this->admin->getIdentity();
+
+		return $administrator;
+	}
 }
