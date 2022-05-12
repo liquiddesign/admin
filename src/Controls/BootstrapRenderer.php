@@ -207,6 +207,10 @@ class BootstrapRenderer extends DefaultRenderer
 				$el->addHtml('</label>');
 				$el->addHtml('<input type="text" class="form-control form-control-sm" readonly="">');
 				$el->addHtml('</div>');
+
+				if ($dataInfo = $control->getControlPrototype()->getAttribute('data-info')) {
+					$el->addHtml('<span id="data-info" class="text-sm"> ' . $dataInfo . ' </span>');
+				}
 			}
 		} elseif ($control instanceof Nette\Forms\Controls\UploadControl) {
 			if ($control->getControlPrototype()->class === 'dropzone') {
