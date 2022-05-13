@@ -979,12 +979,26 @@ class AdminGrid extends \Grid\Datagrid
 		}, $setValueExpression, $defaultValue, $orderExpression, $wrapperAttributes);
 	}
 
-	public function addBulkAction(string $name, string $destination, ?string $caption = null, ?string $buttonClass = 'btn btn-outline-primary btn-sm'): void
+	/**
+	 * @param string $name
+	 * @param string $destination
+	 * @param string|null $caption
+	 * @param string|null $buttonClass
+	 * @param callable|null $onClick ($presenter, $destination, $ids)
+	 */
+	public function addBulkAction(string $name, string $destination, ?string $caption = null, ?string $buttonClass = 'btn btn-outline-primary btn-sm', ?callable $onClick = null): void
 	{
 		$submit = $this->getForm()->addSubmit($name, Html::fromHtml($caption))->setHtmlAttribute('class', $buttonClass);
 
-		$submit->onClick[] = function ($button) use ($destination): void {
-			$this->getPresenter()->redirect($destination, [$this->getSelectedIds()]);
+		$submit->onClick[] = function ($button) use ($destination, $onClick): void {
+			$ids = $this->getSelectedIds();
+			$presenter = $this->getPresenter();
+
+			if ($onClick) {
+				$onClick($presenter, $destination, $ids);
+			}
+
+			$presenter->redirect($destination, [$ids]);
 		};
 	}
 
