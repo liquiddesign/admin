@@ -18,13 +18,20 @@ class Authorizator implements IAuthorizator
 	
 	private PermissionRepository $permissionRepo;
 	
-	public function __construct(PermissionRepository $permissionRepo)
+	private bool $enabled;
+	
+	public function __construct(bool $enabled, PermissionRepository $permissionRepo)
 	{
+		$this->enabled = $enabled;
 		$this->permissionRepo = $permissionRepo;
 	}
 	
 	public function isAllowed($role, $resource, $privilege): bool
 	{
+		if (!$this->enabled) {
+			return false;
+		}
+		
 		if ($role === $this->superRole) {
 			return true;
 		}
