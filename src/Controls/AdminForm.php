@@ -9,6 +9,7 @@ use Forms\Container;
 use Forms\LocaleContainer;
 use Nette\Application\UI\Presenter;
 use Nette\Forms\Controls\BaseControl;
+use Nette\Forms\Controls\SelectBox;
 use Nette\Forms\Controls\TextArea;
 use Nette\Forms\Controls\TextBase;
 use Nette\Forms\Controls\TextInput;
@@ -32,6 +33,9 @@ class AdminForm extends \Forms\Form
 	public $onValidate = [];
 
 	public ?string $entityName = null;
+
+	/** @var array<array<string>> */
+	public array $ajaxInputs = [];
 
 	private IPageRepository $pageRepository;
 
@@ -411,10 +415,88 @@ class AdminForm extends \Forms\Form
 		return $mut;
 	}
 
+	/**
+	 * @param mixed $name
+	 * @param string|null $label
+	 * @param string|null $placeholder
+	 * @param string|null $className Class name of entity to get items
+	 * @param array|null $configuration
+	 * @throws \Nette\Application\UI\InvalidLinkException
+	 * @throws \Exception
+	 */
+	public function addSelectAjax(
+		$name,
+		?string $label = null,
+		?string $placeholder = null,
+		?string $className = null,
+		?array $configuration = []
+	): SelectBox {
+		if (!$className) {
+			throw new \Exception('Missing DataSource');
+		}
+
+		$this->ajaxInputs[$this->getName()][] = $name;
+
+		/** @var \Admin\BackendPresenter|null $presenter */
+		$presenter = $this->getPresenterIfExists();
+
+		if (!$presenter) {
+			throw new \Exception('Missing Presenter');
+		}
+
+		$presenter->ajaxInputs[$this->getName()][] = $name;
+
+		$link = $presenter->link('getAjaxArrayForSelect!', ['name' => $className,]);
+
+		return $this->addSelect2Ajax($name, $link, $label, $configuration, $placeholder);
+	}
+
+	/**
+	 * @return array<mixed>
+	 */
+	public function getValuesWithAjax(): array
+	{
+		$values = (array) $this->getValues();
+		$data = $this->getHttpData();
+
+		/**
+		 * @var string $key
+		 * @var array<mixed>|string $inputName
+		 */
+		foreach ($this->ajaxInputs[$this->getName()] as $key => $inputName) {
+			if (\is_array($inputName)) {
+				$this->getValuesWithAjaxItem($values, $data[$key], $inputName);
+			} elseif (isset($data[$inputName])) {
+				$values[$inputName] = $data[$inputName];
+			}
+		}
+
+		return $values;
+	}
+
 	public static function validateUrl(\Nette\Forms\Controls\TextInput $input, array $args): bool
 	{
 		[$repository, $mutation, $uuid] = $args;
 
 		return (bool )$repository->isUrlAvailable((string)$input->getValue(), $mutation, $uuid);
+	}
+
+	private function getValuesWithAjaxItem(&$values, $data, $inputName): void
+	{
+		if (\is_array($inputName)) {
+			/**
+			 * @var string $key
+			 * @var array<mixed>|string $inputName
+			 */
+			foreach ($this->ajaxInputs[$this->getName()] ?? [] as $key => $inputName) {
+				if (\is_array($inputName)) {
+					$this->getValuesWithAjaxItem($values, $data[$key], $inputName);
+				} else {
+					$values[$inputName] = $data[$inputName];
+				}
+			}
+		} else {
+			$values[$inputName] = $data[$inputName];
+		}
 	}
 }

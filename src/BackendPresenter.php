@@ -8,11 +8,13 @@ use Admin\Controls\AdminFormFactory;
 use Admin\Controls\AdminGridFactory;
 use Admin\Controls\IMenuFactory;
 use Admin\Controls\Menu;
+use Admin\DB\IGeneralAjaxRepository;
 use Nette\Application\BadRequestException;
 use Nette\Application\UI\Presenter;
 use Nette\DI\Container;
 use Nette\Localization\Translator;
 use Nette\Utils\FileSystem;
+use StORM\DIConnection;
 use StORM\Entity;
 
 abstract class BackendPresenter extends Presenter
@@ -53,6 +55,11 @@ abstract class BackendPresenter extends Presenter
 	 * @inject
 	 */
 	public Translator $translator;
+
+	/**
+	 * @inject
+	 */
+	public DIConnection $connection;
 	
 	/**
 	 * @persistent
@@ -63,6 +70,11 @@ abstract class BackendPresenter extends Presenter
 	 * @var string[]
 	 */
 	public array $langs = [];
+
+	/**
+	 * @var array<array<string>>
+	 */
+	public array $ajaxInputs = [];
 	
 	public function checkRequirements($element): void
 	{
@@ -159,6 +171,37 @@ abstract class BackendPresenter extends Presenter
 		$this->template->displayControls = [$this->getComponent($formName)];
 		
 		$this->template->setFile(__DIR__ . \DIRECTORY_SEPARATOR . 'templates' . \DIRECTORY_SEPARATOR . 'bulkEdit.latte');
+	}
+
+	public function handleGetAjaxArrayForSelect(string $name, ?string $q = null, ?int $page = null): void
+	{
+		if (!$q) {
+			$this->payload->results = [];
+			$this->sendPayload();
+		}
+
+		/** @var \Admin\DB\IGeneralAjaxRepository $repository */
+		$repository = $this->connection->findRepository($name);
+
+		if (!$repository instanceof IGeneralAjaxRepository) {
+			return;
+		}
+
+		$items = $repository->getAjaxArrayForSelect(true, $q, $page);
+
+		$results = [];
+
+		foreach ($items as $pk => $name) {
+			$results[] = [
+				'id' => $pk,
+				'text' => $name,
+			];
+		}
+
+		$this->payload->results = $results;
+		$this->payload->pagination = ['more' => \count($items) === 5];
+
+		$this->sendPayload();
 	}
 
 	protected function createBackButton(string $link, ...$arguments): string
