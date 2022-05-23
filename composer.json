@@ -23,7 +23,7 @@
 		"liquiddesign/messages": "@dev",
 		"liquiddesign/translator": "@dev",
 		"liquiddesign/pages": "@dev",
-		"liquiddesign/grid": "@dev",
+		"liquiddesign/grid": "~0.1",
 		"liquiddesign/common": "@dev",
 		"ext-pdo": "*",
 		"ext-json": "*"
