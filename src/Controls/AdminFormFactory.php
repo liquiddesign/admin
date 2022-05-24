@@ -221,7 +221,7 @@ class AdminFormFactory
 
 			$collection = $values['bulkType'] === 'selected' ? $collection->where('this.uuid', $ids) : $grid->getFilteredSource();
 
-			$onProcess($values, $collection);
+			$onProcess($values, $collection, $form);
 		};
 
 		return $form;
