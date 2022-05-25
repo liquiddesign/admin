@@ -210,11 +210,11 @@ class AdminFormFactory
 			'all' => "celý výsledek ($totalNo)",
 		])->setDefaultValue('selected');
 
+		$form->addSubmit('submit', 'Provést');
+
 		if ($onFormCreation) {
 			$onFormCreation($form);
 		}
-
-		$form->addSubmit('submit', 'Provést');
 
 		$form->onSuccess[] = function (AdminForm $form) use ($onProcess, $grid, $ids, $collection): void {
 			$values = $form->getValues('array');
