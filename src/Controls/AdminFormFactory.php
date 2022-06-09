@@ -197,7 +197,8 @@ class AdminFormFactory
 		string $actionLink,
 		Collection $collection,
 		?array $ids = null,
-		?callable $onFormCreation = null
+		?callable $onFormCreation = null,
+		?callable $onFormCreationBeforeSubmit = null
 	): AdminForm {
 		$ids = $ids ?: [];
 		$totalNo = $grid->getPaginator()->getItemCount();
@@ -209,6 +210,10 @@ class AdminFormFactory
 			'selected' => "vybrané ($selectedNo)",
 			'all' => "celý výsledek ($totalNo)",
 		])->setDefaultValue('selected');
+
+		if ($onFormCreationBeforeSubmit) {
+			$onFormCreationBeforeSubmit($form);
+		}
 
 		$form->addSubmit('submit', 'Provést');
 
