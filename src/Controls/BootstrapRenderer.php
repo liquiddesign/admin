@@ -37,7 +37,7 @@ class BootstrapRenderer extends DefaultRenderer
 		$this->wrappers['control']['.email'] = 'form-control form-control-sm';
 	}
 	
-	public function renderPair(\Nette\Forms\IControl $control): string
+	public function renderPair(\Nette\Forms\Control $control): string
 	{
 		$pair = $this->getWrapper('pair container');
 		
@@ -123,7 +123,7 @@ class BootstrapRenderer extends DefaultRenderer
 	/**
 	 * Renders 'control' part of visual row of controls.
 	 */
-	public function renderControl(Nette\Forms\IControl $control): Html
+	public function renderControl(Nette\Forms\Control $control): Html
 	{
 		if (!$control instanceof BaseControl) {
 			return Html::el();

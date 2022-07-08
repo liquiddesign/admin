@@ -15,6 +15,7 @@ use Nette\Forms\Controls\BaseControl;
 use Nette\Forms\Controls\Checkbox;
 use Nette\Forms\Controls\MultiSelectBox;
 use Nette\Forms\Controls\SelectBox;
+use Nette\Forms\Controls\SubmitButton;
 use Nette\Forms\Controls\TextInput;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
@@ -986,7 +987,7 @@ class AdminGrid extends \Grid\Datagrid
 	 * @param string|null $buttonClass
 	 * @param callable|null $onClick ($presenter, $destination, $ids)
 	 */
-	public function addBulkAction(string $name, string $destination, ?string $caption = null, ?string $buttonClass = 'btn btn-outline-primary btn-sm', ?callable $onClick = null): void
+	public function addBulkAction(string $name, string $destination, ?string $caption = null, ?string $buttonClass = 'btn btn-outline-primary btn-sm', ?callable $onClick = null): SubmitButton
 	{
 		$submit = $this->getForm()->addSubmit($name, Html::fromHtml($caption))->setHtmlAttribute('class', $buttonClass);
 
@@ -1000,6 +1001,8 @@ class AdminGrid extends \Grid\Datagrid
 
 			$presenter->redirect($destination, [$ids]);
 		};
+
+		return $submit;
 	}
 
 	public function render(): void
