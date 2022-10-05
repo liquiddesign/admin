@@ -29,6 +29,8 @@ abstract class BackendPresenter extends Presenter
 	
 	public Administrator $admin;
 	
+	public bool $isManager = false;
+	
 	/**
 	 * @inject
 	 */
@@ -91,6 +93,8 @@ abstract class BackendPresenter extends Presenter
 		if (!$this->admin->isAllowed($this->getAction(true))) {
 			throw new BadRequestException('Not allowed action');
 		}
+		
+		$this->isManager = $this->admin->isAllowed($this->getAction(true), '777');
 	}
 	
 	public function createComponentMenu(): Menu
@@ -112,6 +116,7 @@ abstract class BackendPresenter extends Presenter
 		}
 		
 		$this->template->admin = $this->admin;
+		$this->template->isManager = $this->isManager;
 	}
 	
 	/**

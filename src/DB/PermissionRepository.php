@@ -14,7 +14,7 @@ class PermissionRepository extends \StORM\Repository
 {
 	private const FREE_RESOURCES = [':Admin:Error4xx:default'];
 	
-	public function isAllowed(string $role, string $resource, ?int $privilege = null): bool
+	public function isAllowed(string $role, string $resource, ?string $privilege = null): bool
 	{
 		if (Arrays::contains(self::FREE_RESOURCES, $resource)) {
 			return true;
@@ -22,7 +22,7 @@ class PermissionRepository extends \StORM\Repository
 		
 		return !$this->many()
 			->where("'$resource' LIKE CONCAT(REPLACE(this.resource, ':*', ''),'%')")
-			->where('this.privilege IS NULL OR :privilege IS NULL OR this.privilege & :privilege', ['privilege' => $privilege])
+			->where('this.privilege IS NULL OR :privilege IS NULL OR this.privilege = :privilege', ['privilege' => $privilege])
 			->where('fk_role', $role)->isEmpty();
 	}
 }

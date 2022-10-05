@@ -18,7 +18,7 @@ class Permission extends \StORM\Entity
 	/**
 	 * @column
 	 */
-	public ?int $privilege;
+	public ?string $privilege;
 	
 	/**
 	 * @constraint{"onUpdate":"CASCADE","onDelete":"CASCADE"}

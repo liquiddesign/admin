@@ -70,7 +70,7 @@ class RolePresenter extends BackendPresenter
 		$form = $this->formFactory->create();
 		$mutations = $this->formFactory->getMutations();
 		$form->addText('name', $this->_('name', 'Název'))->setRequired();
-
+		
 		if (\count($mutations) > 1) {
 			$form->addMultiSelect2('mutationsList', $this->_('allowedMutations', 'Povolené mutace'), $form->getTranslatedMutations())
 				->setHtmlAttribute('data-info', '<br>' . $this->_('allowedMutationsInfo', 'Pokud necháte prázdné, povolené budou všechny.'));
@@ -113,17 +113,17 @@ class RolePresenter extends BackendPresenter
 						$menuItem = $realMenuItems[$menuItemLabel];
 						
 						if ($menuItem->link) {
-							$this->permissionRepository->syncOne(['resource' => $menuItem->link, 'privilege' => 777, 'role' => $role->getPK()]);
+							$this->permissionRepository->syncOne(['resource' => $menuItem->link, 'privilege' => '777', 'role' => $role->getPK()]);
 						}
 						
 						foreach ($menuItem->items as $subMenuItem) {
 							$resource = \substr($subMenuItem->link, 0, \strrpos($subMenuItem->link, ':')) . ':*';
-							$this->permissionRepository->syncOne(['resource' => $subMenuItem->link ? $resource : null, 'privilege' => 777, 'role' => $role->getPK()]);
+							$this->permissionRepository->syncOne(['resource' => $subMenuItem->link ? $resource : null, 'privilege' => '777', 'role' => $role->getPK()]);
 						}
 					}
 				}
 				
-				$this->permissionRepository->syncOne(['resource' => $this->admin->getFallbackLink(), 'privilege' => 777, 'role' => $role->getPK()]);
+				$this->permissionRepository->syncOne(['resource' => $this->admin->getFallbackLink(), 'privilege' => '777', 'role' => $role->getPK()]);
 			}
 			
 			$this->flashMessage($this->_('.saved', 'Uloženo'), 'success');
@@ -176,7 +176,7 @@ class RolePresenter extends BackendPresenter
 		if (\count($mutations) <= 1) {
 			return;
 		}
-
+		
 		$form['mutationsList']->setDefaultValue($role->getMutations());
 	}
 	
@@ -203,9 +203,17 @@ class RolePresenter extends BackendPresenter
 			$td->setHtml($object->root ? '<strong>' . $td->getHtml() . '</strong>' : '---- ' . $td->getHtml());
 		};
 		
-		$input = $grid->addColumnInputCheckbox("<input type='checkbox' id='check-all-permissions' style='vertical-align: middle;'>", 'allow', '', '', null, ['class' => 'rowSelector']);
+		$input = $grid->addColumnInputCheckbox("<input type='checkbox' id='check-all-permissions' style='vertical-align: middle;'> Povolit", 'allow', '', '', null, ['class' => 'rowSelector']);
 		
 		$input->onRenderCell[] = function (Html $td, $object): void {
+			if (!$object->resource) {
+				$td->setHtml('<input type="checkbox" class="form-check form-control-sm" style="visibility: hidden;">');
+			}
+		};
+		
+		$input2 = $grid->addColumnInputCheckbox("<input type='checkbox' id='check-all-permissions' style='vertical-align: middle;'> Správce", 'admin', '', '', null, ['class' => 'rowSelector']);
+		
+		$input2->onRenderCell[] = function (Html $td, $object): void {
 			if (!$object->resource) {
 				$td->setHtml('<input type="checkbox" class="form-check form-control-sm" style="visibility: hidden;">');
 			}
@@ -219,11 +227,13 @@ class RolePresenter extends BackendPresenter
 					continue;
 				}
 				
-				if ($data['allow']) {
-					$this->permissionRepository->syncOne(['resource' => $resources[$id], 'privilege' => 777, 'role' => $role,]);
-				} else {
-					$this->permissionRepository->many()->where('resource', $resources[$id])->where('privilege', 777)->where('fk_role', $role)->delete();
+				$this->permissionRepository->many()->where('resource', $resources[$id])->where('fk_role', $role)->delete();
+				
+				if (!$data['allow']) {
+					continue;
 				}
+
+				$this->permissionRepository->syncOne(['resource' => $resources[$id], 'privilege' => $data['admin'] ? '777' : '555', 'role' => $role,]);
 			}
 			
 			$grid->getPresenter()->flashMessage($this->_('.saved', 'Uloženo'), 'success');
@@ -266,16 +276,18 @@ class RolePresenter extends BackendPresenter
 			foreach (\array_merge([$group], $group->items) as $item) {
 				$uuid = $item->link ? \str_replace(':', '_', $item->link) : DIConnection::generateUuid();
 				$root = $group === $item;
-				$allow = $item->link && $this->authorizator->isAllowed($role->getPK(), $item->link, (string) 777);
+				$allow = $item->link && $this->authorizator->isAllowed($role->getPK(), $item->link, null);
+				$allow2 = $item->link && $this->authorizator->isAllowed($role->getPK(), $item->link, '777');
+				
 				$resources[$uuid] = $item->link ? \substr($item->link, 0, \strrpos($item->link, ':')) . ':*' : null;
 				
 				if ($select === null) {
-					$select = "'$uuid' as uuid, '$uuid' as uuid, '$item->label' as name, '$allow' as allow, '$item->link' as resource, '$root' as root";
+					$select = "'$uuid' as uuid, '$uuid' as uuid, '$item->label' as name, '$allow' as allow, '$allow2' as admin, '$item->link' as resource, '$root' as root";
 					
 					continue;
 				}
-				
-				$select .= " UNION SELECT ALL '$uuid', '$uuid', '$item->label', '$allow', '$item->link', '$root' as root";
+
+				$select .= " UNION SELECT ALL '$uuid', '$uuid', '$item->label', '$allow', '" . ($allow2 ? '1' : '0') . "', '$item->link', '$root' as root";
 			}
 		}
 		
