@@ -211,7 +211,14 @@ class RolePresenter extends BackendPresenter
 			}
 		};
 		
-		$input2 = $grid->addColumnInputCheckbox("<input type='checkbox' id='check-all-permissions' style='vertical-align: middle;'> Správce", 'admin', '', '', null, ['class' => 'rowSelector']);
+		$input2 = $grid->addColumnInputCheckbox(
+			"<input type='checkbox' id='check-all-manager-permissions' style='vertical-align: middle;'> Správce",
+			'admin',
+			'',
+			'',
+			null,
+			['class' => 'rowSelector'],
+		);
 		
 		$input2->onRenderCell[] = function (Html $td, $object): void {
 			if (!$object->resource) {

@@ -324,6 +324,10 @@
         $("input[id^=frm-permissionGrid-form-allow-]").prop("checked", e.target.checked)
     });
 
+    $('#check-all-manager-permissions').click(function (e) {
+        $("input[id^=frm-permissionGrid-form-admin-]").prop("checked", e.target.checked)
+    });
+
 </script>
 
 <script>
