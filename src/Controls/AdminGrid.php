@@ -936,9 +936,9 @@ class AdminGrid extends \Grid\Datagrid
 					$type = $prop->getType()->getName();
 
 					if ($type === 'int') {
-						$value = $value ? \intval($value) : $value;
+						$value = $value !== null ? \intval($value) : $value;
 					} elseif ($type === 'float') {
-						$value = $value ? NumbersHelper::strtoFloat($value) : $value;
+						$value = $value !== null ? NumbersHelper::strtoFloat($value) : $value;
 					}
 					
 					try {
