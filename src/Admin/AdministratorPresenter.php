@@ -188,7 +188,7 @@ class AdministratorPresenter extends BackendPresenter
 
 		$imageUrl = $administrator->get2FAQrCodeImage($account);
 		
-		$html = Html::el('div')->setHtml('<hr> <h5>QR kód pro dvoufaktorové přihlášeníke</h5><img src="' . $imageUrl . '" />');
+		$html = Html::el('div')->setHtml('<hr> <h5>QR kód pro dvoufaktorové přihlášení</h5><img src="' . $imageUrl . '" />');
 		
 		$this->template->displayControls[] = $html;
 	}
