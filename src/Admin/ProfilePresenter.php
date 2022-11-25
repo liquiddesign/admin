@@ -83,7 +83,10 @@ class ProfilePresenter extends BackendPresenter
 		
 		$imageUrl = $administrator->get2FAQrCodeImage($account);
 		
-		$html = Html::el('div')->setHtml('<hr> <h5>QR kód pro dvoufaktorové přihlášení</h5><img src="' . $imageUrl . '" />');
+		// @codingStandardsIgnoreLine
+		$list = '<ol class="mb-0"> <li> Stáhněte si z <a target="_blank" href="https://itunes.apple.com/app/google-authenticator/id388497605?mt=8">App Store</a> nebo  <a target="_blank" href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2">Google play</a> aplikaci Google Authenticator. </li><li >V aplikaci ťukněte na plus vpravo nahoře.</li><li>Zvolte Skenovat čárový kód.</li></ol>';
+		
+		$html = Html::el('div')->setHtml('<hr> <h5>QR kód pro dvoufaktorové přihlášení</h5>' . $list . '<img src="' . $imageUrl . '" />');
 		
 		$this->template->displayControls[] = $html;
 	}
