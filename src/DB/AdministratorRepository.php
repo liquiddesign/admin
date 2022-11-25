@@ -12,10 +12,18 @@ class AdministratorRepository extends \StORM\Repository implements IUserReposito
 {
 	use UserRepositoryTrait;
 	
+	private Google2FA $google2FA;
+	
 	public function __construct(DIConnection $connection, SchemaManager $schemaManager, Google2FA $google2FA)
 	{
 		parent::__construct($connection, $schemaManager);
-
+		
+		$this->google2FA = $google2FA;
 		$this->injectEntityArguments($google2FA);
+	}
+	
+	public function getGoogle2FA(): Google2FA
+	{
+		return $this->google2FA;
 	}
 }

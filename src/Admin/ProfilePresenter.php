@@ -10,6 +10,7 @@ use Admin\DB\AdministratorRepository;
 use Admin\FormValidators;
 use Admin\Google2FA;
 use Nette\Utils\Html;
+use Nette\Utils\Validators;
 use Security\DB\AccountRepository;
 use Security\DB\IUser;
 
@@ -104,6 +105,12 @@ class ProfilePresenter extends BackendPresenter
 			'profile' => $administrator->toArray(),
 			'role' => $administrator->role->name ?? '',
 		]);
+		
+		$form->onValidate[] = function (AdminForm $form, $values): void {
+			if (isset($values['profile']['google2faSecret']) && $values['profile']['google2faSecret'] && !Validators::isEmail($values['account']['login'])) {
+				$form['account']['login']->addError($this->_('errorLoginMustBeEmail', 'Pro dvoufaktorové přihlášení je potřeba mít jako login Váš email.'));
+			}
+		};
 		
 		$form->onSuccess[] = function (AdminForm $form) use ($administrator): void {
 			$values = $form->getValues();

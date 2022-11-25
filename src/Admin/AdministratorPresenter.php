@@ -115,7 +115,7 @@ class AdministratorPresenter extends BackendPresenter
 		
 		
 		$form->onValidate[] = function (AdminForm $form, $values): void {
-			if ($values['google2faSecret'] && !Validators::isEmail($values['account']['login'])) {
+			if (isset($values['google2faSecret']) && $values['google2faSecret'] && !Validators::isEmail($values['account']['login'])) {
 				$form['account']['login']->addError($this->_('errorLoginMustBeEmail', 'Pro dvoufaktorové přihlášení je potřeba mít jako login Váš email.'));
 			}
 		};

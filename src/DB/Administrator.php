@@ -57,6 +57,21 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	}
 	
 	/**
+	 * @param \StORM\IEntityParent<static> $parent
+	 * @param bool $recursive
+	 */
+	public function setParent(IEntityParent $parent, bool $recursive = true): void
+	{
+		parent::setParent($parent, $recursive);
+		
+		if (isset($this->google2FA) || !$this->getRepository() instanceof AdministratorRepository) {
+			return;
+		}
+		
+		$this->google2FA = $this->getRepository()->getGoogle2FA();
+	}
+	
+	/**
 	 * @return string|int
 	 */
 	public function getId()
