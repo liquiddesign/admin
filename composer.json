@@ -25,6 +25,7 @@
 		"liquiddesign/pages": "@dev",
 		"liquiddesign/grid": "~0.1",
 		"liquiddesign/common": "@dev",
+		"pragmarx/google2fa": "^8.0",
 		"ext-pdo": "*",
 		"ext-json": "*"
 	},

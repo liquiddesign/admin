@@ -2,9 +2,12 @@
 
 namespace Admin\DB;
 
+use Admin\Google2FA;
+use Nette\Application\ApplicationException;
 use Nette\Security\IIdentity;
 use Security\DB\Account;
 use Security\DB\IUser;
+use StORM\IEntityParent;
 use StORM\RelationCollection;
 
 /**
@@ -17,6 +20,12 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	 * @column
 	 */
 	public ?string $fullName = null;
+	
+	/**
+	 * Secret klíč
+	 * @column
+	 */
+	public ?string $google2faSecret = null;
 	
 	/**
 	 * Může editovat URL stránky
@@ -35,8 +44,17 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	 * @relation
 	 */
 	public ?Role $role = null;
-	
+
 	protected ?Account $account;
+
+	private Google2FA $google2FA;
+	
+	public function __construct(array $vars, Google2FA $google2FA, ?IEntityParent $parent = null, array $mutations = [], ?string $mutation = null)
+	{
+		parent::__construct($vars, $parent, $mutations, $mutation);
+		
+		$this->google2FA = $google2FA;
+	}
 	
 	/**
 	 * @return string|int
@@ -62,5 +80,39 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	public function setAccount(Account $account): void
 	{
 		$this->account = $account;
+	}
+	
+	public function has2FAEnabled(): bool
+	{
+		return !!$this->google2faSecret;
+	}
+	
+	public function get2FAQrCodeImage(Account $account): string
+	{
+		return $this->google2FA->getQrCodeImage($this, $account);
+	}
+	
+	public function set2FASecretKey(bool $unset = false, bool $save = false): void
+	{
+		$this->google2faSecret = $unset ? null : $this->google2FA->generateSecretKey();
+		
+		if (!$save) {
+			return;
+		}
+
+		$this->update(['google2faSecret' => $this->google2faSecret]);
+	}
+	
+	public function verify2FAKey(string $key, bool $passIfNotSet = false): bool
+	{
+		if (!$this->google2faSecret && !$passIfNotSet) {
+			throw new ApplicationException('2FA secret is not set');
+		}
+
+		if (!$this->google2faSecret) {
+			return true;
+		}
+		
+		return $this->google2FA->verify($key, $this->google2faSecret);
 	}
 }

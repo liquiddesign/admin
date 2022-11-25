@@ -2,10 +2,20 @@
 
 namespace Admin\DB;
 
+use Admin\Google2FA;
 use Security\DB\IUserRepository;
 use Security\DB\UserRepositoryTrait;
+use StORM\DIConnection;
+use StORM\SchemaManager;
 
 class AdministratorRepository extends \StORM\Repository implements IUserRepository
 {
 	use UserRepositoryTrait;
+	
+	public function __construct(DIConnection $connection, SchemaManager $schemaManager, Google2FA $google2FA)
+	{
+		parent::__construct($connection, $schemaManager);
+
+		$this->injectEntityArguments($google2FA);
+	}
 }

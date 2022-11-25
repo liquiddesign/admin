@@ -12,6 +12,7 @@ use Admin\Controls\AdminGridFactory;
 use Admin\Controls\ILoginFormFactory;
 use Admin\Controls\IMenuFactory;
 use Admin\DB\AdministratorRepository;
+use Admin\Google2FA;
 use Admin\Route;
 use Nette\DI\Definitions\ServiceDefinition;
 use Nette\DI\Definitions\Statement;
@@ -38,6 +39,10 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			'prettyPages' => Expect::bool(false),
 			'serviceMode' => Expect::bool(false),
 			'adminGrid' => Expect::array([]),
+			'google2FA' => Expect::arrayOf(Expect::structure([
+				'enabled' => Expect::bool(false),
+				'company' => Expect::string(['Admin']),
+			])),
 		]);
 	}
 	
@@ -50,6 +55,9 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		$builder = $this->getContainerBuilder();
 		
 		$builder->addDefinition($this->prefix('administrators'), new ServiceDefinition())->setType(AdministratorRepository::class);
+		$builder->addDefinition($this->prefix('google2FA'), new ServiceDefinition())->setType(Google2FA::class)
+			->setArgument('enabled', $config->google2FA->enabled ?? false)
+			->setArgument('company', $config->google2FA->company ?? 'Admin');
 		
 		$factory = $builder->addFactoryDefinition($this->prefix('menuFactory'))->setImplement(IMenuFactory::class)->getResultDefinition();
 		

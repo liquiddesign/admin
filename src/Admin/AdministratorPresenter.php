@@ -11,9 +11,12 @@ use Admin\Controls\AdminGrid;
 use Admin\DB\Administrator;
 use Admin\DB\AdministratorRepository;
 use Admin\DB\RoleRepository;
+use Admin\Google2FA;
 use Forms\Form;
 use Messages\DB\TemplateRepository;
 use Nette\Mail\Mailer;
+use Nette\Utils\Html;
+use Nette\Utils\Validators;
 use Security\DB\AccountRepository;
 
 class AdministratorPresenter extends BackendPresenter
@@ -51,6 +54,11 @@ class AdministratorPresenter extends BackendPresenter
 	 * @inject
 	 */
 	public Mailer $mailer;
+	
+	/**
+	 * @inject
+	 */
+	public Google2FA $google2FA;
 	
 	public string $tAdministrators;
 	
@@ -98,13 +106,28 @@ class AdministratorPresenter extends BackendPresenter
 		if (\in_array('editUrl', $this::CONFIGURATION['groups'])) {
 			$form->addCheckbox('urlEditor', $this->_('canEdit', 'Může editovat URL'));
 		}
+		
+		if ($this->google2FA->isEnabled()) {
+			$form->addCheckbox('google2faSecret', $this->_('2faSign', 'Aktivovat dvoufaktorové přihlášení'));
+		}
 
 		$form->addSubmits(!$this->getParameter('administrator'));
 		
 		
+		$form->onValidate[] = function (AdminForm $form, $values): void {
+			if ($values['google2faSecret'] && !Validators::isEmail($values['account']['login'])) {
+				$form['account']['login']->addError($this->_('errorLoginMustBeEmail', 'Pro dvoufaktorové přihlášení je potřeba mít jako login Váš email.'));
+			}
+		};
+		
 		$form->onSuccess[] = function (AdminForm $form): void {
 			$values = $form->getValues('array');
 			unset($values['account']);
+			
+			$administrator = $this->getParameter('administrator');
+			$doNotRedirect = !$administrator->google2faSecret && $values['google2faSecret'];
+			
+			$values['google2faSecret'] = $values['google2faSecret'] && $this->google2FA->isEnabled() ? $this->google2FA->generateSecretKey() : null;
 			
 			/** @var \Admin\DB\Administrator $administrator */
 			$administrator = $this->adminRepo->syncOne($values, null, true);
@@ -114,7 +137,7 @@ class AdministratorPresenter extends BackendPresenter
 			$this->accountFormFactory->success($form);
 			
 			$form->getPresenter()->flashMessage($this->_('.saved', 'Uloženo'), 'success');
-			$form->processRedirect('detail', 'default', [$administrator]);
+			$form->processRedirect('detail', $doNotRedirect ? 'detail' : 'default', [$administrator], $doNotRedirect ? [$administrator] : []);
 		};
 		
 		return $form;
@@ -142,7 +165,7 @@ class AdministratorPresenter extends BackendPresenter
 		$this->template->displayControls = [$this->getComponent('newForm')];
 	}
 	
-	public function renderDetail(): void
+	public function renderDetail(Administrator $administrator): void
 	{
 		$tDetail = $this->_('detail', 'Detail');
 		$this->template->headerLabel = $tDetail;
@@ -152,6 +175,18 @@ class AdministratorPresenter extends BackendPresenter
 		];
 		$this->template->displayButtons = [$this->createBackButton('default')];
 		$this->template->displayControls = [$this->getComponent('newForm')];
+		
+		$account = $administrator->accounts->first();
+		
+		if (!$account || !$administrator->has2FAEnabled()) {
+			return;
+		}
+
+		$imageUrl = $administrator->get2FAQrCodeImage($account);
+		
+		$html = Html::el('div')->setHtml('<hr> <h5>QR kód pro dvoufaktorovou authorizaci</h5><img src="' . $imageUrl . '" />');
+		
+		$this->template->displayControls[] = $html;
 	}
 	
 	public function actionNew(): void
