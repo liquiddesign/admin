@@ -42,13 +42,13 @@
     <!-- /.login-logo -->
     <div class="card">
         <div n:if="$required2FA" class="card-body login-card-body">
-            <p class="login-box-msg">Zadejte vygenerované časově omezené jednorázové heslo:</p>
+            <p class="login-box-msg">Zadejte časově omezené jednorázové heslo:</p>
             <div n:foreach="$flashes as $flash" class="alert alert-danger">
                 <span><i class="icon fas fa-exclamation"></i> {$flash->message}</span>
             </div>
             {form google2FAForm}
                 <div class="input-group mb-3">
-                    <input n:name="key" type="text" class="form-control" placeholder="Klíč">
+                    <input n:name="key" type="text" class="form-control" placeholder="Heslo">
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-lock"></span>

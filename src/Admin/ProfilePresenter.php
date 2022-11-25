@@ -41,11 +41,11 @@ class ProfilePresenter extends BackendPresenter
 		
 		$profile = $form->addContainer('profile');
 		$profile->addText('fullName', $this->_('name', 'Jméno'));
-
+		
 		if ($this->google2FA->isEnabled()) {
 			$profile->addCheckbox('google2faSecret', $this->_('2faSign', 'Aktivovat dvoufaktorové přihlášení'));
 		}
-
+		
 		$account = $form->addContainer('account');
 		$account->addText('login', 'Login')->setDisabled();
 		$form->addText('role', 'Role')->setDisabled();
@@ -106,11 +106,9 @@ class ProfilePresenter extends BackendPresenter
 			'role' => $administrator->role->name ?? '',
 		]);
 		
-		$form->onValidate[] = function (AdminForm $form, $values): void {
-			if (isset($values['profile']['google2faSecret']) && $values['profile']['google2faSecret'] && !Validators::isEmail($values['account']['login'])) {
-				$form['account']['login']->addError($this->_('errorLoginMustBeEmail', 'Pro dvoufaktorové přihlášení je potřeba mít jako login Váš email.'));
-			}
-		};
+		if (!Validators::isEmail($administrator->getAccount()->login)) {
+			$form['profile']['google2faSecret']->setDisabled()->setHtmlAttribute('data-info', '<span>Pro dvoufaktorové přihlášení je nutné mít jako login planý e-mail</span>');
+		}
 		
 		$form->onSuccess[] = function (AdminForm $form) use ($administrator): void {
 			$values = $form->getValues();
