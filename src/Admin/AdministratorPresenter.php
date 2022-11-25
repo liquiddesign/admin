@@ -124,6 +124,10 @@ class AdministratorPresenter extends BackendPresenter
 			$values = $form->getValues('array');
 			unset($values['account']);
 			
+			if (!isset($values['google2faSecret'])) {
+				$values['google2faSecret'] = false;
+			}
+			
 			$administrator = $this->getParameter('administrator');
 			$doNotRedirect = (!$administrator || !$administrator->google2faSecret) && $values['google2faSecret'];
 			
@@ -184,7 +188,7 @@ class AdministratorPresenter extends BackendPresenter
 
 		$imageUrl = $administrator->get2FAQrCodeImage($account);
 		
-		$html = Html::el('div')->setHtml('<hr> <h5>QR kód pro dvoufaktorovou authorizaci</h5><img src="' . $imageUrl . '" />');
+		$html = Html::el('div')->setHtml('<hr> <h5>QR kód pro dvoufaktorové přihlášeníke</h5><img src="' . $imageUrl . '" />');
 		
 		$this->template->displayControls[] = $html;
 	}

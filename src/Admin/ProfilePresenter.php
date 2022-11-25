@@ -8,6 +8,8 @@ use Admin\BackendPresenter;
 use Admin\Controls\AdminForm;
 use Admin\DB\AdministratorRepository;
 use Admin\FormValidators;
+use Admin\Google2FA;
+use Nette\Utils\Html;
 use Security\DB\AccountRepository;
 use Security\DB\IUser;
 
@@ -23,6 +25,11 @@ class ProfilePresenter extends BackendPresenter
 	 */
 	public AdministratorRepository $adminRepo;
 	
+	/**
+	 * @inject
+	 */
+	public Google2FA $google2FA;
+	
 	public function createComponentAccountForm(): AdminForm
 	{
 		if (!$this->admin->getIdentity() instanceof IUser) {
@@ -33,7 +40,11 @@ class ProfilePresenter extends BackendPresenter
 		
 		$profile = $form->addContainer('profile');
 		$profile->addText('fullName', $this->_('name', 'Jméno'));
-		
+
+		if ($this->google2FA->isEnabled()) {
+			$profile->addCheckbox('google2faSecret', $this->_('2faSign', 'Aktivovat dvoufaktorové přihlášení'));
+		}
+
 		$account = $form->addContainer('account');
 		$account->addText('login', 'Login')->setDisabled();
 		$form->addText('role', 'Role')->setDisabled();
@@ -59,6 +70,21 @@ class ProfilePresenter extends BackendPresenter
 		$this->template->displayControls = [
 			$this->getComponent('accountForm'),
 		];
+		
+		/** @var \Admin\DB\Administrator $administrator */
+		$administrator = $this->admin->getIdentity();
+		
+		$account = $administrator->getAccount();
+		
+		if (!$account || !$administrator->has2FAEnabled()) {
+			return;
+		}
+		
+		$imageUrl = $administrator->get2FAQrCodeImage($account);
+		
+		$html = Html::el('div')->setHtml('<hr> <h5>QR kód pro dvoufaktorovou authorizaci</h5><img src="' . $imageUrl . '" />');
+		
+		$this->template->displayControls[] = $html;
 	}
 	
 	public function actionDefault(): void
@@ -72,7 +98,7 @@ class ProfilePresenter extends BackendPresenter
 		if (!$administrator->getAccount()) {
 			return;
 		}
-
+		
 		$form->setDefaults([
 			'account' => $administrator->getAccount()->toArray(),
 			'profile' => $administrator->toArray(),
@@ -85,6 +111,12 @@ class ProfilePresenter extends BackendPresenter
 			if ($values['account']->newPassword && $values['account']->oldPassword) {
 				$administrator->getAccount()->changePassword($values['account']->newPassword);
 			}
+			
+			if (!isset($values['profile']['google2faSecret'])) {
+				$values['profile']['google2faSecret'] = false;
+			}
+			
+			$values['profile']['google2faSecret'] = $values['profile']['google2faSecret'] && $this->google2FA->isEnabled() ? $this->google2FA->generateSecretKey() : null;
 			
 			$administrator->update($values['profile']);
 			

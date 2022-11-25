@@ -1,73 +1,105 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>⋆ Admin - Přihlášení</title>
+    <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="author" content="Liquid Design s.r.o.">
-    <meta name="developer" content="Liquid Design s.r.o."/>
-    <meta property="og:type" content="website"/>
-    <meta name=”robots” content=”noindex,nofollow” />
+    <meta name="robots" content="noindex, nofollow">
 
-    <title>Přihlášení | Administrace</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{$basePath}/public/admin/plugins/fontawesome-free/css/all.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{$basePath}/public/admin/css/adminlte.min.css">
+    <link rel="shortcut icon" href="https://www.lqd.cz/public/favicon.ico?v=2" />
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 
-    <meta name="viewport" content="width=device-width, maximum-scale=1, initial-scale=1, user-scalable=0"/>
+    <style>
+        .login-page {
+            background-image: url("{$pubUrl}/admin/img/grid-symetric.png");
+            background-position: left top;
+            background-repeat: repeat-x;
+            background-size: 10rem;
+            background-color: #fff;
+        }
 
-    <link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATBwaPEwcGp9MHBrMTBwa9kwcGuRMHBqxTBwaSwAAAAAAAAAATBwaFQAAAAAAAAAAAAAAAAAAAABMHBoJTBwatEwcGv9MHBr/TBwa/0wcGv9MHBrSTBwaaUwcGsNMHBrSTBwasUwcGl1MHBpOTBwaEkwcGiFMHBpaTBwa4UwcGvZMHBrzTBwa/EwcGudMHBoqTBwagUwcGgYAAAAATBwaIUwcGm9MHBqfTBwaVEwcGnJMHBrMTBwa50wcGvxMHBr/TBwa/EwcGvxMHBrSTBwaGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATBwaRUwcGn5MHBqTTBwa/0wcGv9MHBpsTBwa+UwcGsZMHBoGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEwcGg9MHBpgTBwaUUwcGv9MHBr/TBwadUwcGktMHBrYTBwaNgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABMHBoGTBwasUwcGvZMHBr5TBwargAAAAAAAAAATBwaq0wcGl0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEwcGiRMHBq0TBwaUUwcGgkAAAAAAAAAAEwcGhVMHBoJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATBwaCQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAP//AAD//wAA//8AAP4PAAD4EQAA8F4AAMB/AADxPwAA+b8AAOG/AAD3/wAA//8AAP//AAD//wAA//8AAA==" type="image/x-icon">
-    <!--[if IE]>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
-    <![endif]-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"/>
-    <link href="{$nodeUrl}/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-    <link href="{$nodeUrl}/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet" type="text/css"/>
-    <link href="{$pubUrl}/admin/css/admin-login.min.css?{$ts}" rel="stylesheet" type="text/css" />
-<body>
-
-<main>
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="login-heading">
-                    <div class="text-center shield">
-                        <i class="fas fa-shield-alt" style="color: #007bff;"></i>
-                    </div>
-                    <h1 class="text-center"> LIQUID ADMIN</h1>
-                </div>
-            </div>
-
-            <div class="col-md-6 offset-md-3">
-                <div class="login border rounded">
-                    {var $form = $control['loginForm']}
-
-                    <div style="background: #C45252; color: #FFF; padding: 5px; text-align: center; margin-bottom: 1em" n:if="$form->hasErrors()">
-                        <span>{$form->errors[0]}</span>
-                    </div>
-
-                    <div class="login-form">
-                        {form loginForm}
-                            <div class="form-group position-relative">
-                                {*                            {label login /}*}
-                                <i class="fas fa-user"></i>
-                                <input n:name="login" type="text" class="form-control" placeholder="Přihlašovací jméno">
-                            </div>
-
-                            <div class="form-group position-relative">
-                                <i class="fas fa-key"></i>
-                                <input n:name="password" type="password" class="form-control" placeholder="****">
-                            </div>
-
-                            <button n:name="submit" class="btn btn-primary mt-4 w-100">PŘIHLÁSIT SE</button>
-
-                        {/form}
-                    </div>
-                </div>
-            </div>
-        </div>
+        .login-card-body {
+            border-radius: .25rem;
+        }
+    </style>
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+    <div class="login-logo">
+        <a href="{$basePath}/admin">
+            <img height="60" src="{$pubUrl}/admin/img/lqd-logo-blue.png" alt="" style="margin-bottom: 20px;">
+        </a>
     </div>
-</main>
-
-<script type="text/javascript" src="{$nodeUrl}/jquery/dist/jquery.min.js"></script>
-<script type="text/javascript" src="{$nodeUrl}/nette-forms/src/assets/netteForms.js"></script>
+    <!-- /.login-logo -->
+    <div class="card">
+        <div n:if="$required2FA" class="card-body login-card-body">
+            <p class="login-box-msg">Zadejte vygenerované časově omezené jednorázové heslo:</p>
+            <div n:foreach="$flashes as $flash" class="alert alert-danger">
+                <span><i class="icon fas fa-exclamation"></i> {$flash->message}</span>
+            </div>
+            {form google2FAForm}
+                <div class="input-group mb-3">
+                    <input n:name="key" type="text" class="form-control" placeholder="Klíč">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-lock"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <!-- /.col -->
+                    <div class="col-12">
+                        <button n:name="submit" type="submit" class="btn btn-primary btn-block">Přihlásit se</button>
+                    </div>
+                    <!-- /.col -->
+                </div>
+            {/form}
+        </div>
+        <div n:if="!$required2FA" class="card-body login-card-body">
+            <p class="login-box-msg">Přihlaste se pro přístup do administrace</p>
+            <div n:foreach="$flashes as $flash" class="alert alert-danger">
+                <span><i class="icon fas fa-exclamation"></i> {$flash->message}</span>
+            </div>
+            {form loginForm}
+                <div class="input-group mb-3">
+                    <input n:name="login" type="text" class="form-control" placeholder="Login">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-envelope"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group mb-3">
+                    <input n:name="password" type="password" class="form-control" placeholder="Heslo">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-lock"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <!-- /.col -->
+                    <div class="col-12">
+                        <button n:name="submit" type="submit" class="btn btn-primary btn-block">Přihlásit se</button>
+                    </div>
+                    <!-- /.col -->
+                </div>
+            {/form}
+        </div>
+        <!-- /.login-card-body -->
+    </div>
+</div>
+<!-- /.login-box -->
 
 </body>
 </html>
+
