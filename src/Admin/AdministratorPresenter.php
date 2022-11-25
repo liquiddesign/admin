@@ -125,7 +125,7 @@ class AdministratorPresenter extends BackendPresenter
 			unset($values['account']);
 			
 			$administrator = $this->getParameter('administrator');
-			$doNotRedirect = !$administrator->google2faSecret && $values['google2faSecret'];
+			$doNotRedirect = (!$administrator || !$administrator->google2faSecret) && $values['google2faSecret'];
 			
 			$values['google2faSecret'] = $values['google2faSecret'] && $this->google2FA->isEnabled() ? $this->google2FA->generateSecretKey() : null;
 			

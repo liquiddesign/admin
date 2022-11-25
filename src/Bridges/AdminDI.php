@@ -39,10 +39,10 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			'prettyPages' => Expect::bool(false),
 			'serviceMode' => Expect::bool(false),
 			'adminGrid' => Expect::array([]),
-			'google2FA' => Expect::arrayOf(Expect::structure([
+			'google2FA' => Expect::structure([
 				'enabled' => Expect::bool(false),
 				'company' => Expect::string(['Admin']),
-			])),
+			]),
 		]);
 	}
 	
