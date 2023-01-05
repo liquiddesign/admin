@@ -17,6 +17,7 @@
 		"nette/utils":"^3.0",
 		"nette/di":"^3.0",
 		"nette/component-model":"^3.0",
+		"latte/latte":"~2.0 || ~3.0",
 		"liquiddesign/storm": "~1.0",
 		"liquiddesign/forms": "@dev",
 		"liquiddesign/security": "~1.0",
@@ -44,6 +45,7 @@
 		"phpstan": "phpstan analyse --memory-limit 1G -c phpstan.neon",
 		"phpcs": "phpcs --standard=ruleset.xml --ignore=assets src",
 		"phpcsfix": "phpcbf --standard=ruleset.xml --ignore=assets src",
+		"lattelint": "php lattelint.php",
 		"tester": "tester tests/Cases/*.phpt  -c tests/php.ini --setup tests/setup.php",
 		"aux-sync-database": "Migrator\\Scripts::syncDatabase",
 		"sync-database": "@aux-sync-database Security\\Tests\\Bootstrap"

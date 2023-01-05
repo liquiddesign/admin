@@ -113,12 +113,12 @@
         // On value change
         document.getElementById({$component->getHtmlId()}).onchange = function () {
             document.getElementById({$presenter[$formName]['keep'][$key]->getHtmlId()}).checked = false;
-            document.getElementById("tr-{$component->getHtmlId()|noescape}").classList.remove("bg-light");
+            document.getElementById({="tr-" . $component->getHtmlId()}).classList.remove("bg-light");
         };
 
         // On keep checkbox change
         document.getElementById({$presenter[$formName]['keep'][$key]->getHtmlId()}).onchange = function () {
-            var element = document.getElementById("tr-{$component->getHtmlId()|noescape}");
+            var element = document.getElementById({="tr-" . $component->getHtmlId()});
             if(this.checked){
                 element.classList.add("bg-light");
             }else{
