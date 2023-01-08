@@ -41,7 +41,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			'adminGrid' => Expect::array([]),
 			'google2FA' => Expect::structure([
 				'enabled' => Expect::bool(false),
-				'company' => Expect::string(['Admin']),
+				'company' => Expect::string('Admin'),
 			]),
 		]);
 	}
@@ -95,7 +95,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		$gridDef->addSetup('setDefaultOnPage', [$config->adminGrid['defaulOnPage'] ?? null]);
 		
 		/** @var \Nette\DI\Definitions\FactoryDefinition $definition */
-		$definition = $builder->getDefinition($this->prefix('latteFactory'));
+		$definition = $builder->getDefinition('latte.latteFactory');
 		$definition->getResultDefinition()->addSetup('addExtension', [new \Latte\Essential\RawPhpExtension()]);
 	}
 	
