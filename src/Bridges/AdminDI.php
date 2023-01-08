@@ -93,6 +93,10 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		$gridDef->addSetup('setItemsPerPage', [$config->adminGrid['itemsPerPage'] ?? array(10, 20, 50, 100)]);
 		$gridDef->addSetup('setShowItemsPerPage', [$config->adminGrid['showItemsPerPage'] ?? true]);
 		$gridDef->addSetup('setDefaultOnPage', [$config->adminGrid['defaulOnPage'] ?? null]);
+		
+		/** @var \Nette\DI\Definitions\FactoryDefinition $definition */
+		$definition = $builder->getDefinition($this->prefix('latteFactory'));
+		$definition->getResultDefinition()->addSetup('addExtension', [new \Latte\Essential\RawPhpExtension()]);
 	}
 	
 	public function beforeCompile(): void
