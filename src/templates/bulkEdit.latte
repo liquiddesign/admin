@@ -38,7 +38,7 @@
                 {/if}
             </div>
             <div class="card-body p-3">
-                {form $formName}
+                {form "$formName"}
 
                     {var $renderer = $form->getRenderer()}
                     <fieldset>
@@ -67,14 +67,14 @@
                     {foreach $form['values']->getComponents() as $key => $component}
                         <tr class="m-0 mt-1 bg-light" id="tr-{$component->getHtmlId()}">
                             <th class="col-label col-form-label col">
-                                <label n:name="values-$key" />
+                                {label "values-$key" /}
                             </th>
                             {$renderer->renderControl($component)|noescape}
                             <td class="align-middle d-inline-flex align-items-center pr-4">
 
                                 <div class="form-check ml-4">
-                                    <input n:name="keep-$key" class="form-check-input">
-                                    <label n:name="keep-$key" class="form-check-label"/>
+                                    {input "keep-$key", "class" => "form-check-input"}
+                                    {label "keep-$key", "class" => "form-check-label" /}
                                 </div>
                             </td>
                         </tr>
