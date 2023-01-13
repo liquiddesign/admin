@@ -109,7 +109,7 @@ class ProfilePresenter extends BackendPresenter
 			'role' => $administrator->role->name ?? '',
 		]);
 		
-		if (!Validators::isEmail($administrator->getAccount()->login)) {
+		if (!Validators::isEmail($administrator->getAccount()->login) && isset($form['profile']['google2faSecret'])) {
 			$form['profile']['google2faSecret']->setDisabled()->setHtmlAttribute('data-info', '<span>Pro dvoufaktorové přihlášení je nutné mít jako login planý e-mail</span>');
 		}
 		
