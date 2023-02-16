@@ -41,10 +41,10 @@
 	},
 	"scripts": {
 		"fix-code": ["@phpcsfix"],
-		"check-code": ["@phpcs", "@phpstan"],
+		"check-code": ["@phpcs", "@phpstan", "@lattelint"],
 		"phpstan": "phpstan analyse --memory-limit 1G -c phpstan.neon",
-		"phpcs": "phpcs --standard=ruleset.xml --ignore=assets src",
-		"phpcsfix": "phpcbf --standard=ruleset.xml --ignore=assets src",
+		"phpcs": "phpcs --standard=ruleset.xml --ignore=assets --cache src",
+		"phpcsfix": "phpcbf --standard=ruleset.xml --ignore=assets --cache src",
 		"lattelint": "php lattelint.php",
 		"tester": "tester tests/Cases/*.phpt  -c tests/php.ini --setup tests/setup.php",
 		"aux-sync-database": "Migrator\\Scripts::syncDatabase",
