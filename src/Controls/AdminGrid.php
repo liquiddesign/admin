@@ -386,8 +386,9 @@ class AdminGrid extends \Grid\Datagrid
 	 * @param callable|null $beforeDeleteCallback Callback that will be called before object removal. If callback throw exception, it will catch it and object will not be deleted.
 	 * @param bool $override If true, object will not be automatically delete. You can delete it manually in callback.
 	 * @param callable|null $condition Condition callback, must return boolean
+	 * @param callable|null $afterDeleteCallback Called once at the end, no parameter is passed, if condition is false then this is not called!
 	 */
-	public function addColumnActionDelete(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null): Column
+	public function addColumnActionDelete(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $condition = null, ?callable $afterDeleteCallback = null): Column
 	{
 		$confirmJS = 'return confirm("' . $this->translator->translate('admin.really', 'Opravdu?') . '")';
 		$removeLabel = $this->translator->translate('admin.remove', 'Smazat');
@@ -395,7 +396,7 @@ class AdminGrid extends \Grid\Datagrid
 		return $this->addColumnAction(
 			'',
 			"<a href=\"%s\" class='btn btn-danger btn-sm text-xs' title='" . $removeLabel . "' onclick='" . $confirmJS . "'><i class='far fa-trash-alt'></i></a>",
-			function ($object) use ($beforeDeleteCallback, $override, $condition): void {
+			function ($object) use ($beforeDeleteCallback, $override, $condition, $afterDeleteCallback): void {
 				try {
 					$this->getPresenter()->flashMessage($this->translator->translate('admin.done', 'Provedeno'), 'success');
 
@@ -429,6 +430,10 @@ class AdminGrid extends \Grid\Datagrid
 					$this->getPresenter()->flashMessage($this->translator->translate('admin.unableToRemove', 'Chyba: Nelze smazat.'), 'error');
 				}
 
+				if ($afterDeleteCallback) {
+					$afterDeleteCallback();
+				}
+
 				$this->getPresenter()->redirect('this');
 			},
 			[],
@@ -437,11 +442,11 @@ class AdminGrid extends \Grid\Datagrid
 		);
 	}
 
-	public function addColumnActionDeleteSystemic(?callable $beforeDeleteCallback = null, bool $override = false): Column
+	public function addColumnActionDeleteSystemic(?callable $beforeDeleteCallback = null, bool $override = false, ?callable $afterDeleteCallback = null): Column
 	{
 		$column = $this->addColumnActionDelete($beforeDeleteCallback, $override, function (Entity $object) {
 			return \method_exists($object, 'isSystemic') && !$object->isSystemic();
-		});
+		}, $afterDeleteCallback);
 
 		$column->onRenderCell[] = function (\Nette\Utils\Html $td, Entity $object): void {
 			if (\method_exists($object, 'isSystemic') && $object->isSystemic()) {
@@ -462,6 +467,7 @@ class AdminGrid extends \Grid\Datagrid
 	 * @param bool $diff Check diff on every row
 	 * @param callable|null $overrideCallback If set, all other options is ingored and this callback must process data
 	 * @param callable|null $oneTimeBeforeCallback Callback called once before any processing on submit click. No data passed. Good for e.g. cache clearing.
+	 * @param callable|null $oneTimeAfterCallback Callback called once after all processing on submit click. No data passed. Good for e.g. cache clearing.
 	 */
 	public function addButtonSaveAll(
 		array $processNullColumns = [],
@@ -472,7 +478,8 @@ class AdminGrid extends \Grid\Datagrid
 		?callable $onRowUpdate = null,
 		bool $diff = true,
 		?callable $overrideCallback = null,
-		?callable $oneTimeBeforeCallback = null
+		?callable $oneTimeBeforeCallback = null,
+		?callable $oneTimeAfterCallback = null,
 	): void {
 		$grid = $this;
 		$defaults = $this->getForm()->addHidden('_defaults')->setNullable(true)->setOmitted(true);
@@ -495,7 +502,8 @@ class AdminGrid extends \Grid\Datagrid
 			$onRowUpdate,
 			$diff,
 			$overrideCallback,
-			$oneTimeBeforeCallback
+			$oneTimeBeforeCallback,
+			$oneTimeAfterCallback
 		): void {
 			if ($oneTimeBeforeCallback) {
 				$oneTimeBeforeCallback();
@@ -548,13 +556,6 @@ class AdminGrid extends \Grid\Datagrid
 
 					$this->onUpdateRow($id, $data);
 
-					/*$this->changelogRepository->createOne([
-						'user' => $grid->getPresenter()->admin->getIdentity()->getAccount()->login,
-						'entity' => $grid->entityName,
-						'objectId' => $id,
-						'type' => 'grid-edit',
-					]);*/
-
 					if (\count($data) === 0) {
 						continue;
 					}
@@ -564,6 +565,10 @@ class AdminGrid extends \Grid\Datagrid
 						->where($sourceIdName ?? $grid->getSource(false)->getPrefix() . $grid->getSourceIdName(), $id)
 						->update($data, $ignore, $grid->getSource(false)->getPrefix(false));
 				}
+			}
+
+			if ($oneTimeAfterCallback) {
+				$oneTimeAfterCallback();
 			}
 
 			$grid->getPresenter()->flashMessage($this->translator->translate('admin.saved', 'Uloženo'), 'success');
@@ -577,19 +582,21 @@ class AdminGrid extends \Grid\Datagrid
 	 * @param callable|null $condition Condition callback, must return boolean
 	 * @param string|null $sourceIdName Name of source primary key
 	 * @param callable|null $oneTimeBeforeCallback Callback called once before any processing on submit click. No data passed. Good for e.g. cache clearing.
+	 * @param callable|null $oneTimeAfterCallback Callback called once after all processing on submit click. No data passed. Good for e.g. cache clearing.
 	 */
 	public function addButtonDeleteSelected(
 		?callable $beforeDeleteCallback = null,
 		bool $override = false,
 		?callable $condition = null,
 		?string $sourceIdName = null,
-		?callable $oneTimeBeforeCallback = null
+		?callable $oneTimeBeforeCallback = null,
+		?callable $oneTimeAfterCallback = null,
 	): void {
 		$grid = $this;
 		$submit = $this->getForm()->addSubmit('deleteAll', $this->translator->translate('admin.remove', 'Smazat'));
 		$submit->setHtmlAttribute('class', 'btn btn-sm btn-danger');
 		$submit->setHtmlAttribute('onClick', 'return confirm("' . $this->translator->translate('admin.really', 'Opravdu?') . '")');
-		$submit->onClick[] = function ($button) use ($grid, $beforeDeleteCallback, $override, $condition, $sourceIdName, $oneTimeBeforeCallback): void {
+		$submit->onClick[] = function ($button) use ($grid, $beforeDeleteCallback, $override, $condition, $sourceIdName, $oneTimeBeforeCallback, $oneTimeAfterCallback): void {
 			if ($oneTimeBeforeCallback) {
 				$oneTimeBeforeCallback();
 			}
@@ -634,6 +641,10 @@ class AdminGrid extends \Grid\Datagrid
 
 			if ($warning) {
 				$grid->getPresenter()->flashMessage($this->translator->translate('admin.cantBeRemoved', 'Varování: Některé položky nebylo možné smazat!'), 'warning');
+			}
+
+			if ($oneTimeAfterCallback) {
+				$oneTimeAfterCallback();
 			}
 
 			$grid->getPresenter()->flashMessage($this->translator->translate('admin.done', 'Provedeno'), 'success');
