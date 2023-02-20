@@ -551,7 +551,7 @@ class AdminGrid extends \Grid\Datagrid
 					}
 
 					if ($onRowUpdate) {
-						$onRowUpdate($id, $data);
+						$onRowUpdate($id, $data, $object);
 					}
 
 					$this->onUpdateRow($id, $data);
