@@ -14,8 +14,11 @@
 			<div class="col-12">
 				<div class="form-group row">
 					{foreach $components as $component}
-						<div n:tag-if="!$component instanceof Nette\Forms\Controls\HiddenField"  class="col-auto p-1 inline-style">
+						<div n:tag-if="!$component instanceof Nette\Forms\Controls\HiddenField" class="col-auto p-1 inline-style">
 							{$component->getControl()}
+							{if $component instanceOf Nette\Forms\Controls\MultiSelectBox}
+								<input type="hidden" name="{$component->getHtmlName()}" value="__none__">
+							{/if}
 						</div>
 					{/foreach}
 				{ifset $submit}
