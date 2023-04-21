@@ -17,7 +17,7 @@
 		"nette/utils":"~3.0",
 		"nette/di":"~3.0",
 		"nette/component-model":"~3.0",
-		"latte/latte":"~2.0 || ~3.0",
+		"latte/latte":"~3.0",
 		"liquiddesign/storm": "~1.0",
 		"liquiddesign/forms": "~0.1.0",
 		"liquiddesign/security": "~1.0",
@@ -26,7 +26,7 @@
 		"liquiddesign/pages": "~1.0.0",
 		"liquiddesign/grid": "~0.1",
 		"liquiddesign/common": "~1.0.0",
-		"liquiddesign/base": "dev-main",
+		"liquiddesign/base": "v2.x-dev",
 		"pragmarx/google2fa": "~8.0",
 		"ext-pdo": "*",
 		"ext-json": "*"
