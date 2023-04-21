@@ -9,11 +9,14 @@ use Admin\Controls\AdminGridFactory;
 use Admin\Controls\IMenuFactory;
 use Admin\Controls\Menu;
 use Admin\DB\IGeneralAjaxRepository;
+use Base\DB\ShopRepository;
+use Nette\Application\Attributes\Persistent;
 use Nette\Application\BadRequestException;
 use Nette\Application\UI\Presenter;
 use Nette\DI\Container;
 use Nette\Localization\Translator;
 use Nette\Utils\FileSystem;
+use Nette\Utils\Strings;
 use StORM\DIConnection;
 use StORM\Entity;
 
@@ -62,14 +65,20 @@ abstract class BackendPresenter extends Presenter
 	 * @inject
 	 */
 	public DIConnection $connection;
+
+	/** @inject */
+	public ShopRepository $shopRepository;
 	
 	/**
 	 * @persistent
 	 */
 	public string $lang;
+
+	#[Persistent]
+	public string|null $shop = null;
 	
 	/**
-	 * @var string[]
+	 * @var array<string>
 	 */
 	public array $langs = [];
 
@@ -117,10 +126,11 @@ abstract class BackendPresenter extends Presenter
 		
 		$this->template->admin = $this->admin;
 		$this->template->isManager = $this->isManager;
+		$this->template->shops = $this->shopRepository->many()->toArray();
 	}
 	
 	/**
-	 * @return string[]
+	 * @return array<string>
 	 */
 	public function formatLayoutTemplateFiles(): array
 	{
@@ -141,7 +151,7 @@ abstract class BackendPresenter extends Presenter
 			return $this->translator->translate('admin' . $source[0] . $module . '.' . $message, ...$parameters);
 		}
 		
-		if (\substr($message, 0, 1) === '.') {
+		if (Strings::substring($message, 0, 1) === '.') {
 			return $this->translator->translate('admin' . $message, ...$parameters);
 		}
 		
@@ -257,7 +267,7 @@ abstract class BackendPresenter extends Presenter
 	
 	protected function onDeleteImage(Entity $object, string $propertyName = 'imageFileName'): void
 	{
-		if ($object->$propertyName && \defined(\get_class($object) . '::IMAGE_DIR')) {
+		if ($object->$propertyName && \defined($object::class . '::IMAGE_DIR')) {
 			$subDirs = ['origin', 'detail', 'thumb'];
 			/* @phpstan-ignore-next-line */
 			$dir = $object::IMAGE_DIR;
@@ -286,5 +296,14 @@ abstract class BackendPresenter extends Presenter
 		$administrator = $this->admin->getIdentity();
 
 		return $administrator;
+	}
+
+	protected function startup(): void
+	{
+		parent::startup();
+
+		$shop = $this->shopRepository->getSelectedShop();
+		$this->shop = $shop->getPK();
+		$this->template->shop = $shop;
 	}
 }

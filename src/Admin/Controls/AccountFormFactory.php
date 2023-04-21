@@ -30,17 +30,17 @@ class AccountFormFactory
 	];
 
 	/**
-	 * @var callable[]&callable(\Security\DB\Account, array): void
+	 * @var array<callable>&callable(\Security\DB\Account, array): void
 	 */
 	public $onCreateAccount;
 
 	/**
-	 * @var callable[]&callable(): void
+	 * @var array<callable>&callable(): void
 	 */
 	public $onDeleteAccount;
 
 	/**
-	 * @var callable[]&callable(\Security\DB\Account, array): void
+	 * @var array<callable>&callable(\Security\DB\Account, array): void
 	 */
 	public $onUpdateAccount;
 
@@ -207,7 +207,7 @@ class AccountFormFactory
 	{
 		/** @var \Security\DB\AccountRepository $repository */
 		$repository = $args[0];
-		$collection = $repository->many()->where('login', (string)$input->getValue());
+		$collection = $repository->many()->where('login', (string) $input->getValue());
 
 		if (isset($args[1]) && $args[1]) {
 			$collection->whereNot('this.uuid', $args[1]);

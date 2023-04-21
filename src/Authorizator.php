@@ -12,7 +12,7 @@ class Authorizator implements IAuthorizator
 	private ?string $superRole = null;
 	
 	/**
-	 * @var bool[]
+	 * @var array<bool>
 	 */
 	private array $allowedCache = [];
 	

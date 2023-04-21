@@ -7,6 +7,7 @@ namespace Admin\Controls;
 use Admin\Administrator;
 use Nette\Application\UI\Control;
 use Nette\DI\Container;
+use Nette\Utils\Strings;
 
 /**
  * @property \Nette\Bridges\ApplicationLatte\Template|\StdClass $template
@@ -16,7 +17,7 @@ class Menu extends Control
 	private Administrator $admin;
 	
 	/**
-	 * @var \Admin\Controls\MenuItem[]
+	 * @var array<\Admin\Controls\MenuItem>
 	 */
 	private array $items = [];
 	
@@ -73,7 +74,7 @@ class Menu extends Control
 						unset($item->items[$key]);
 					}
 					
-					if (!$this->getPresenter()->isLinkCurrent(\substr($subItem->link, 0, \strrpos($subItem->link, ':')) . ':*')) {
+					if (!$this->getPresenter()->isLinkCurrent(Strings::substring($subItem->link, 0, \strrpos($subItem->link, ':')) . ':*')) {
 						continue;
 					}
 
@@ -93,7 +94,7 @@ class Menu extends Control
 	}
 	
 	/**
-	 * @return \Admin\Controls\MenuItem[]
+	 * @return array<\Admin\Controls\MenuItem>
 	 */
 	public function getItems(): array
 	{

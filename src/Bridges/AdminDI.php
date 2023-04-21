@@ -90,7 +90,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		$formDef->addSetup('setMutations', [$config->mutations]);
 		
 		$gridDef = $builder->addDefinition($this->prefix('adminGridFactory'), new ServiceDefinition())->setFactory(AdminGridFactory::class, [$administratorDef]);
-		$gridDef->addSetup('setItemsPerPage', [$config->adminGrid['itemsPerPage'] ?? array(10, 20, 50, 100)]);
+		$gridDef->addSetup('setItemsPerPage', [$config->adminGrid['itemsPerPage'] ?? [10, 20, 50, 100]]);
 		$gridDef->addSetup('setShowItemsPerPage', [$config->adminGrid['showItemsPerPage'] ?? true]);
 		$gridDef->addSetup('setDefaultOnPage', [$config->adminGrid['defaulOnPage'] ?? null]);
 		
@@ -117,7 +117,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 	
 	/**
 	 * @param string $type
-	 * @return \Nette\DI\Definitions\Definition[]
+	 * @return array<\Nette\DI\Definitions\Definition>
 	 */
 	private function findByType(string $type): array
 	{

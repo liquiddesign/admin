@@ -21,7 +21,7 @@ class Role extends \StORM\Entity
 	public ?string $mutations = null;
 	
 	/**
-	 * @return string[]|null
+	 * @return array<string>|null
 	 */
 	public function getMutations(): ?array
 	{

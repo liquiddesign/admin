@@ -24,7 +24,7 @@ class AdminGridFactory
 	private Translator $translator;
 	
 	/**
-	 * @var int[]
+	 * @var array<int>
 	 */
 	private array $itemsPerPage;
 

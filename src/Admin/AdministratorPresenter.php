@@ -15,6 +15,7 @@ use Admin\Google2FA;
 use Forms\Form;
 use Messages\DB\TemplateRepository;
 use Nette\Mail\Mailer;
+use Nette\Utils\Arrays;
 use Nette\Utils\Html;
 use Nette\Utils\Validators;
 use Security\DB\AccountRepository;
@@ -103,7 +104,7 @@ class AdministratorPresenter extends BackendPresenter
 		
 		$this->accountFormFactory->addContainer($form, true, !$this->getParameter('administrator'));
 
-		if (\in_array('editUrl', $this::CONFIGURATION['groups'])) {
+		if (Arrays::contains($this::CONFIGURATION['groups'], 'editUrl')) {
 			$form->addCheckbox('urlEditor', $this->_('canEdit', 'Může editovat URL'));
 		}
 		
@@ -206,7 +207,7 @@ class AdministratorPresenter extends BackendPresenter
 	
 	public function actionDetail(Administrator $administrator): void
 	{
-		/** @var \Forms\Form|\Nette\Forms\Container[] $form */
+		/** @var \Forms\Form|array<\Nette\Forms\Container> $form */
 		$form = $this->getComponent('newForm');
 		$form->setDefaults($administrator->toArray());
 		

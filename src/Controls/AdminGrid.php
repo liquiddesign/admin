@@ -20,6 +20,7 @@ use Nette\Forms\Controls\TextInput;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
 use Nette\Utils\Html;
+use Nette\Utils\Strings;
 use StORM\Collection;
 use StORM\Entity;
 use StORM\ICollection;
@@ -32,7 +33,7 @@ use StORM\RelationCollection;
 class AdminGrid extends \Grid\Datagrid
 {
 	/**
-	 * @var callable[]
+	 * @var array<callable>
 	 */
 	public array $onDelete = [];
 
@@ -43,7 +44,7 @@ class AdminGrid extends \Grid\Datagrid
 	private ?string $bulkFormId = null;
 	
 	/**
-	 * @var string[]|null
+	 * @var array<string>|null
 	 */
 	private ?array $bulkFormInputs = null;
 
@@ -55,7 +56,7 @@ class AdminGrid extends \Grid\Datagrid
 	private $bulkFormOnBeforeProcess = null;
 	
 	/**
-	 * @var string[]
+	 * @var array<string>
 	 */
 	private array $bulkFormCopyRawValues = [];
 
@@ -72,7 +73,7 @@ class AdminGrid extends \Grid\Datagrid
 	private AdminFormFactory $formFactory;
 	
 	/**
-	 * @var int[]
+	 * @var array<int>
 	 */
 	private array $itemsPerPage;
 
@@ -132,13 +133,13 @@ class AdminGrid extends \Grid\Datagrid
 			foreach ($this->columns as $column) {
 				$column->onRender[] = function (\Nette\Utils\Html $th) use ($orderColumn, $orderDirection, $column): void {
 					if ($column->getOrderExpression() && $orderColumn === $column->getOrderExpression()) {
-						$sortClass = \strpos($orderColumn, 'DESC') !== false ? 'fa fa-sort-amount-down' : ($orderDirection === 'ASC' ? 'fa fa-sort-amount-up-alt' : 'fa fa-sort-amount-down');
+						$sortClass = \str_contains($orderColumn, 'DESC') ? 'fa fa-sort-amount-down' : ($orderDirection === 'ASC' ? 'fa fa-sort-amount-up-alt' : 'fa fa-sort-amount-down');
 						$th->setHtml('<i class="mr-1 ' . $sortClass . '"></i>' . $th->getHtml());
 					}
 				};
 
 				$column->onRenderCell[] = function (Html $td, $object): void {
-					if (\strpos($td[0], 'btn-sm') !== false) {
+					if (\str_contains($td[0], 'btn-sm')) {
 						$td->class('fit');
 					}
 				};
@@ -302,9 +303,9 @@ class AdminGrid extends \Grid\Datagrid
 			$textbox->setHtmlAttribute('class', 'form-control form-control-sm');
 
 			if ($id) {
-				$vat = \strpos($name, 'Vat') !== false;
+				$vat = \str_contains($name, 'Vat') !== false;
 				$textbox->setHtmlAttribute('data-vat', !$vat ? '0' : '1');
-				$rate = (float)\str_replace(',', '.', (string) $grid->getItemsOnPage()[$id]->$rateProperty);
+				$rate = (float) \str_replace(',', '.', (string) $grid->getItemsOnPage()[$id]->$rateProperty);
 
 				$textbox->setHtmlAttribute('data-vatMultiplier', !$vat ? 100 / (100 + $rate) : (100 + $rate) / 100);
 			}
@@ -656,7 +657,7 @@ class AdminGrid extends \Grid\Datagrid
 	{
 		unset($object);
 		
-		if (\trim(\strip_tags($td->getHtml()))) {
+		if (Strings::trim(\strip_tags($td->getHtml()))) {
 			return;
 		}
 		
@@ -678,7 +679,7 @@ class AdminGrid extends \Grid\Datagrid
 	}
 
 	/**
-	 * @param string[]|array<string, string[]> $resetLink First item is link as string. Second argument to link.
+	 * @param array<string>|array<string, array<string>> $resetLink First item is link as string. Second argument to link.
 	 */
 	public function addFilterButtons(array $resetLink = ['default']): void
 	{
@@ -714,10 +715,10 @@ class AdminGrid extends \Grid\Datagrid
 			$query .= " $column LIKE :$name OR";
 		}
 
-		$query = \substr($query, 0, -2);
+		$query = Strings::substring($query, 0, -2);
 
 		$input = $this->addFilterText(function (ICollection $source, $value) use ($name, $query, $likeFormat): void {
-			if (\strlen($value) === 0) {
+			if (Strings::length($value) === 0) {
 				return;
 			}
 
@@ -942,7 +943,7 @@ class AdminGrid extends \Grid\Datagrid
 				$updateKeys = [];
 
 				foreach ($localValues['values'] as $key => $value) {
-					$prop = new \ReflectionProperty(\get_class($object), $key);
+					$prop = new \ReflectionProperty($object::class, $key);
 					/** @phpstan-ignore-next-line */
 					$type = $prop->getType()->getName();
 

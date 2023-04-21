@@ -15,12 +15,12 @@ class MenuItem
 	public bool $active = false;
 	
 	/**
-	 * @var \Admin\Controls\MenuItem[]
+	 * @var array<\Admin\Controls\MenuItem>
 	 */
 	public array $items = [];
 	
 	/**
-	 * @var string[]
+	 * @var array<string>
 	 */
 	public array $itemName = [];
 }

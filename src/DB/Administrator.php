@@ -35,7 +35,7 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	
 	/**
 	 * @relationNxN
-	 * @var \StORM\RelationCollection<\Security\DB\Account>|\Security\DB\Account[]
+	 * @var \StORM\RelationCollection<\Security\DB\Account>
 	 */
 	public RelationCollection $accounts;
 	
@@ -71,16 +71,13 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 		$this->google2FA = $this->getRepository()->getGoogle2FA();
 	}
 	
-	/**
-	 * @return string|int
-	 */
-	public function getId()
+	public function getId(): string|int
 	{
 		return $this->getPK();
 	}
 	
 	/**
-	 * @return string[]
+	 * @return array<string>
 	 */
 	public function getRoles(): array
 	{

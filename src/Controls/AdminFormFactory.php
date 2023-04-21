@@ -32,7 +32,7 @@ class AdminFormFactory
 	private bool $prettyPages;
 	
 	/**
-	 * @var string[]
+	 * @var array<string>
 	 */
 	private array $mutations;
 
@@ -66,7 +66,7 @@ class AdminFormFactory
 	}
 	
 	/**
-	 * @return string[]
+	 * @return array<string>
 	 */
 	public function getMutations(): array
 	{

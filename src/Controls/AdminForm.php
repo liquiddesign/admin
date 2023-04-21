@@ -57,7 +57,7 @@ class AdminForm extends \Forms\Form
 	
 	/**
 	 * @param string|null $containerName
-	 * @return mixed[]|null
+	 * @return array<mixed>|null
 	 */
 	public function getChangedProperties(?string $containerName = null): ?array
 	{
@@ -388,11 +388,11 @@ class AdminForm extends \Forms\Form
 	}
 	
 	/**
-	 * @param mixed[]|object $data
+	 * @param array<mixed>|object $data
 	 * @param bool $erase
 	 * @return static
 	 */
-	public function setDefaults($data, bool $erase = false)
+	public function setDefaults($data, bool $erase = false): static
 	{
 		if (isset($this['_defaults']) && $this['_defaults'] instanceof BaseControl) {
 			$this['_defaults']->setDefaultValue(\json_encode($data));
@@ -402,7 +402,7 @@ class AdminForm extends \Forms\Form
 	}
 	
 	/**
-	 * @return string[]
+	 * @return array<string>
 	 */
 	public function getTranslatedMutations(): array
 	{
@@ -478,7 +478,7 @@ class AdminForm extends \Forms\Form
 	{
 		[$repository, $mutation, $uuid] = $args;
 
-		return (bool )$repository->isUrlAvailable((string)$input->getValue(), $mutation, $uuid);
+		return (bool ) $repository->isUrlAvailable((string) $input->getValue(), $mutation, $uuid);
 	}
 
 	private function getValuesWithAjaxItem(&$values, $data, $inputName): void

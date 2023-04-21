@@ -10,7 +10,7 @@
 	},
 	"require":
 	{
-		"php":">=8.0",
+		"php":">=8.2",
 		"nette/application":"~3.0",
 		"nette/security":"~3.0",
 		"nette/forms":"~3.0",
@@ -26,6 +26,7 @@
 		"liquiddesign/pages": "~1.0.0",
 		"liquiddesign/grid": "~0.1",
 		"liquiddesign/common": "~1.0.0",
+		"liquiddesign/base": "dev-main",
 		"pragmarx/google2fa": "~8.0",
 		"ext-pdo": "*",
 		"ext-json": "*"
@@ -35,7 +36,7 @@
 		"nette/tester":"^2.0",
 		"tracy/tracy":"^2.0",
 		"composer/composer": "^2.0",
-		"liquiddesign/codestyle": "^1.0",
+		"liquiddesign/codestyle": "^3.0",
 		"liquiddesign/migrator": "^1.0",
 		"phpstan/phpstan-nette": "^1.0"
 	},

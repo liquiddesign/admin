@@ -66,7 +66,7 @@ class BootstrapRenderer extends DefaultRenderer
 				if ($controlMutation) {
 					$pair->setAttribute('data-mutation', $controlMutation);
 					
-					if (\strpos($control->getHtmlId(), Form::MUTATION_TRANSLATOR_NAME)) {
+					if (\str_contains($control->getHtmlId(), Form::MUTATION_TRANSLATOR_NAME)) {
 						$pair->appendAttribute('class', 'translated');
 					}
 					

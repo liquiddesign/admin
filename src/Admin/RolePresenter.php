@@ -117,7 +117,7 @@ class RolePresenter extends BackendPresenter
 						}
 						
 						foreach ($menuItem->items as $subMenuItem) {
-							$resource = \substr($subMenuItem->link, 0, \strrpos($subMenuItem->link, ':')) . ':*';
+							$resource = Strings::substring($subMenuItem->link, 0, \strrpos($subMenuItem->link, ':')) . ':*';
 							$this->permissionRepository->syncOne(['resource' => $subMenuItem->link ? $resource : null, 'privilege' => '777', 'role' => $role->getPK()]);
 						}
 					}
@@ -168,7 +168,7 @@ class RolePresenter extends BackendPresenter
 	
 	public function actionDetail(Role $role): void
 	{
-		/** @var \Forms\Form|\Nette\Forms\Container[] $form */
+		/** @var \Forms\Form|array<\Nette\Forms\Container> $form */
 		$form = $this->getComponent('form');
 		$form->setDefaults($role->jsonSerialize());
 		$mutations = $this->formFactory->getMutations();
@@ -286,7 +286,7 @@ class RolePresenter extends BackendPresenter
 				$allow = $item->link && $this->authorizator->isAllowed($role->getPK(), $item->link, null);
 				$allow2 = $item->link && $this->authorizator->isAllowed($role->getPK(), $item->link, '777');
 				
-				$resources[$uuid] = $item->link ? \substr($item->link, 0, \strrpos($item->link, ':')) . ':*' : null;
+				$resources[$uuid] = $item->link ? Strings::substring($item->link, 0, \strrpos($item->link, ':')) . ':*' : null;
 				
 				if ($select === null) {
 					$select = "'$uuid' as uuid, '$uuid' as uuid, '$item->label' as name, '$allow' as allow, '$allow2' as admin, '$item->link' as resource, '$root' as root";
