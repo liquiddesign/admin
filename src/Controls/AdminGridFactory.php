@@ -6,23 +6,17 @@ namespace Admin\Controls;
 
 use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
+use Base\DB\ShopRepository;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
 use Security\DB\IUser;
+use StORM\Collection;
+use StORM\DIConnection;
 use StORM\ICollection;
 
 class AdminGridFactory
 {
-	private ChangelogRepository $changelogRepository;
-	
-	private AdminFormFactory $formFactory;
-	
-	private Administrator $administrator;
 
-	private Session $session;
-
-	private Translator $translator;
-	
 	/**
 	 * @var array<int>
 	 */
@@ -32,13 +26,15 @@ class AdminGridFactory
 
 	private ?int $defaultOnPage;
 
-	public function __construct(Administrator $administrator, AdminFormFactory $formFactory, Session $session, Translator $translator, ChangelogRepository $changelogRepository)
-	{
-		$this->formFactory = $formFactory;
-		$this->session = $session;
-		$this->translator = $translator;
-		$this->changelogRepository = $changelogRepository;
-		$this->administrator = $administrator;
+	public function __construct(
+		private readonly Administrator $administrator,
+		private readonly AdminFormFactory $formFactory,
+		private readonly Session $session,
+		private readonly Translator $translator,
+		private readonly ChangelogRepository $changelogRepository,
+		private readonly ShopRepository $shopRepository,
+		private readonly DIConnection $connection,
+	) {
 	}
 
 	public function setItemsPerPage(array $items): void
@@ -56,8 +52,12 @@ class AdminGridFactory
 		$this->defaultOnPage = $defaultOnPage;
 	}
 	
-	public function create(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false): AdminGrid
+	public function create(Collection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false): AdminGrid
 	{
+		if (($shop = $this->shopRepository->getSelectedShop()) && $source->getRepository()->getStructure()->getRelation('shop')) {
+			$source->where('this.fk_shop = :shopVar OR this.fk_shop IS NULL', [':shopVar' => $shop->getPK()]);
+		}
+
 		$grid = new AdminGrid($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId, $this->session);
 		$grid->setFormsFactory($this->formFactory);
 		$grid->setItemsPerPage($this->itemsPerPage);

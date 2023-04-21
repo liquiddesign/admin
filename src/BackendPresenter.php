@@ -303,7 +303,7 @@ abstract class BackendPresenter extends Presenter
 		parent::startup();
 
 		$shop = $this->shopRepository->getSelectedShop();
-		$this->shop = $shop->getPK();
+		$this->shop = $shop?->getPK();
 		$this->template->shop = $shop;
 	}
 }
