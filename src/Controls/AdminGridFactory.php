@@ -10,13 +10,10 @@ use Base\DB\ShopRepository;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
 use Security\DB\IUser;
-use StORM\Collection;
-use StORM\DIConnection;
 use StORM\ICollection;
 
 class AdminGridFactory
 {
-
 	/**
 	 * @var array<int>
 	 */
@@ -33,7 +30,6 @@ class AdminGridFactory
 		private readonly Translator $translator,
 		private readonly ChangelogRepository $changelogRepository,
 		private readonly ShopRepository $shopRepository,
-		private readonly DIConnection $connection,
 	) {
 	}
 
@@ -52,9 +48,12 @@ class AdminGridFactory
 		$this->defaultOnPage = $defaultOnPage;
 	}
 	
-	public function create(Collection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false): AdminGrid
+	public function create(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false): AdminGrid
 	{
-		if (($shop = $this->shopRepository->getSelectedShop()) && $source->getRepository()->getStructure()->getRelation('shop')) {
+		$shop = $this->shopRepository->getSelectedShop();
+		$shopsAvailable = $shop && $source->getRepository()->getStructure()->getRelation('shop');
+
+		if ($shopsAvailable) {
 			$source->where('this.fk_shop = :shopVar OR this.fk_shop IS NULL', [':shopVar' => $shop->getPK()]);
 		}
 
@@ -91,6 +90,10 @@ class AdminGridFactory
 				]);
 			}
 		};
+
+		if ($shopsAvailable) {
+			$grid->addColumnTextFit('<i class="fas fa-store-alt"></i>', 'shop', '%s');
+		}
 		
 		return $grid;
 	}
