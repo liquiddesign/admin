@@ -10,7 +10,7 @@ use Admin\Controls\IMenuFactory;
 use Admin\Controls\Menu;
 use Admin\DB\IGeneralAjaxRepository;
 use Base\DB\Shop;
-use Base\DB\ShopRepository;
+use Base\ShopsConfig;
 use Nette\Application\Attributes\Persistent;
 use Nette\Application\BadRequestException;
 use Nette\Application\UI\Presenter;
@@ -68,7 +68,7 @@ abstract class BackendPresenter extends Presenter
 	public DIConnection $connection;
 
 	/** @inject */
-	public ShopRepository $shopRepository;
+	public ShopsConfig $shopsConfig;
 	
 	/**
 	 * @persistent
@@ -129,7 +129,7 @@ abstract class BackendPresenter extends Presenter
 		
 		$this->template->admin = $this->admin;
 		$this->template->isManager = $this->isManager;
-		$this->template->shops = $this->shopRepository->many()->toArray();
+		$this->template->shops = $this->shopsConfig->getAvailableShops();
 	}
 	
 	/**
@@ -305,7 +305,7 @@ abstract class BackendPresenter extends Presenter
 	{
 		parent::startup();
 
-		$shop = $this->shopRepository->getSelectedShop();
+		$shop = $this->shopsConfig->getSelectedShop();
 		$this->shopObject = $shop;
 		$this->shop = $shop?->getPK();
 		$this->template->shop = $shop;
