@@ -6,6 +6,8 @@ namespace Admin\Controls;
 
 use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
+use Base\DB\ShopRepository;
+use Forms\Container;
 use Forms\Form;
 use Forms\FormFactory;
 use Grid\Datagrid;
@@ -17,18 +19,6 @@ use StORM\DIConnection;
 
 class AdminFormFactory
 {
-	public FormFactory $formFactory;
-
-	private ChangelogRepository $changelogRepository;
-
-	private IPageRepository $pageRepository;
-
-	private Administrator $administrator;
-
-	private Translator $translator;
-
-	private DIConnection $connection;
-
 	private bool $prettyPages;
 	
 	/**
@@ -39,20 +29,15 @@ class AdminFormFactory
 	private ?string $defaultMutation = null;
 
 	public function __construct(
-		Administrator $administrator,
-		FormFactory $formFactory,
-		DIConnection $connection,
-		IPageRepository $pageRepository,
-		Translator $translator,
-		ChangelogRepository $changelogRepository
+		private readonly Administrator $administrator,
+		public FormFactory $formFactory,
+		private readonly DIConnection $connection,
+		private readonly IPageRepository $pageRepository,
+		private readonly Translator $translator,
+		private readonly ChangelogRepository $changelogRepository,
+		private readonly ShopRepository $shopRepository,
 	) {
-		$this->formFactory = $formFactory;
-		$this->pageRepository = $pageRepository;
-		$this->administrator = $administrator;
-		$this->translator = $translator;
-		$this->connection = $connection;
 		$this->mutations = $formFactory->getDefaultMutations();
-		$this->changelogRepository = $changelogRepository;
 	}
 
 	public function setPrettyPages(bool $prettyPages): void
@@ -230,5 +215,25 @@ class AdminFormFactory
 		};
 
 		return $form;
+	}
+
+	/**
+	 * @param \Admin\Controls\AdminForm $adminForm
+	 * @param bool $autoSelect true - shop input is auto selected base on selected shop in shop repository | false - shop input is not auto selected
+	 */
+	public function addShopsContainerToAdminForm(AdminForm $adminForm, bool $autoSelect = true): void
+	{
+		$shopsAvailable = $this->shopRepository->getArrayForSelect();
+
+		if (!$shopsAvailable) {
+			return;
+		}
+
+		if (!$autoSelect) {
+			$adminForm->addGroup('Obchody');
+			$adminForm->addSelect2('shop', 'Vybraný obchod', $shopsAvailable)->setPrompt('- Vyberte obchod -');
+		} else {
+			$adminForm->addHidden('shop')->setDefaultValue($this->shopRepository->getSelectedShop());
+		}
 	}
 }

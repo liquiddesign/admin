@@ -9,6 +9,7 @@ use Admin\Controls\AdminGridFactory;
 use Admin\Controls\IMenuFactory;
 use Admin\Controls\Menu;
 use Admin\DB\IGeneralAjaxRepository;
+use Base\DB\Shop;
 use Base\DB\ShopRepository;
 use Nette\Application\Attributes\Persistent;
 use Nette\Application\BadRequestException;
@@ -76,6 +77,8 @@ abstract class BackendPresenter extends Presenter
 
 	#[Persistent]
 	public string|null $shop = null;
+
+	public Shop|null $shopObject = null;
 	
 	/**
 	 * @var array<string>
@@ -303,6 +306,7 @@ abstract class BackendPresenter extends Presenter
 		parent::startup();
 
 		$shop = $this->shopRepository->getSelectedShop();
+		$this->shopObject = $shop;
 		$this->shop = $shop?->getPK();
 		$this->template->shop = $shop;
 	}
