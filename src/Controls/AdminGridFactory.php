@@ -7,6 +7,7 @@ namespace Admin\Controls;
 use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
 use Base\DB\ShopRepository;
+use Base\ShopsConfig;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
 use Security\DB\IUser;
@@ -29,7 +30,7 @@ class AdminGridFactory
 		private readonly Session $session,
 		private readonly Translator $translator,
 		private readonly ChangelogRepository $changelogRepository,
-		private readonly ShopRepository $shopRepository,
+		private readonly ShopsConfig $shopsConfig,
 	) {
 	}
 
@@ -50,7 +51,7 @@ class AdminGridFactory
 	
 	public function create(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false): AdminGrid
 	{
-		$shop = $this->shopRepository->getSelectedShop();
+		$shop = $this->shopsConfig->getSelectedShop();
 		$shopsAvailable = $shop && $source->getRepository()->getStructure()->getRelation('shop');
 
 		if ($shopsAvailable) {
