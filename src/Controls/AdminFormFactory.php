@@ -7,6 +7,7 @@ namespace Admin\Controls;
 use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
 use Base\DB\ShopRepository;
+use Base\ShopsConfig;
 use Forms\Container;
 use Forms\Form;
 use Forms\FormFactory;
@@ -36,6 +37,7 @@ class AdminFormFactory
 		private readonly Translator $translator,
 		private readonly ChangelogRepository $changelogRepository,
 		private readonly ShopRepository $shopRepository,
+		private readonly ShopsConfig $shopsConfig,
 	) {
 		$this->mutations = $formFactory->getDefaultMutations();
 	}
@@ -233,7 +235,7 @@ class AdminFormFactory
 			$adminForm->addGroup('Obchody');
 			$adminForm->addSelect2('shop', 'Vybraný obchod', $shopsAvailable)->setPrompt('- Vyberte obchod -');
 		} else {
-			$adminForm->addHidden('shop')->setDefaultValue($this->shopRepository->getSelectedShop());
+			$adminForm->addHidden('shop')->setDefaultValue($this->shopsConfig->getSelectedShop());
 		}
 	}
 }
