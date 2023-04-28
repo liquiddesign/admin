@@ -1,3 +1,5 @@
+{varType Base\DB\Shop[] $shops}
+{varType Base\DB\Shop|null $shop}
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -95,6 +97,13 @@
 
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto">
+            <li class="nav-item" n:if="$shops">
+                <select class="form-control" onchange="location = this.value;">
+                    {foreach $shops as $itemShop}
+                        <option value="{plink this, shop => $itemShop->getPK()}" {if $shop?->getPK() === $itemShop->getPK()}selected{/if}>{$itemShop->name}</option>
+                    {/foreach}
+                </select>
+            </li>
             <li class="nav-item">
                 <i class="fas fa-external-link-alt"></i> &nbsp;ESHOP
             </li>
