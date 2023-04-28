@@ -100,7 +100,7 @@ class AdminGridFactory
 			}
 		};
 
-		if ($shopsAvailable) {
+		if ($useShops && $shopsAvailable) {
 			$grid->addColumnTextFit('<i class="fas fa-store-alt"></i>', 'shop', '%s');
 		}
 		
