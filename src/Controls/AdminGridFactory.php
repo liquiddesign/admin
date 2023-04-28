@@ -49,13 +49,21 @@ class AdminGridFactory
 		$this->defaultOnPage = $defaultOnPage;
 	}
 	
-	public function create(ICollection $source, ?int $defaultOnPage = null, ?string $defaultOrderExpression = null, ?string $defaultOrderDir = null, bool $encodeId = false): AdminGrid
-	{
-		$shop = $this->shopsConfig->getSelectedShop();
-		$shopsAvailable = $shop && $source instanceof IEntityParent && $source->getRepository()->getStructure()->getRelation('shop');
+	public function create(
+		ICollection $source,
+		?int $defaultOnPage = null,
+		?string $defaultOrderExpression = null,
+		?string $defaultOrderDir = null,
+		bool $encodeId = false,
+		bool $useShops = true,
+	): AdminGrid {
+		if ($useShops) {
+			$shop = $this->shopsConfig->getSelectedShop();
+			$shopsAvailable = $shop && $source instanceof IEntityParent && $source->getRepository()->getStructure()->getRelation('shop');
 
-		if ($shopsAvailable) {
-			$source->where('this.fk_shop = :shopVar OR this.fk_shop IS NULL', [':shopVar' => $shop->getPK()]);
+			if ($shopsAvailable) {
+				$source->where('this.fk_shop = :shopVar OR this.fk_shop IS NULL', [':shopVar' => $shop->getPK()]);
+			}
 		}
 
 		$grid = new AdminGrid($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId, $this->session);
