@@ -220,7 +220,7 @@ class AdminFormFactory
 
 	/**
 	 * @param \Admin\Controls\AdminForm $adminForm
-	 * @param bool $autoSelect true - shop input is auto selected base on selected shop in shop repository | false - shop input is not auto selected
+	 * @param bool $autoSelect true - shop input is auto selected based on selected shop in shop repository | false - shop input is not auto selected
 	 */
 	public function addShopsContainerToAdminForm(AdminForm $adminForm, bool $autoSelect = true): void
 	{
