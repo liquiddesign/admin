@@ -230,11 +230,15 @@ class AdminFormFactory
 			return;
 		}
 
+		$selectedShop = $this->shopsConfig->getSelectedShop();
+
 		if (!$autoSelect) {
 			$adminForm->addGroup('Obchody');
-			$adminForm->addSelect2('shop', 'Vybraný obchod', $shopsAvailable)->setPrompt('- Vyberte obchod -');
+			$adminForm->addSelect2('shop', 'Vybraný obchod', $shopsAvailable)
+				->setPrompt('- Vyberte obchod -')
+				->setDefaultValue($selectedShop->getPK());
 		} else {
-			$adminForm->addHidden('shop')->setDefaultValue($this->shopsConfig->getSelectedShop());
+			$adminForm->addHidden('shop')->setDefaultValue($selectedShop->getPK());
 		}
 	}
 }
