@@ -15,6 +15,8 @@ Note to versioning: version 1 is skipped to match version 2 with other packages.
   - Used only when some Shop is available
 - *AdminForm* via *AdminFormFactory* has option to add Shop container to save Shop to entities
 - *BackendPresenter* has Shop property to access currently selected Shop in all presenters and templates in Admin
+- `FormValidators` new method `checkUniqueCode`
+- `AdminFormFactory` new method `addCodeValidationToInput` to simply validate code in all forms
 ### Changed
 
 - **BREAKING:** PHP version 8.2 or higher is required

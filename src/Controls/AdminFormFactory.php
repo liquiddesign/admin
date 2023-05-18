@@ -6,6 +6,7 @@ namespace Admin\Controls;
 
 use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
+use Admin\FormValidators;
 use Base\DB\ShopRepository;
 use Base\ShopsConfig;
 use Forms\Form;
@@ -16,11 +17,13 @@ use Nette\Localization\Translator;
 use Pages\DB\IPageRepository;
 use StORM\Collection;
 use StORM\DIConnection;
+use StORM\Entity;
+use StORM\Repository;
 
 class AdminFormFactory
 {
 	private bool $prettyPages;
-	
+
 	/**
 	 * @var array<string>
 	 */
@@ -50,7 +53,7 @@ class AdminFormFactory
 	{
 		return $this->prettyPages;
 	}
-	
+
 	/**
 	 * @return array<string>
 	 */
@@ -115,7 +118,7 @@ class AdminFormFactory
 
 		if ($mutationSelector && \count($form->getMutations()) > 1) {
 			$form->addMutationSelector($this->translator->translate('admin.selectMutatiom', 'Zvolte mutaci'));
-			
+
 			if ($translatedCheckbox) {
 				$form->addTranslatedCheckbox($this->translator->translate('admin.activeMutation', 'Mutace je aktivní'), Form::MUTATION_TRANSLATOR_NAME, false, $forcePrimary);
 			}
@@ -240,5 +243,22 @@ class AdminFormFactory
 		} else {
 			$adminForm->addHidden('shop')->setDefaultValue($selectedShop->getPK());
 		}
+	}
+
+	public static function addCodeValidationToInput(BaseControl $baseControl, Repository $repository, Entity|null $existingEntity): BaseControl
+	{
+		$baseControl->addRule(
+			AdminForm::PATTERN,
+			'Kód může obsahovat pouze znaky a-z, A-Z, 0-9. Speciální znaky nejsou povoleny!',
+			'^[0-9a-zA-Z]+$',
+		);
+
+		$baseControl->addRule(
+			[FormValidators::class, 'checkUniqueCode'],
+			'Seznam s tímto kódem již existuje!',
+			[$repository, $existingEntity],
+		);
+
+		return $baseControl;
 	}
 }
