@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Admin\Controls;
 
 use Admin\Administrator;
+use Base\DB\Shop;
 use Forms\Container;
 use Forms\LocaleContainer;
 use Nette\Application\UI\Presenter;
@@ -17,6 +18,7 @@ use Nette\Forms\Form;
 use Nette\Http\FileUpload;
 use Nette\Localization\Translator;
 use Nette\NotImplementedException;
+use Nette\Utils\Html;
 use Nette\Utils\Image;
 use Pages\DB\IPageRepository;
 use Pages\DB\Page;
@@ -36,6 +38,8 @@ class AdminForm extends \Forms\Form
 
 	/** @var array<array<string>> */
 	public array $ajaxInputs = [];
+
+	public Shop|null $selectedShop = null;
 
 	private IPageRepository $pageRepository;
 
@@ -205,6 +209,18 @@ class AdminForm extends \Forms\Form
 		}
 	}
 
+	/**
+	 * @param string|null $pageType
+	 * @param array<mixed> $params
+	 * @param \Forms\LocaleContainer|null $copyControls
+	 * @param bool $isOffline
+	 * @param bool $required
+	 * @param bool $content
+	 * @param string $title
+	 * @param bool $opengraph
+	 * @param bool $linkToDetail
+	 * @param bool $richSnippet
+	 */
 	public function addPageContainer(
 		?string $pageType = null,
 		array $params = [],
@@ -215,14 +231,16 @@ class AdminForm extends \Forms\Form
 		string $title = 'URL a SEO',
 		bool $opengraph = false,
 		bool $linkToDetail = false,
-		bool $richSnippet = false
+		bool $richSnippet = false,
 	): Container {
 		if (!$this->prettyPages) {
 			return $this->addContainer('page');
 		}
 
+		$shopIcon = $this->selectedShop ? '<i class="fas fa-store-alt fa-sm mr-1" title="Specifické nastavení pro zvolený obchod"></i>' : null;
+
 		/** @var \Pages\DB\Page|null $page */
-		$page = $pageType ? $this->pageRepository->getPageByTypeAndParams($pageType, null, $params, true) : null;
+		$page = $pageType ? $this->pageRepository->getPageByTypeAndParams($pageType, null, $params, true, selectedShop: $this->selectedShop) : null;
 
 		/** @var \Forms\Container $pageContainer */
 		$pageContainer = $this->getComponent('page', false) ?: $this->addContainer('page');
@@ -231,11 +249,11 @@ class AdminForm extends \Forms\Form
 		$pageContainer->setCurrentGroup($group);
 
 		$pageContainer->addHidden('uuid')->setNullable();
-		$pageContainer->addLocaleText('url', 'URL')->forAll(function (TextInput $text, $mutation) use ($page, $pageType): void {
+		$pageContainer->addLocaleText('url', Html::fromHtml($shopIcon . 'URL'))->forAll(function (TextInput $text, $mutation) use ($page, $pageType): void {
 			$text->addRule(
 				[$this, 'validateUrl'],
 				$this->translator->translate('admin.urlError', 'URL již existuje'),
-				[$this->pageRepository, $mutation, $page ? $page->getPK() : null],
+				[$this->pageRepository, $mutation, $page?->getPK(), $this->selectedShop],
 			)->setNullable($pageType !== 'index');
 
 			if ($pageType === 'index') {
@@ -249,7 +267,8 @@ class AdminForm extends \Forms\Form
 
 			$text->setHtmlAttribute('data-copy-url-targets', 'page[url]');
 			$text->setHtmlAttribute('data-copy-url-source', 'name');
-			$text->setHtmlAttribute('class', 'd-inline seo_url');
+			$text->setHtmlAttribute('class', 'd-inline seo_url w-25');
+			$text->setHtmlAttribute('style', 'width:50%!important; min-width:400px!important;');
 		})->forAll(function (TextInput $text, $mutation) use ($linkToDetail, $page, $pageType, $required): void {
 			if (isset($this[self::MUTATION_TRANSLATOR_NAME]) && $pageType !== 'index' && $required) {
 				$text->addConditionOn($this[self::MUTATION_TRANSLATOR_NAME][$mutation], $this::EQUAL, true);
@@ -274,17 +293,17 @@ class AdminForm extends \Forms\Form
 		});
 
 		if ($isOffline) {
-			$pageContainer->addCheckbox('isOffline', $this->translator->translate('admin.isOffline', 'Nedostupná'))
+			$pageContainer->addCheckbox('isOffline', Html::fromHtml($shopIcon . $this->translator->translate('admin.isOffline', 'Nedostupná')))
 				->setHtmlAttribute('data-info', $this->translator->translate('admin.isOfflineDescription', 'Na daném URL bude stránka jako stránka 404'));
 		}
 
-		$pageContainer->addLocaleText('title', $this->translator->translate('admin.title', 'Titulek'))
+		$pageContainer->addLocaleText('title', Html::fromHtml($shopIcon . $this->translator->translate('admin.title', 'Titulek')))
 			->forAll(function (TextInput $text): void {
 				$text->setHtmlAttribute('data-characters', 70)
 					->setHtmlAttribute('style', 'width: 450px !important');
 			});
 
-		$pageContainer->addLocaleTextArea('description', $this->translator->translate('admin.description', 'Popisek'))
+		$pageContainer->addLocaleTextArea('description', Html::fromHtml($shopIcon . $this->translator->translate('admin.description', 'Popisek')))
 			->forAll(function (TextArea $text): void {
 				$text->setHtmlAttribute('style', 'width: 862px !important;')
 					->setHtmlAttribute('data-characters', 150);
@@ -296,7 +315,7 @@ class AdminForm extends \Forms\Form
 					$image->resize(1200, 628, Image::EXACT);
 				}]);
 
-			$opengraphImage->setOption('description', $this->translator->translate('admin.imageSizeInfo', 'Obrázek vkládejte o minimální velikosti %dx%d px', [1200, 628]));
+			$opengraphImage->setOption('description', Html::fromHtml($shopIcon . $this->translator->translate('admin.imageSizeInfo', 'Obrázek vkládejte o minimální velikosti %dx%d px', [1200, 628])));
 
 			$opengraphImage->onDelete[] = function () use ($page): void {
 				if ($page) {
@@ -307,14 +326,14 @@ class AdminForm extends \Forms\Form
 		}
 
 		if ($content) {
-			$pageContainer->addLocaleTextArea('content', $this->translator->translate('admin.content', 'Obsah'))
+			$pageContainer->addLocaleTextArea('content', Html::fromHtml($shopIcon . $this->translator->translate('admin.content', 'Obsah')))
 				->forAll(function (TextArea $text): void {
 					$text->setHtmlAttribute('style', 'width: 862px !important;');
 				});
 		}
 
 		if ($richSnippet) {
-			$pageContainer->addLocaleTextArea('richSnippet', $this->translator->translate('admin.richSnippet', 'Rich snippet'))
+			$pageContainer->addLocaleTextArea('richSnippet', Html::fromHtml($shopIcon . $this->translator->translate('admin.richSnippet', 'Rich snippet')))
 				->forAll(function (TextArea $text): void {
 					$text->setHtmlAttribute('style', 'width: 862px !important; min-height: 300px !important;');
 
@@ -325,6 +344,7 @@ class AdminForm extends \Forms\Form
 
 		$pageContainer->addHidden('type', $pageType);
 		$pageContainer->addHidden('params', $params ? \http_build_query($params) . '&' : '');
+		$pageContainer->addHidden('shop', $page?->getValue('shop') ?: $this->selectedShop?->getPK());
 
 		if ($page) {
 			$pageContainer->setDefaults($page->toArray());
@@ -476,9 +496,10 @@ class AdminForm extends \Forms\Form
 
 	public static function validateUrl(\Nette\Forms\Controls\TextInput $input, array $args): bool
 	{
-		[$repository, $mutation, $uuid] = $args;
+		/** @var \Pages\DB\IPageRepository $repository */
+		[$repository, $mutation, $uuid, $selectedShop] = $args;
 
-		return (bool ) $repository->isUrlAvailable((string) $input->getValue(), $mutation, $uuid);
+		return (bool ) $repository->isUrlAvailable((string) $input->getValue(), $mutation, $uuid, $selectedShop);
 	}
 
 	private function getValuesWithAjaxItem(&$values, $data, $inputName): void

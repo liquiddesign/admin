@@ -88,6 +88,8 @@ class AdminFormFactory
 		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->formFactory->create(AdminForm::class);
 
+		$form->selectedShop = $this->shopsConfig->getSelectedShop();
+
 		if ($this->administrator->getIdentity() instanceof \Admin\DB\Administrator && $this->administrator->getIdentity()->role) {
 			$mutations = $this->administrator->getIdentity()->role->getMutations() === null ? $this->getMutations() : $this->administrator->getIdentity()->role->getMutations();
 			$form->setMutations($mutations);
