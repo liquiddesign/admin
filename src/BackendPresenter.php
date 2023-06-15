@@ -89,6 +89,8 @@ abstract class BackendPresenter extends Presenter
 	 * @var array<array<string>>
 	 */
 	public array $ajaxInputs = [];
+
+	protected string|null $shopIcon = null;
 	
 	public function checkRequirements($element): void
 	{
@@ -309,5 +311,6 @@ abstract class BackendPresenter extends Presenter
 		$this->shopObject = $shop;
 		$this->shop = $shop?->getPK();
 		$this->template->shop = $shop;
+		$this->shopIcon = $this->shopsConfig->getAvailableShops() ? '<i class="fas fa-store-alt fa-sm mr-1" title="Specifické nastavení pro zvolený obchod"></i>' : null;
 	}
 }
