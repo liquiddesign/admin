@@ -56,12 +56,13 @@ class AdminGridFactory
 		?string $defaultOrderDir = null,
 		bool $encodeId = false,
 		bool $useShops = true,
+		bool $filterShops = true,
 	): AdminGrid {
 		if ($useShops) {
 			$shop = $this->shopsConfig->getSelectedShop();
 			$shopsAvailable = $shop && $source instanceof IEntityParent && $source->getRepository()->getStructure()->getRelation('shop');
 
-			if ($shopsAvailable) {
+			if ($filterShops && $shopsAvailable) {
 				$source->where('this.fk_shop = :shopVar OR this.fk_shop IS NULL', [':shopVar' => $shop->getPK()]);
 			}
 		}
