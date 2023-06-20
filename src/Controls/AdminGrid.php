@@ -1075,10 +1075,6 @@ class AdminGrid extends \Grid\Datagrid
 			}
 
 			$source->join(['sub' => $subSelect], 'this.uuid = sub.uuid', type: 'INNER');
-
-			if ($this->getOnPage()) {
-				$source->setPage($this->getPage(), $this->getOnPage());
-			}
 		}
 
 		$this->onLoad($source);
