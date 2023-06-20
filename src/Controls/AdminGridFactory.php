@@ -10,6 +10,8 @@ use Base\ShopsConfig;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
 use Security\DB\IUser;
+use StORM\Collection;
+use StORM\Connection;
 use StORM\ICollection;
 use StORM\IEntityParent;
 
@@ -31,6 +33,7 @@ class AdminGridFactory
 		private readonly Translator $translator,
 		private readonly ChangelogRepository $changelogRepository,
 		private readonly ShopsConfig $shopsConfig,
+		private readonly Connection $connection,
 	) {
 	}
 
@@ -78,6 +81,14 @@ class AdminGridFactory
 		}
 
 		$grid->setTranslator($this->translator);
+
+		$grid->setItemCountCallback(function (Collection $collection): int {
+			$collection->setSelect(['DISTINCT this.uuid'])->setGroupBy([])->setOrderBy([]);
+
+			$sql = \PdoDebugger::show($collection->getSql(), $collection->getVars());
+
+			return $this->connection->rows(['agg' => "($sql)"])->setSelect(['count' => 'COUNT(agg.uuid)'])->firstValue('count');
+		});
 		
 		$grid->onUpdateRow[] = function ($object) use ($grid): void {
 			if ($grid->entityName && $this->administrator->getIdentity() instanceof IUser) {

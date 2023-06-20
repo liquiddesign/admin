@@ -19,6 +19,7 @@ use Nette\Forms\Controls\SubmitButton;
 use Nette\Forms\Controls\TextInput;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
+use Nette\Utils\Arrays;
 use Nette\Utils\Html;
 use Nette\Utils\Strings;
 use StORM\Collection;
@@ -36,6 +37,11 @@ class AdminGrid extends \Grid\Datagrid
 	 * @var array<callable>
 	 */
 	public array $onDelete = [];
+
+	/**
+	 * @var array<callable(\StORM\ICollection): void>
+	 */
+	public array $onBeforeGetItems = [];
 
 	public Translator $translator;
 
@@ -1022,6 +1028,109 @@ class AdminGrid extends \Grid\Datagrid
 		$this->template->setTranslator($this->translator);
 
 		parent::render();
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getItemsOnPage(): array
+	{
+		if ($this->itemsOnPage !== null) {
+			return $this->itemsOnPage;
+		}
+
+		/** @var \StORM\Collection $source */
+		$source = $this->getFilteredSource();
+
+		$source->setOrderBy(['visibilityListItem.priority']);
+
+		if ($this->onBeforeGetItems) {
+			Arrays::invoke($this->onBeforeGetItems, $source);
+		} else {
+			$subSelect = $source->getRepository()->many()->setSelect(['this.uuid'])->setGroupBy(['this.uuid']);
+
+			$orderByStatements = $source->getModifiers()['ORDER BY'] ?? [];
+			$whereStatements = $source->getModifiers()['WHERE'] ?? [];
+			$joinStatements = $source->getModifiers()['JOIN'] ?? [];
+			$tableAliases = $source->getTableAliases();
+			$subSelectJoinStatements = $subSelect->getModifiers()['JOIN'] ?? [];
+
+			foreach ($orderByStatements as $key => $direction) {
+				if (!\is_string($key)) {
+					$key = $direction;
+					$direction = 'ASC';
+				}
+
+				$this->joinSubSelectHelper($key, $source, $tableAliases, $subSelect, $joinStatements, $subSelectJoinStatements);
+
+				$subSelect->orderBy([$key => $direction]);
+			}
+
+			foreach ($whereStatements as $value) {
+				$this->joinSubSelectHelper($value, $source, $tableAliases, $subSelect, $joinStatements, $subSelectJoinStatements);
+
+				$subSelect->where($value);
+			}
+
+			if ($this->getOnPage()) {
+				$subSelect->setPage($this->getPage(), $this->getOnPage());
+			}
+
+			$source->join(['sub' => $subSelect], 'this.uuid = sub.uuid', type: 'INNER');
+
+			if ($this->getOnPage()) {
+				$source->setPage($this->getPage(), $this->getOnPage());
+			}
+		}
+
+		$this->onLoad($source);
+
+		$this->itemsOnPage = $this->nestingCallback && !$this->filters ? $this->getNestedSource($source, null) : $source->toArray();
+
+		return $this->itemsOnPage;
+	}
+
+	protected function joinSubSelectHelper(string $value, ICollection $collection, array $tableAliases, Collection $subSelect, array $joinStatements, array &$subSelectJoinStatements): void
+	{
+		foreach ($tableAliases as $table => $tableAlias) {
+			// If alias is THIS, just do simple where
+			if ($tableAlias === 'this') {
+				continue;
+			}
+
+			// Find if current alias is used in where/order
+			if (!Strings::contains($value, "$table.") && !Strings::contains($value, "$tableAlias.")) {
+				continue;
+			}
+
+			// Search in sub select if join already exists
+			$join = Arrays::first(\array_filter($subSelectJoinStatements, function (array $value) use ($tableAlias): bool {
+				return isset($value[1][$tableAlias]);
+			}));
+
+			// If exists, nothing to be done
+			if ($join) {
+				continue;
+			}
+
+			// Find join in base collection
+			$join = Arrays::first(\array_filter($joinStatements, function (array $value) use ($tableAlias): bool {
+				return isset($value[1][$tableAlias]);
+			}));
+
+			// If join not found in base collection -> fatal error
+			if (!$join) {
+				throw new \Exception("Unable to join WHERE '$value' with TABLE '$tableAlias' to subquery!");
+			}
+
+			$subSelectJoinStatements[] = $join;
+
+			// First join any needed tables of found JOIN
+			$this->joinSubSelectHelper($join[2], $collection, $tableAliases, $subSelect, $joinStatements, $subSelectJoinStatements);
+
+			// Join it to sub select
+			$subSelect->join($join[1], $join[2], [], $join[0]);
+		}
 	}
 
 	protected function createComponentFilterForm(): \Nette\Application\UI\Form
