@@ -1042,8 +1042,6 @@ class AdminGrid extends \Grid\Datagrid
 		/** @var \StORM\Collection $source */
 		$source = $this->getFilteredSource();
 
-		$source->setOrderBy(['visibilityListItem.priority']);
-
 		if ($this->onBeforeGetItems) {
 			Arrays::invoke($this->onBeforeGetItems, $source);
 		} else {
