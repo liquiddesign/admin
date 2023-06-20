@@ -85,9 +85,10 @@ class AdminGridFactory
 		$grid->setItemCountCallback(function (Collection $collection): int {
 			$collection->setSelect(['DISTINCT this.uuid'])->setGroupBy([])->setOrderBy([]);
 
-			$sql = \PdoDebugger::show($collection->getSql(), $collection->getVars());
-
-			return $this->connection->rows(['agg' => "($sql)"])->setSelect(['count' => 'COUNT(agg.uuid)'])->firstValue('count');
+			return $this->connection->rows()
+				->setFrom(['agg' => "({$collection->getSql()})"], $collection->getVars())
+				->setSelect(['count' => 'COUNT(agg.uuid)'])
+				->firstValue('count');
 		});
 		
 		$grid->onUpdateRow[] = function ($object) use ($grid): void {
