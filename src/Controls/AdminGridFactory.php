@@ -87,8 +87,7 @@ class AdminGridFactory
 
 			return $this->connection->rows()
 				->setFrom(['agg' => "({$collection->getSql()})"], $collection->getVars())
-				->setSelect(['count' => 'COUNT(agg.uuid)'])
-				->firstValue('count');
+				->enum('agg.uuid');
 		});
 		
 		$grid->onUpdateRow[] = function ($object) use ($grid): void {
