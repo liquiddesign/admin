@@ -1045,36 +1045,7 @@ class AdminGrid extends \Grid\Datagrid
 		if ($this->onBeforeGetItems) {
 			Arrays::invoke($this->onBeforeGetItems, $source);
 		} else {
-			$subSelect = $source->getRepository()->many()->setSelect(['this.uuid'])->setGroupBy(['this.uuid']);
-
-			$orderByStatements = $source->getModifiers()['ORDER BY'] ?? [];
-			$whereStatements = $source->getModifiers()['WHERE'] ?? [];
-			$joinStatements = $source->getModifiers()['JOIN'] ?? [];
-			$tableAliases = $source->getTableAliases();
-			$subSelectJoinStatements = $subSelect->getModifiers()['JOIN'] ?? [];
-
-			foreach ($orderByStatements as $key => $direction) {
-				if (!\is_string($key)) {
-					$key = $direction;
-					$direction = 'ASC';
-				}
-
-				$this->joinSubSelectHelper($key, $source, $tableAliases, $subSelect, $joinStatements, $subSelectJoinStatements);
-
-				$subSelect->orderBy([$key => $direction]);
-			}
-
-			foreach ($whereStatements as $value) {
-				$this->joinSubSelectHelper($value, $source, $tableAliases, $subSelect, $joinStatements, $subSelectJoinStatements);
-
-				$subSelect->where($value);
-			}
-
-			if ($this->getOnPage()) {
-				$subSelect->setPage($this->getPage(), $this->getOnPage());
-			}
-
-			$source->join(['sub' => $subSelect], 'this.uuid = sub.uuid', type: 'INNER');
+			self::processCollectionBaseFrom($source, $this->getOnPage(), $this->getPage());
 		}
 
 		$this->onLoad($source);
@@ -1084,43 +1055,91 @@ class AdminGrid extends \Grid\Datagrid
 		return $this->itemsOnPage;
 	}
 
-	protected function joinSubSelectHelper(string $value, ICollection $collection, array $tableAliases, Collection $subSelect, array $joinStatements, array &$subSelectJoinStatements): void
+	public static function processCollectionBaseFrom(Collection $source, int|null $onPage = null, int $page = 1, bool $useOrder = true, bool $join = true,): Collection
 	{
-		foreach ($tableAliases as $table => $tableAlias) {
+		$subSelect = $source->getRepository()->many()->setSelect(['this.uuid'])->setGroupBy(['this.uuid']);
+
+		$whereStatements = $source->getModifiers()['WHERE'] ?? [];
+		$joinStatements = $source->getModifiers()['JOIN'] ?? [];
+		$aliases = $source->getAliases();
+		$subSelectJoinStatements = $subSelect->getModifiers()['JOIN'] ?? [];
+
+		if ($useOrder) {
+			$orderByStatements = $source->getModifiers()['ORDER BY'] ?? [];
+
+			foreach ($orderByStatements as $key => $direction) {
+				if (!\is_string($key)) {
+					$key = $direction;
+					$direction = 'ASC';
+				}
+
+				self::joinSubSelectHelper($key, $source, $aliases, $subSelect, $joinStatements, $subSelectJoinStatements);
+
+				$subSelect->orderBy([$key => $direction]);
+			}
+		}
+
+		foreach ($whereStatements as $value) {
+			self::joinSubSelectHelper($value, $source, $aliases, $subSelect, $joinStatements, $subSelectJoinStatements);
+
+			$subSelect->where($value);
+		}
+
+		if ($onPage) {
+			$subSelect->setPage($page, $onPage);
+		}
+
+		if ($join) {
+			$source->join(['sub' => $subSelect], 'this.uuid = sub.uuid', type: 'INNER');
+		}
+
+		return $subSelect;
+	}
+
+	public static function joinSubSelectHelper(string $value, ICollection $collection, array $aliases, Collection $subSelect, array $joinStatements, array &$subSelectJoinStatements): void
+	{
+		foreach ($aliases as $alias => $type) {
 			// If alias is THIS, just do simple where
-			if ($tableAlias === 'this') {
+			if ($alias === 'this') {
 				continue;
 			}
 
-			// Find if current alias is used in where/order
-			if (!Strings::contains($value, "$table.") && !Strings::contains($value, "$tableAlias.")) {
-				continue;
-			}
-
-			// Search in sub select if join already exists
-			$join = Arrays::first(\array_filter($subSelectJoinStatements, function (array $value) use ($tableAlias): bool {
-				return isset($value[1][$tableAlias]);
-			}));
-
-			// If exists, nothing to be done
-			if ($join) {
+			// @TODO Currently is only supported JOIN
+			if ($type !== 'JOIN') {
 				continue;
 			}
 
 			// Find join in base collection
-			$join = Arrays::first(\array_filter($joinStatements, function (array $value) use ($tableAlias): bool {
-				return isset($value[1][$tableAlias]);
+			$join = Arrays::first(\array_filter($joinStatements, function (array $value) use ($alias): bool {
+				return isset($value[1][$alias]);
 			}));
+
+			$table = $join[1][$alias];
 
 			// If join not found in base collection -> fatal error
 			if (!$join) {
-				throw new \Exception("Unable to join WHERE '$value' with TABLE '$tableAlias' to subquery!");
+				throw new \Exception("Unable to join WHERE '$value' with TABLE '$alias' to subquery!");
+			}
+
+			// Find if current alias is used in where/order
+			if (!Strings::contains($value, "$table.") && !Strings::contains($value, "$alias.")) {
+				continue;
+			}
+
+			// Search in subselect if join already exists
+			$subSelectJoin = Arrays::first(\array_filter($subSelectJoinStatements, function (array $value) use ($alias): bool {
+				return isset($value[1][$alias]);
+			}));
+
+			// If exists, nothing to be done
+			if ($subSelectJoin) {
+				continue;
 			}
 
 			$subSelectJoinStatements[] = $join;
 
 			// First join any needed tables of found JOIN
-			$this->joinSubSelectHelper($join[2], $collection, $tableAliases, $subSelect, $joinStatements, $subSelectJoinStatements);
+			self::joinSubSelectHelper($join[2], $collection, $aliases, $subSelect, $joinStatements, $subSelectJoinStatements);
 
 			// Join it to sub select
 			$subSelect->join($join[1], $join[2], [], $join[0]);

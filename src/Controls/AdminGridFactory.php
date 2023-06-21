@@ -85,9 +85,12 @@ class AdminGridFactory
 		$grid->setItemCountCallback(function (Collection $collection): int {
 			$collection->setSelect(['DISTINCT this.uuid'])->setGroupBy([])->setOrderBy([]);
 
+			$subCollection = AdminGrid::processCollectionBaseFrom($collection, useOrder: false, join: false);
+			$subCollection->setSelect(['DISTINCT this.uuid'])->setGroupBy([])->setOrderBy([]);
+
 			return $this->connection->rows()
-				->setFrom(['agg' => "({$collection->getSql()})"], $collection->getVars())
-				->enum('agg.uuid');
+				->setFrom(['agg' => "({$subCollection->getSql()})"], $collection->getVars())
+				->enum('agg.uuid', unique: false);
 		});
 		
 		$grid->onUpdateRow[] = function ($object) use ($grid): void {
