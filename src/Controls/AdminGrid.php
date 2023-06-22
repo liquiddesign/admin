@@ -1061,6 +1061,7 @@ class AdminGrid extends \Grid\Datagrid
 
 		$whereStatements = $source->getModifiers()['WHERE'] ?? [];
 		$joinStatements = $source->getModifiers()['JOIN'] ?? [];
+		$selectStatements = $source->getModifiers()['SELECT'] ?? [];
 		$aliases = $source->getAliases();
 		$subSelectJoinStatements = $subSelect->getModifiers()['JOIN'] ?? [];
 
@@ -1074,6 +1075,24 @@ class AdminGrid extends \Grid\Datagrid
 				}
 
 				self::joinSubSelectHelper($key, $source, $aliases, $subSelect, $joinStatements, $subSelectJoinStatements);
+
+				foreach ($selectStatements as $alias => $select) {
+					if ($alias === $key) {
+						$found = false;
+
+						foreach (\array_keys($subSelect->getModifiers()['SELECT']) as $subSelectAlias) {
+							if ($subSelectAlias === $key) {
+								$found = true;
+
+								break;
+							}
+						}
+
+						if (!$found) {
+							$subSelect->select([$alias => $select]);
+						}
+					}
+				}
 
 				$subSelect->orderBy([$key => $direction]);
 			}

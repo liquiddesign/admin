@@ -83,10 +83,10 @@ class AdminGridFactory
 		$grid->setTranslator($this->translator);
 
 		$grid->setItemCountCallback(function (Collection $collection): int {
-			$collection->setSelect(['DISTINCT this.uuid'])->setGroupBy([])->setOrderBy([]);
+			$collection->setSelect([])->setGroupBy([])->setOrderBy([]);
 
 			$subCollection = AdminGrid::processCollectionBaseFrom($collection, useOrder: false, join: false);
-			$subCollection->setSelect(['DISTINCT this.uuid'])->setGroupBy([])->setOrderBy([]);
+			$subCollection->setSelect(['DISTINCT this.uuid']);
 
 			return $this->connection->rows()
 				->setFrom(['agg' => "({$subCollection->getSql()})"], $collection->getVars())
