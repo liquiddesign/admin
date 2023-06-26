@@ -1030,30 +1030,29 @@ class AdminGrid extends \Grid\Datagrid
 		parent::render();
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	public function getItemsOnPage(): array
-	{
-		if ($this->itemsOnPage !== null) {
-			return $this->itemsOnPage;
-		}
-
-		/** @var \StORM\Collection $source */
-		$source = $this->getFilteredSource();
-
-		if ($this->onBeforeGetItems) {
-			Arrays::invoke($this->onBeforeGetItems, $source);
-		} else {
-			self::processCollectionBaseFrom($source, $this->getOnPage(), $this->getPage());
-		}
-
-		$this->onLoad($source);
-
-		$this->itemsOnPage = $this->nestingCallback && !$this->filters ? $this->getNestedSource($source, null) : $source->toArray();
-
-		return $this->itemsOnPage;
-	}
+//	/**
+//	 * @inheritDoc
+//	 */
+//	public function getItemsOnPage(): array
+//	{
+//		if ($this->itemsOnPage !== null) {
+//			return $this->itemsOnPage;
+//		}
+//
+//		/** @var \StORM\Collection $source */
+//		$source = $this->getFilteredSource();
+//
+//		if ($this->onBeforeGetItems) {
+//			Arrays::invoke($this->onBeforeGetItems, $source);
+//		} else {
+//			self::processCollectionBaseFrom($source, $this->getOnPage(), $this->getPage());
+//		}
+//
+//		$this->onLoad($source);
+//		$this->itemsOnPage = $this->nestingCallback && !$this->filters ? $this->getNestedSource($source, null) : $source->toArray();
+//
+//		return $this->itemsOnPage;
+//	}
 
 	public static function processCollectionBaseFrom(Collection $source, int|null $onPage = null, int $page = 1, bool $useOrder = true, bool $join = true,): Collection
 	{
