@@ -344,7 +344,7 @@ class AdminForm extends \Forms\Form
 
 		$pageContainer->addHidden('type', $pageType);
 		$pageContainer->addHidden('params', $params ? \http_build_query($params) . '&' : '');
-		$pageContainer->addHidden('shop', $page?->getValue('shop') ?: $this->selectedShop?->getPK());
+		$pageContainer->addHidden('shop', $page?->getValue('shop') ?: $this->selectedShop?->getPK())->setNullable();
 
 		if ($page) {
 			$pageContainer->setDefaults($page->toArray());
