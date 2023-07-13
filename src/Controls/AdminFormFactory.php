@@ -240,10 +240,10 @@ class AdminFormFactory
 		if (!$autoSelect) {
 			$adminForm->addGroup('Obchody');
 			$adminForm->addSelect2('shop', 'Vybraný obchod', $shopsAvailable)
-				->setPrompt('- Vyberte obchod -')
-				->setDefaultValue($selectedShop->getPK());
+				->setPrompt('- Žádný obchod -')
+				->setDefaultValue($selectedShop?->getPK());
 		} else {
-			$adminForm->addHidden('shop')->setDefaultValue($selectedShop->getPK());
+			$adminForm->addHidden('shop')->setDefaultValue($selectedShop?->getPK());
 		}
 	}
 

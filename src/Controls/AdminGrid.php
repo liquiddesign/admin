@@ -50,7 +50,7 @@ class AdminGrid extends \Grid\Datagrid
 	private ?string $bulkFormId = null;
 	
 	/**
-	 * @var array<string>|null
+	 * @var array<string>|array<mixed>|null
 	 */
 	private ?array $bulkFormInputs = null;
 
