@@ -839,6 +839,7 @@ class AdminGrid extends \Grid\Datagrid
 		$values = $form->addContainer('values');
 
 		foreach ($this->bulkFormInputs as $key => $name) {
+			/** @phpstan-ignore-next-line */
 			$components = \is_array($name) ? $name : [$name];
 
 			foreach ($components as $nameParsed) {
