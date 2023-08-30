@@ -112,6 +112,9 @@ class AccountFormFactory
 
 		$accountContainer->addCheckbox('active', $this->translator->translate('adminAdminAdministrator.active', 'Aktivní'))->setDefaultValue(true);
 		$accountContainer->addCheckbox('authorized', $this->translator->translate('adminAdminAdministrator.authorized', 'Autorizovaný'))->setDefaultValue(true);
+		$accountContainer->addDatetime('tsLastLogin', $this->translator->translate('adminAdminAdministrator.tsLastLogin', 'Poslední přihlášení'))->setDisabled();
+		$accountContainer->addDatetime('tsRegisteredEmailSent', $this->translator->translate('adminAdminAdministrator.tsRegisteredEmailSent', 'Datum odeslání emailu o registraci'))
+			->setNullable();
 
 		if ($activeFromTo) {
 			$accountContainer->addDatetime('activeFrom', 'Aktivní od')->setNullable();
