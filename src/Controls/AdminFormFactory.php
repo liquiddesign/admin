@@ -197,7 +197,7 @@ class AdminFormFactory
 
 		$form = $this->create();
 		$form->setAction($actionLink);
-		$form->addRadioList('bulkType', 'Výběr položek', [
+		$bulkTypeInput = $form->addRadioList('bulkType', 'Výběr položek', [
 			'selected' => "vybrané ($selectedNo)",
 			'all' => "celý výsledek ($totalNo)",
 		])->setDefaultValue('selected');
@@ -211,6 +211,14 @@ class AdminFormFactory
 		if ($onFormCreation) {
 			$onFormCreation($form);
 		}
+
+		$form->onRender[] = function (AdminForm $form) use ($bulkTypeInput): void {
+			$presenter = $form->getPresenter();
+
+			foreach ($presenter->template->flashes as $flash) {
+				$bulkTypeInput->setHtmlAttribute('data-info', '<br><br>' . $flash->message);
+			}
+		};
 
 		$form->onSuccess[] = function (AdminForm $form) use ($onProcess, $grid, $ids, $collection): void {
 			$values = $form->getValues('array');
