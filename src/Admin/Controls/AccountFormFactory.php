@@ -6,12 +6,14 @@ namespace Admin\Admin\Controls;
 
 use Admin\Controls\AdminForm;
 use Admin\Controls\AdminFormFactory;
+use Base\ShopsConfig;
 use Messages\DB\TemplateRepository;
 use Nette\Forms\Controls\Button;
 use Nette\Localization\Translator;
 use Nette\Mail\Mailer;
 use Nette\Security\Passwords;
 use Nette\SmartObject;
+use Security\DB\Account;
 use Security\DB\AccountRepository;
 use Security\DB\IUser;
 use StORM\Entity;
@@ -44,38 +46,22 @@ class AccountFormFactory
 	 */
 	public $onUpdateAccount;
 
-	private AccountRepository $accountRepository;
-
-	private Mailer $mailer;
-
-	private TemplateRepository $templateRepository;
-
-	private AdminFormFactory $adminFormFactory;
-
-	private Translator $translator;
-	
-	private Passwords $passwords;
-	
 	public function __construct(
-		AdminFormFactory $adminFormFactory,
-		AccountRepository $accountRepository,
-		TemplateRepository $templateRepository,
-		Mailer $mailer,
-		Translator $translator,
-		Passwords $passwords
+		protected readonly AdminFormFactory $adminFormFactory,
+		protected readonly AccountRepository $accountRepository,
+		protected readonly TemplateRepository $templateRepository,
+		protected readonly Mailer $mailer,
+		protected readonly Translator $translator,
+		protected readonly Passwords $passwords,
+		protected readonly ShopsConfig $shopsConfig,
 	) {
-		$this->adminFormFactory = $adminFormFactory;
-		$this->accountRepository = $accountRepository;
-		$this->templateRepository = $templateRepository;
-		$this->mailer = $mailer;
-		$this->translator = $translator;
-		$this->passwords = $passwords;
 	}
 
-	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true, bool $fullname = false, bool $activeFromTo = false): void
+	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true, bool $fullname = false, bool $activeFromTo = false, Account|null $existingAccount = null): void
 	{
 		unset($addRoles);
-		
+
+		/** @var \Forms\Container|array{'shop': \Nette\Forms\Controls\TextInput} $accountContainer */
 		$accountContainer = $form->addContainer('account');
 		$accountContainer->addHidden('uuid')->setNullable();
 
@@ -83,13 +69,7 @@ class AccountFormFactory
 			$accountContainer->addText('fullname', $this->translator->translate('adminAdminAdministrator.fullName', 'Jméno a příjmení'));
 		}
 
-		$accountContainer->addText('login', 'Login')
-			->setRequired()
-			->addRule(
-				[$this, 'validateLogin'],
-				$this->translator->translate('adminAdminAdministrator.loginExists', 'Login již existuje'),
-				[$this->accountRepository, $form['account']['uuid']],
-			);
+		$accountContainer->addText('login', 'Login')->setRequired();
 
 		$accountContainer->addPassword('password', $this->translator->translate('adminAdminAdministrator.password', 'Heslo'));
 		$accountContainer->addPassword('passwordCheck', $this->translator->translate('adminAdminAdministrator.passwordCheck', 'Kontrola hesla'))
@@ -121,6 +101,12 @@ class AccountFormFactory
 			$accountContainer->addDatetime('activeTo', 'Aktivní do')->setNullable();
 		}
 
+		$this->adminFormFactory->addShopsContainerToAdminForm($form, false, $accountContainer);
+
+		if ($existingAccount) {
+			$accountContainer['shop']->setDisabled();
+		}
+
 		$accountContainer->addHidden('email');
 
 		if (!$sendEmail) {
@@ -131,11 +117,11 @@ class AccountFormFactory
 		//$accountContainer->addCheckbox('sendEmail', 'Odeslat e-mail o vytvoření');
 	}
 
-	public function create(bool $delete = true, ?callable $beforeSubmits = null, bool $fullname = false, bool $activeFromTo = false): AdminForm
+	public function create(bool $delete = true, ?callable $beforeSubmits = null, bool $fullname = false, bool $activeFromTo = false, Account|null $existingAccount = null): AdminForm
 	{
 		$form = $this->adminFormFactory->create();
 
-		$this->addContainer($form, false, true, $fullname, $activeFromTo);
+		$this->addContainer($form, false, true, $fullname, $activeFromTo, $existingAccount);
 
 		if ($beforeSubmits) {
 			\call_user_func_array($beforeSubmits, [$form]);
@@ -153,6 +139,33 @@ class AccountFormFactory
 				$this->onDeleteAccount();
 			};
 		}
+
+		$form->onValidate[] = function (AdminForm $form): void {
+			if (!$form->isValid()) {
+				return;
+			}
+
+			$values = $form->getValues('array')['account'];
+
+			$query = $this->accountRepository->many()->where('this.login', $values['login']);
+
+			if (isset($values['uuid'])) {
+				$query->whereNot('this.uuid', $values['uuid']);
+			}
+
+			if (isset($values['shop'])) {
+				$query->where('this.fk_shop', $values['shop']);
+			}
+
+			if (!$query->first()) {
+				return;
+			}
+
+			/** @var \Nette\Forms\Controls\TextInput $input */
+			$input = $form['account']['login'];
+
+			$input->addError($this->translator->translate('adminAdminAdministrator.loginExists', 'Login již existuje'));
+		};
 
 		$form->onSuccess[] = [$this, 'success'];
 
@@ -206,6 +219,9 @@ class AccountFormFactory
 		$holder->delete();
 	}
 
+	/**
+	 * @deprecated Validation is in onValidate
+	 */
 	public static function validateLogin(\Nette\Forms\Controls\TextInput $input, array $args): bool
 	{
 		/** @var \Security\DB\AccountRepository $repository */
