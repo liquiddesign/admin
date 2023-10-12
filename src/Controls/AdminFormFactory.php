@@ -235,7 +235,7 @@ class AdminFormFactory
 	 * @param \Admin\Controls\AdminForm $adminForm
 	 * @param bool $autoSelect true - shop input is auto selected based on selected shop in shop repository | false - shop input is not auto selected
 	 */
-	public function addShopsContainerToAdminForm(AdminForm $adminForm, bool $autoSelect = true): void
+	public function addShopsContainerToAdminForm(AdminForm $adminForm, bool $autoSelect = true, \Forms\Container|null $container = null): void
 	{
 		$shopsAvailable = $this->shopRepository->getArrayForSelect();
 
@@ -245,13 +245,15 @@ class AdminFormFactory
 
 		$selectedShop = $this->shopsConfig->getSelectedShop();
 
+		$container ??= $adminForm;
+
 		if (!$autoSelect) {
 			$adminForm->addGroup('Obchody');
-			$adminForm->addSelect2('shop', 'Vybraný obchod', $shopsAvailable)
+			$container->addSelect2('shop', 'Vybraný obchod', $shopsAvailable)
 				->setPrompt('- Žádný obchod -')
 				->setDefaultValue($selectedShop?->getPK());
 		} else {
-			$adminForm->addHidden('shop')->setDefaultValue($selectedShop?->getPK());
+			$container->addHidden('shop')->setDefaultValue($selectedShop?->getPK());
 		}
 	}
 
