@@ -6,6 +6,7 @@ namespace Admin\Controls;
 
 use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
+use Base\BaseHelpers;
 use Base\ShopsConfig;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
@@ -27,13 +28,13 @@ class AdminGridFactory
 	private ?int $defaultOnPage;
 
 	public function __construct(
-		private readonly Administrator $administrator,
-		private readonly AdminFormFactory $formFactory,
-		private readonly Session $session,
-		private readonly Translator $translator,
-		private readonly ChangelogRepository $changelogRepository,
-		private readonly ShopsConfig $shopsConfig,
-		private readonly Connection $connection,
+		protected readonly Administrator $administrator,
+		protected readonly AdminFormFactory $formFactory,
+		protected readonly Session $session,
+		protected readonly Translator $translator,
+		protected readonly ChangelogRepository $changelogRepository,
+		protected readonly ShopsConfig $shopsConfig,
+		protected readonly Connection $connection,
 	) {
 	}
 
@@ -120,5 +121,14 @@ class AdminGridFactory
 		}
 		
 		return $grid;
+	}
+
+	public function addShopsFilterSelect(AdminGrid $grid): void
+	{
+		if ($shops = $this->shopsConfig->getAvailableShopsArrayForSelect()) {
+			$grid->addFilterDataMultiSelect(function (Collection $source, $value): void {
+				$source->where('this.fk_shop', BaseHelpers::replaceArrayValue($value, '0', null));
+			}, '', 'shops', null, $shops, ['placeholder' => '- Obchody -']);
+		}
 	}
 }
