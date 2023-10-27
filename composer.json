@@ -20,7 +20,7 @@
 		"latte/latte":"~3.0",
 		"liquiddesign/security": "~2.0",
 		"liquiddesign/messages": "~2.0",
-		"liquiddesign/translator": "~0.1.0",
+		"liquiddesign/translator": "~2.0",
 		"liquiddesign/pages": "~2.0.0-beta",
 		"liquiddesign/grid": "~0.1",
 		"liquiddesign/common": "~1.0.0",
