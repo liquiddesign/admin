@@ -128,7 +128,7 @@ class AdminGridFactory
 		if ($shops = $this->shopsConfig->getAvailableShopsArrayForSelect()) {
 			$grid->addFilterDataMultiSelect(function (Collection $source, $value): void {
 				$source->where('this.fk_shop', BaseHelpers::replaceArrayValue($value, '0', null));
-			}, '', 'shops', null, $shops, ['placeholder' => '- Obchody -']);
+			}, '', 'shops', null, ['0' => 'Žádný'] + $shops, ['placeholder' => '- Obchody -']);
 		}
 	}
 }
