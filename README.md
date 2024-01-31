@@ -1,5 +1,5 @@
 # Ⓐ Admin
-Admin je routa, formulář a grid do administrace webů
+Admin je routa, formulář a grid do administrace webů.
 
 ![Actions](https://github.com/liquiddesign/admin/actions/workflows/php.yml/badge.svg)
 ![Release](https://img.shields.io/github/v/release/liquiddesign/admin)
