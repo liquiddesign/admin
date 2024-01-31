@@ -36,6 +36,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			'defaultMutation' => Expect::list(null),
 			'superRole' => Expect::string(null),
 			'authorizatorEnabled' => Expect::bool(null),
+			'url' => Expect::string('admin'),
 			'prettyPages' => Expect::bool(false),
 			'serviceMode' => Expect::bool(false),
 			'adminGrid' => Expect::array([]),
@@ -74,7 +75,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		if ($builder->hasDefinition('routing.router')) {
 			/** @var \Nette\DI\Definitions\ServiceDefinition $routerListDef */
 			$routerListDef = $builder->getDefinition('routing.router');
-			$routerListDef->addSetup('add', [new \Nette\DI\Definitions\Statement(Route::class, [$config->mutations[0] ?? null])]);
+			$routerListDef->addSetup('add', [new \Nette\DI\Definitions\Statement(Route::class, [$config->mutations[0] ?? null, $config->url])]);
 		}
 		
 		$authorizator = $builder->addDefinition('authorizator', new ServiceDefinition())
