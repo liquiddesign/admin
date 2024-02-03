@@ -108,10 +108,18 @@ class AdminGrid extends \Grid\Datagrid
 		};
 
 		$this->onLoadState[] = function (Datalist $datalist, $params) use ($session): void {
+			if (($params['sessionIgnoreLoad'] ?? 0) || ($params['sessionIgnore'] ?? 0)) {
+				return;
+			}
+
 			Datalist::loadSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getPresenter()->getName() . $datalist->getName()));
 		};
 
 		$this->onSaveState[] = function (Datalist $datalist, $params) use ($session): void {
+			if (($datalist->getParameters()['sessionIgnoreSave'] ?? 0) || ($datalist->getParameters()['sessionIgnore'] ?? 0)) {
+				return;
+			}
+
 			Datalist::saveSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getPresenter()->getName() . $datalist->getName()));
 		};
 
@@ -844,6 +852,7 @@ class AdminGrid extends \Grid\Datagrid
 
 		$keep = $form->addContainer('keep');
 		$values = $form->addContainer('values');
+		$keepOptions = ['none' => 'Původní', 'replace' => 'Nahradit', 'add' => 'Přidat', 'remove' => 'Odebrat'];
 
 		foreach ($this->bulkFormInputs as $key => $name) {
 			$components = \is_array($name) ? $name : [$name];
@@ -860,7 +869,11 @@ class AdminGrid extends \Grid\Datagrid
 				$container->removeComponent($component);
 
 				if ($component instanceof BaseControl) {
-					$keep->addCheckbox($nameParsed, 'Původní')->setDefaultValue(true);
+					if ($component instanceof MultiSelectBox) {
+						$keep->addSelect($nameParsed, null, $keepOptions)->setDefaultValue('none');
+					} else {
+						$keep->addCheckbox($nameParsed, ' Původní')->setDefaultValue(true);
+					}
 
 					$component->getRules()->reset();
 					$component->setRequired(false);
@@ -868,7 +881,11 @@ class AdminGrid extends \Grid\Datagrid
 					$values->addComponent($component, $nameParsed);
 				} elseif ($component instanceof Container) {
 					foreach ($component->getControls() as $input) {
-						$keep->addCheckbox($nameParsed . '_' . $input->getName(), 'Původní')->setDefaultValue(true);
+						if ($input instanceof MultiSelectBox) {
+							$keep->addSelect($nameParsed . '_' . $input->getName(), null, $keepOptions)->setDefaultValue('none');
+						} else {
+							$keep->addCheckbox($nameParsed . '_' . $input->getName(), 'Původní')->setDefaultValue(true);
+						}
 
 						$input->getRules()->reset();
 						$input->setRequired(false);
@@ -904,10 +921,30 @@ class AdminGrid extends \Grid\Datagrid
 					continue;
 				}
 
+				if ($keep === 'none') {
+					unset($values['values'][$name]);
+
+					continue;
+				}
+
 				if ($values['values'][$name] && $source instanceof Collection && $source->getRepository()->getStructure()->getRelation($name) instanceof RelationNxN) {
 					foreach ($ids as $id) {
 						$relation = new RelationCollection($source->getRepository(), $source->getRepository()->getStructure()->getRelation($name), $id);
-						$relation->relate($values['values'][$name]);
+
+						if ($keep === 'add') {
+							$relation->relate($values['values'][$name]);
+						}
+
+						if ($keep === 'replace') {
+							$relation->unrelateAll();
+							$relation->relate($values['values'][$name]);
+						}
+
+						if ($keep === 'remove') {
+							$relation->unrelate($values['values'][$name]);
+						}
+
+						continue;
 					}
 				}
 
