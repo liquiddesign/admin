@@ -71,11 +71,15 @@
                             </th>
                             {$renderer->renderControl($component)|noescape}
                             <td class="align-middle d-inline-flex align-items-center pr-4">
-
-                                <div class="form-check ml-4">
-                                    {input "keep-$key", "class" => "form-check-input"}
-                                    {label "keep-$key", "class" => "form-check-label" /}
-                                </div>
+                                {if !$component instanceof Nette\Forms\Controls\MultiSelectBox}
+                                    <div class="form-check ml-4 pt-2">
+                                        {input "keep-$key", "class" => "form-check-input"}
+                                    </div>
+                                {else}
+                                    <div class="form-check ml-4">
+                                        {input "keep-$key", "class" => "form-control form-control-sm"}
+                                    </div>
+                                {/if}
                             </td>
                         </tr>
 
