@@ -392,7 +392,7 @@ class AdminForm extends \Forms\Form
 	 * @param bool $erase
 	 * @return static
 	 */
-	public function setDefaults($data, bool $erase = false)
+	public function setDefaults($data, bool $erase = false): static
 	{
 		if (isset($this['_defaults']) && $this['_defaults'] instanceof BaseControl) {
 			$this['_defaults']->setDefaultValue(\json_encode($data));

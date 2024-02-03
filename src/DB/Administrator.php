@@ -71,10 +71,7 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 		$this->google2FA = $this->getRepository()->getGoogle2FA();
 	}
 	
-	/**
-	 * @return string|int
-	 */
-	public function getId()
+	public function getId(): string|int
 	{
 		return $this->getPK();
 	}

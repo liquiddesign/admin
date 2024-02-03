@@ -943,7 +943,7 @@ class AdminGrid extends \Grid\Datagrid
 				$updateKeys = [];
 
 				foreach ($localValues['values'] as $key => $value) {
-					$prop = new \ReflectionProperty(\get_class($object), $key);
+					$prop = new \ReflectionProperty($object::class, $key);
 					/** @phpstan-ignore-next-line */
 					$type = $prop->getType()->getName();
 
