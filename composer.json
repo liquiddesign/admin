@@ -45,7 +45,8 @@
 		"lattelint": "php lattelint.php",
 		"tester": "tester tests/Cases/*.phpt  -c tests/php.ini --setup tests/setup.php",
 		"aux-sync-database": "Migrator\\Scripts::syncDatabase",
-		"sync-database": "@aux-sync-database Security\\Tests\\Bootstrap"
+		"sync-database": "@aux-sync-database Security\\Tests\\Bootstrap",
+		"check-commit": "@php ./vendor/liquiddesign/codestyle/src/scripts/check-last-commit.php"
 	},
 	"config": {
 		"allow-plugins": {
