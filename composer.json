@@ -1,56 +1,71 @@
 {
-	"name": "liquiddesign/admin",
-	"description": "Ⓐ Admin je routa a sada tříd pro možnost mít u každého modulu část pro administraci",
-	"license": "MIT",
-	"autoload": {
-		"psr-4": {"Admin\\": "src/"}
-	},
-	"autoload-dev": {
-		"psr-4": { "Admin\\Tests\\": "tests/" }
-	},
-	"require":
-	{
-		"php":">=8.2",
-		"nette/application":"~3.0",
-		"nette/security":"~3.0",
-		"nette/utils":"~3.0",
-		"nette/di":"~3.0",
-		"nette/component-model":"~3.0",
-		"latte/latte":"~3.0",
-		"liquiddesign/security": "~2.0",
-		"liquiddesign/messages": "~2.0",
-		"liquiddesign/translator": "~2.0",
-		"liquiddesign/pages": "~2.0",
-		"liquiddesign/grid": "~0.1",
-		"liquiddesign/common": "~1.0.0",
-		"pragmarx/google2fa": "~8.0",
-		"ext-pdo": "*",
-		"ext-json": "*"
-	},
-	"require-dev":
-	{
-		"nette/tester":"^2.0",
-		"tracy/tracy":"^2.0",
-		"composer/composer": "^2.0",
-		"liquiddesign/codestyle": "^3.0",
-		"liquiddesign/migrator": "^1.0",
-		"phpstan/phpstan-nette": "^1.0"
-	},
-	"scripts": {
-		"fix-code": ["@phpcsfix"],
-		"check-code": ["@phpcs", "@phpstan", "@lattelint"],
-		"phpstan": "phpstan analyse --memory-limit 1G -c phpstan.neon",
-		"phpcs": "phpcs --standard=ruleset.xml --ignore=assets --cache src",
-		"phpcsfix": "phpcbf --standard=ruleset.xml --ignore=assets --cache src",
-		"lattelint": "php lattelint.php",
-		"tester": "tester tests/Cases/*.phpt  -c tests/php.ini --setup tests/setup.php",
-		"aux-sync-database": "Migrator\\Scripts::syncDatabase",
-		"sync-database": "@aux-sync-database Security\\Tests\\Bootstrap",
-		"check-commit": "@php ./vendor/liquiddesign/codestyle/src/scripts/check-last-commit.php"
-	},
-	"config": {
-		"allow-plugins": {
-			"dealerdirect/phpcodesniffer-composer-installer": true
-		}
-	}
+    "name": "liquiddesign/admin",
+    "description": "Ⓐ Admin je routa a sada tříd pro možnost mít u každého modulu část pro administraci",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Admin\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Admin\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": ">=8.2",
+        "nette/application": "~3.0",
+        "nette/security": "~3.0",
+        "nette/utils": "~3.0",
+        "nette/di": "~3.0",
+        "nette/component-model": "~3.0",
+        "latte/latte": "~3.0",
+        "liquiddesign/security": "~2.0",
+        "liquiddesign/messages": "~2.0",
+        "liquiddesign/translator": "~2.0",
+        "liquiddesign/pages": "~2.0",
+        "liquiddesign/grid": "~0.1",
+        "liquiddesign/common": "~1.0.0",
+        "pragmarx/google2fa": "~8.0",
+        "ext-pdo": "*",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "nette/tester": "^2.0",
+        "tracy/tracy": "^2.0",
+        "composer/composer": "^2.0",
+        "liquiddesign/codestyle": "^3.0",
+        "liquiddesign/migrator": "^1.0",
+        "phpstan/phpstan-nette": "^1.0"
+    },
+    "scripts": {
+        "fix-code": [
+            "@phpcsfix"
+        ],
+        "check-code": [
+            "@phpcs",
+            "@phpstan",
+            "@lattelint"
+        ],
+        "phpstan": "phpstan analyse --memory-limit 1G -c phpstan.neon",
+        "phpcs": "phpcs --standard=ruleset.xml --ignore=assets --cache src",
+        "phpcsfix": "phpcbf --standard=ruleset.xml --ignore=assets --cache src",
+        "lattelint": "php lattelint.php",
+        "tester": "tester tests/Cases/*.phpt  -c tests/php.ini --setup tests/setup.php",
+        "aux-sync-database": "Migrator\\Scripts::syncDatabase",
+        "sync-database": "@aux-sync-database Security\\Tests\\Bootstrap",
+        "check-commit": "@php ./vendor/liquiddesign/codestyle/src/scripts/check-last-commit.php",
+        "changelog": "conventional-changelog",
+        "release": "conventional-changelog --commit",
+        "release:patch": "conventional-changelog --patch --commit",
+        "release:minor": "conventional-changelog --minor --commit",
+        "release:major": "conventional-changelog --major --commit"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
 }
