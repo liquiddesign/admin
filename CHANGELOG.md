@@ -4,6 +4,18 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.7](https://github.com/liquiddesign/admin/compare/v2.1.6...v2.1.7) (2024-02-28)
+
+### Features
+
+
+##### Administrator
+
+* Add ability to extend ([1f5c7a](https://github.com/liquiddesign/admin/commit/1f5c7a2433fc7a4c5971e913a97e06bb996632cc))
+
+
+---
+
 ## [2.1.6](https://github.com/liquiddesign/admin/compare/v2.1.5...v2.1.6) (2024-02-19)
 
 ### Performance Improvements
