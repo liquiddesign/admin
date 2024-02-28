@@ -8,6 +8,10 @@ use Security\DB\UserRepositoryTrait;
 use StORM\DIConnection;
 use StORM\SchemaManager;
 
+/**
+ * @template T of \Admin\DB\Administrator
+ * @extends \StORM\Repository<T>
+ */
 class AdministratorRepository extends \StORM\Repository implements IUserRepository
 {
 	use UserRepositoryTrait;

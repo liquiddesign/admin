@@ -112,9 +112,10 @@ class AdministratorPresenter extends BackendPresenter
 			$form->addCheckbox('google2faSecret', $this->_('2faSign', 'Aktivovat dvoufaktorové přihlášení'));
 		}
 
+		$this->addCustomFieldsToForm($form);
+
 		$form->addSubmits(!$this->getParameter('administrator'));
-		
-		
+
 		$form->onValidate[] = function (AdminForm $form, $values): void {
 			if (isset($values['google2faSecret']) && $values['google2faSecret'] && !Validators::isEmail($values['account']['login'])) {
 				$form['account']['login']->addError($this->_('errorLoginMustBeEmail', 'Pro dvoufaktorové přihlášení je potřeba mít jako login Váš email.'));
@@ -216,5 +217,10 @@ class AdministratorPresenter extends BackendPresenter
 		}
 
 		$form['account']->setDefaults($account->toArray());
+	}
+
+	protected function addCustomFieldsToForm(AdminForm $form): void
+	{
+		unset($form);
 	}
 }
