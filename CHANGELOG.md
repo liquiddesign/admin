@@ -4,6 +4,16 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.8](https://github.com/liquiddesign/admin/compare/v2.1.7...v2.1.8) (2024-03-07)
+
+### Builds
+
+* Dependency updates ([20ba21](https://github.com/liquiddesign/admin/commit/20ba21d801f0662fec458962cbdbbf31764b8fe7))
+* Utils 4.0 dependency ([e0174e](https://github.com/liquiddesign/admin/commit/e0174eadb933c10d53e1afd6ff6551c1fb9c3c52))
+
+
+---
+
 ## [2.1.7](https://github.com/liquiddesign/admin/compare/v2.1.6...v2.1.7) (2024-02-28)
 
 ### Features
