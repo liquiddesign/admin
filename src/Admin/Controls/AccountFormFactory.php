@@ -92,13 +92,13 @@ class AccountFormFactory
 
 		$accountContainer->addCheckbox('active', $this->translator->translate('adminAdminAdministrator.active', 'Aktivní'))->setDefaultValue(true);
 		$accountContainer->addCheckbox('authorized', $this->translator->translate('adminAdminAdministrator.authorized', 'Autorizovaný'))->setDefaultValue(true);
-		$accountContainer->addDatetime('tsLastLogin', $this->translator->translate('adminAdminAdministrator.tsLastLogin', 'Poslední přihlášení'))->setDisabled();
-		$accountContainer->addDatetime('tsRegisteredEmailSent', $this->translator->translate('adminAdminAdministrator.tsRegisteredEmailSent', 'Datum odeslání emailu o registraci'))
+		$accountContainer->addPolyfillDatetime('tsLastLogin', $this->translator->translate('adminAdminAdministrator.tsLastLogin', 'Poslední přihlášení'))->setDisabled();
+		$accountContainer->addPolyfillDatetime('tsRegisteredEmailSent', $this->translator->translate('adminAdminAdministrator.tsRegisteredEmailSent', 'Datum odeslání emailu o registraci'))
 			->setNullable();
 
 		if ($activeFromTo) {
-			$accountContainer->addDatetime('activeFrom', 'Aktivní od')->setNullable();
-			$accountContainer->addDatetime('activeTo', 'Aktivní do')->setNullable();
+			$accountContainer->addPolyfillDatetime('activeFrom', 'Aktivní od')->setNullable();
+			$accountContainer->addPolyfillDatetime('activeTo', 'Aktivní do')->setNullable();
 		}
 
 		$this->adminFormFactory->addShopsContainerToAdminForm($form, false, $accountContainer);

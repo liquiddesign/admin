@@ -10,7 +10,7 @@ use Nette\Security\AuthenticationException;
 use Nette\Security\Authorizator;
 use Nette\Security\IAuthenticator;
 use Nette\Security\IIdentity;
-use Nette\Security\IUserStorage;
+use Nette\Security\UserStorage;
 use Security\Authenticator;
 
 class Administrator extends \Nette\Security\User
@@ -22,7 +22,7 @@ class Administrator extends \Nette\Security\User
 	private SessionSection $google2FaSession;
 	
 	
-	public function __construct(Session $session, ?IAuthenticator $authenticator = null, ?Authorizator $authorizator = null, ?IUserStorage $legacyStorage = null)
+	public function __construct(Session $session, ?IAuthenticator $authenticator = null, ?Authorizator $authorizator = null, ?UserStorage $legacyStorage = null)
 	{
 		parent::__construct(clone $legacyStorage, $authenticator, $authorizator);
 		
