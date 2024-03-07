@@ -4,6 +4,11 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.9](https://github.com/liquiddesign/admin/compare/v2.1.8...v2.1.9) (2024-03-07)
+
+
+---
+
 ## [2.1.8](https://github.com/liquiddesign/admin/compare/v2.1.7...v2.1.8) (2024-03-07)
 
 ### Builds
