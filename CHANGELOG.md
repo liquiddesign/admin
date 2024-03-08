@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.10](https://github.com/liquiddesign/admin/compare/v2.1.9...v2.1.10) (2024-03-08)
+
+### Builds
+
+* PHP 8.1 ([845832](https://github.com/liquiddesign/admin/commit/845832ca86164929280a4d6c84f7f46b83b2e8b5))
+
+
+---
+
 ## [2.1.9](https://github.com/liquiddesign/admin/compare/v2.1.8...v2.1.9) (2024-03-07)
 
 
