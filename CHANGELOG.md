@@ -4,6 +4,18 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.12](https://github.com/liquiddesign/admin/compare/v2.1.11...v2.1.12) (2024-03-20)
+
+### Features
+
+
+##### Administrator
+
+* Add ability to extend form ([8831af](https://github.com/liquiddesign/admin/commit/8831af082b184eb2366162b0621a3901e5b0cdc7))
+
+
+---
+
 ## [2.1.11](https://github.com/liquiddesign/admin/compare/v2.1.10...v2.1.11) (2024-03-08)
 
 ### Builds
