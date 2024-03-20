@@ -62,6 +62,9 @@ class AdministratorPresenter extends BackendPresenter
 	public Google2FA $google2FA;
 	
 	public string $tAdministrators;
+
+	/** @var array<callable> */
+	public array $onFormSuccess = [];
 	
 	public function beforeRender(): void
 	{
@@ -141,6 +144,8 @@ class AdministratorPresenter extends BackendPresenter
 				$administrator->accounts->relate([$account]);
 			};
 			$this->accountFormFactory->success($form);
+
+			Arrays::invoke($this->onFormSuccess, $this->adminRepo->one($administrator->getPK(), true));
 			
 			$form->getPresenter()->flashMessage($this->_('.saved', 'Uloženo'), 'success');
 			$form->processRedirect('detail', $doNotRedirect ? 'detail' : 'default', [$administrator], $doNotRedirect ? [$administrator] : []);
