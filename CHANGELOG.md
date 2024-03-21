@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.13](https://github.com/liquiddesign/admin/compare/v2.1.12...v2.1.13) (2024-03-21)
+
+### Bug Fixes
+
+* Admin Grid count depends on primary key rather than uuid ([4f142b](https://github.com/liquiddesign/admin/commit/4f142ba6e8ce7518641cd6e21e98801db6d8baa7))
+
+
+---
+
 ## [2.1.12](https://github.com/liquiddesign/admin/compare/v2.1.11...v2.1.12) (2024-03-20)
 
 ### Features
