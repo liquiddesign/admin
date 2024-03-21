@@ -1093,7 +1093,9 @@ class AdminGrid extends \Grid\Datagrid
 
 	public static function processCollectionBaseFrom(Collection $source, int|null $onPage = null, int $page = 1, bool $useOrder = true, bool $join = true,): Collection
 	{
-		$subSelect = $source->getRepository()->many()->setSelect(['this.uuid'])->setGroupBy(['this.uuid']);
+		$pkName = $source->getRepository()->getStructure()->getPK()->getName();
+
+		$subSelect = $source->getRepository()->many()->setSelect(['this.' . $pkName])->setGroupBy(['this.' . $pkName]);
 
 		$whereStatements = $source->getModifiers()['WHERE'] ?? [];
 		$joinStatements = $source->getModifiers()['JOIN'] ?? [];
@@ -1145,7 +1147,7 @@ class AdminGrid extends \Grid\Datagrid
 		}
 
 		if ($join) {
-			$source->join(['sub' => $subSelect], 'this.uuid = sub.uuid', type: 'INNER');
+			$source->join(['sub' => $subSelect], "this.$pkName = sub.$pkName", type: 'INNER');
 		}
 
 		return $subSelect;

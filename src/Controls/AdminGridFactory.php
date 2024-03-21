@@ -84,14 +84,14 @@ class AdminGridFactory
 		$grid->setTranslator($this->translator);
 
 		$grid->setItemCountCallback(function (Collection $collection): int {
+			$pkName = $collection->getRepository()->getStructure()->getPK()->getName();
 			$collection->setSelect([])->setGroupBy([])->setOrderBy([]);
-
 			$subCollection = AdminGrid::processCollectionBaseFrom($collection, useOrder: false, join: false);
-			$subCollection->setSelect(['DISTINCT this.uuid']);
+			$subCollection->setSelect(['DISTINCT this.' . $pkName]);
 
 			return $this->connection->rows()
 				->setFrom(['agg' => "({$subCollection->getSql()})"], $collection->getVars())
-				->enum('agg.uuid', unique: false);
+				->enum('agg.' . $pkName, unique: false);
 		});
 		
 		$grid->onUpdateRow[] = function ($object) use ($grid): void {

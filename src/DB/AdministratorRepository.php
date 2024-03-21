@@ -15,6 +15,7 @@ use StORM\SchemaManager;
 class AdministratorRepository extends \StORM\Repository implements IUserRepository
 {
 	use UserRepositoryTrait;
+
 	
 	private Google2FA $google2FA;
 	

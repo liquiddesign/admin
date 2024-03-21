@@ -26,6 +26,7 @@ use StORM\Entity;
 class AccountFormFactory
 {
 	use SmartObject;
+
 	
 	protected const CONFIGURATIONS = [
 		'preferredMutation' => false,
