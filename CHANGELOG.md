@@ -4,6 +4,18 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.14](https://github.com/liquiddesign/admin/compare/v2.1.13...v2.1.14) (2024-03-25)
+
+### Bug Fixes
+
+
+##### Bulk Form
+
+* Save correctly collections with shop suffix ([6494f5](https://github.com/liquiddesign/admin/commit/6494f500958c55401d5807c477cef14cc1262cf1))
+
+
+---
+
 ## [2.1.13](https://github.com/liquiddesign/admin/compare/v2.1.12...v2.1.13) (2024-03-21)
 
 ### Bug Fixes
