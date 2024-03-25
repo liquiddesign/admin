@@ -917,19 +917,30 @@ class AdminGrid extends \Grid\Datagrid
 			$ids = $values['bulkType'] === 'selected' ? $ids : $this->getFilteredSource()->toArrayOf($this->getSourceIdName());
 
 			foreach ($values['keep'] as $name => $keep) {
-				if (!$keep) {
+				if ($keep === false) {
 					continue;
 				}
 
-				if ($keep === 'none') {
+				if ($keep === 'none' || $keep === true) {
 					unset($values['values'][$name]);
 
 					continue;
 				}
 
-				if ($values['values'][$name] && $source instanceof Collection && $source->getRepository()->getStructure()->getRelation($name) instanceof RelationNxN) {
+				$relationName = null;
+				$nameWithoutSuffix = \str_contains($name, '_') ? Strings::before($name, '_') : null;
+
+				if ($values['values'][$name] &&
+					$nameWithoutSuffix &&
+					$source instanceof Collection && $source->getRepository()->getStructure()->getRelation($nameWithoutSuffix) instanceof RelationNxN) {
+					$relationName = $nameWithoutSuffix;
+				} elseif ($values['values'][$name] && $source instanceof Collection && $source->getRepository()->getStructure()->getRelation($name) instanceof RelationNxN) {
+					$relationName = $name;
+				}
+
+				if ($relationName && $source instanceof Collection) {
 					foreach ($ids as $id) {
-						$relation = new RelationCollection($source->getRepository(), $source->getRepository()->getStructure()->getRelation($name), $id);
+						$relation = new RelationCollection($source->getRepository(), $source->getRepository()->getStructure()->getRelation($relationName), $id);
 
 						if ($keep === 'add') {
 							$relation->relate($values['values'][$name]);
@@ -948,7 +959,7 @@ class AdminGrid extends \Grid\Datagrid
 					}
 				}
 
-				unset($values['values'][$name]);
+				continue;
 			}
 
 			$relations = [];
