@@ -4,6 +4,18 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.15](https://github.com/liquiddesign/admin/compare/v2.1.14...v2.1.15) (2024-05-03)
+
+### Features
+
+
+##### Admin Grid
+
+* Reset order in filter form cancel ([0e31bc](https://github.com/liquiddesign/admin/commit/0e31bcb9831a297bbbf840ae65d2e670930d0789))
+
+
+---
+
 ## [2.1.14](https://github.com/liquiddesign/admin/compare/v2.1.13...v2.1.14) (2024-03-25)
 
 ### Bug Fixes
