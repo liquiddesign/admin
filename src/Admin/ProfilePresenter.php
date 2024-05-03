@@ -67,7 +67,7 @@ class ProfilePresenter extends BackendPresenter
 		$this->template->headerTree = [
 			[$tProfile],
 		];
-		$this->template->displayButtons = [];
+		$this->template->displayButtons = [$this->createButton('clearGridSettings!', 'Resetovat nastavení tabulek')];
 		$this->template->displayControls = [
 			$this->getComponent('accountForm'),
 		];
@@ -131,5 +131,23 @@ class ProfilePresenter extends BackendPresenter
 			$this->flashMessage($this->_('.saved', 'Uloženo'), 'success');
 			$this->redirect('this');
 		};
+	}
+
+	public function handleClearGridSettings(): void
+	{
+		// phpcs:ignore
+		if (isset($_SESSION['__NF']['DATA']) && \is_array($_SESSION['__NF']['DATA'])) {
+			// phpcs:ignore
+			foreach ($_SESSION['__NF']['DATA'] as $key => $value) {
+				if (!\str_starts_with($key, 'admingrid-')) {
+					continue;
+				}
+
+				// phpcs:ignore
+				unset($_SESSION['__NF']['DATA'][$key]);
+			}
+		}
+
+		$this->redirect('this');
 	}
 }
