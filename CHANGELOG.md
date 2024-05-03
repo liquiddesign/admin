@@ -4,6 +4,18 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.16](https://github.com/liquiddesign/admin/compare/v2.1.15...v2.1.16) (2024-05-03)
+
+### Features
+
+
+##### Admin Profile
+
+* Add reset filters button ([573ed7](https://github.com/liquiddesign/admin/commit/573ed716732f79a3a2563d9ff1434798305f9c98))
+
+
+---
+
 ## [2.1.15](https://github.com/liquiddesign/admin/compare/v2.1.14...v2.1.15) (2024-05-03)
 
 ### Features
