@@ -712,6 +712,7 @@ class AdminGrid extends \Grid\Datagrid
 			// for persistance session storage
 			$grid->setFilters(null);
 			$grid->setPage(1);
+			$grid->setOrder(null);
 
 			if (isset($resetLink[1])) {
 				$grid->getPresenter()->redirect($resetLink[0], $resetLink[1]);
