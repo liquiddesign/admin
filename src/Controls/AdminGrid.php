@@ -958,6 +958,9 @@ class AdminGrid extends \Grid\Datagrid
 
 						continue;
 					}
+
+					unset($values['keep'][$name]);
+					unset($values['values'][$name]);
 				}
 
 				continue;
