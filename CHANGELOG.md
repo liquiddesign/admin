@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.17](https://github.com/liquiddesign/admin/compare/v2.1.16...v2.1.17) (2024-05-13)
+
+### Bug Fixes
+
+* Nxn bulk edit ([327c52](https://github.com/liquiddesign/admin/commit/327c5278b911820927602ce59eeff20eae901fa8))
+
+
+---
+
 ## [2.1.16](https://github.com/liquiddesign/admin/compare/v2.1.15...v2.1.16) (2024-05-03)
 
 ### Features
