@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.18](https://github.com/liquiddesign/admin/compare/v2.1.17...v2.1.18) (2024-05-27)
+
+### Bug Fixes
+
+* Isset ([92cec7](https://github.com/liquiddesign/admin/commit/92cec763fbfa4beb8acb6680fbc8431869a87c14))
+
+
+---
+
 ## [2.1.17](https://github.com/liquiddesign/admin/compare/v2.1.16...v2.1.17) (2024-05-13)
 
 ### Bug Fixes
