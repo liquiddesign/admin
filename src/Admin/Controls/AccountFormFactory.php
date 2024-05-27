@@ -104,7 +104,7 @@ class AccountFormFactory
 
 		$this->adminFormFactory->addShopsContainerToAdminForm($form, false, $accountContainer);
 
-		if ($existingAccount) {
+		if ($existingAccount && isset($accountContainer['shop'])) {
 			$accountContainer['shop']->setDisabled();
 		}
 
