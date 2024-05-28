@@ -4,6 +4,22 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.19](https://github.com/liquiddesign/admin/compare/v2.1.18...v2.1.19) (2024-05-28)
+
+### Features
+
+
+##### Admin Form
+
+* Add multiSelectAjax ([055c6e](https://github.com/liquiddesign/admin/commit/055c6ec696dbb35b8cbf6c042dc40948967731b1))
+
+### Styles
+
+* Fix ([2554e7](https://github.com/liquiddesign/admin/commit/2554e7f7af53b63eccb2e84e92bed84edbd9b5d4))
+
+
+---
+
 ## [2.1.18](https://github.com/liquiddesign/admin/compare/v2.1.17...v2.1.18) (2024-05-27)
 
 ### Bug Fixes
