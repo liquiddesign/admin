@@ -10,6 +10,7 @@ use Forms\Container;
 use Forms\LocaleContainer;
 use Nette\Application\UI\Presenter;
 use Nette\Forms\Controls\BaseControl;
+use Nette\Forms\Controls\MultiSelectBox;
 use Nette\Forms\Controls\SelectBox;
 use Nette\Forms\Controls\TextArea;
 use Nette\Forms\Controls\TextBase;
@@ -463,6 +464,42 @@ class AdminForm extends \Forms\Form
 		$link = $presenter->link('getAjaxArrayForSelect!', ['name' => $className,]);
 
 		return $this->addSelect2Ajax($name, $link, $label, $configuration, $placeholder);
+	}
+
+	/**
+	 * @param mixed $name
+	 * @param string|null $label
+	 * @param string|null $placeholder
+	 * @param string|null $className Class name of entity to get items
+	 * @param array|null $configuration
+	 * @throws \Nette\Application\UI\InvalidLinkException
+	 * @throws \Exception
+	 */
+	public function addMultiSelectAjax(
+		$name,
+		?string $label = null,
+		?string $placeholder = null,
+		?string $className = null,
+		?array $configuration = []
+	): MultiSelectBox {
+		if (!$className) {
+			throw new \Exception('Missing DataSource');
+		}
+
+		$this->ajaxInputs[$this->getName()][] = $name;
+
+		/** @var \Admin\BackendPresenter|null $presenter */
+		$presenter = $this->getPresenterIfExists();
+
+		if (!$presenter) {
+			throw new \Exception('Missing Presenter');
+		}
+
+		$presenter->ajaxInputs[$this->getName()][] = $name;
+
+		$link = $presenter->link('getAjaxArrayForSelect!', ['name' => $className,]);
+
+		return $this->addMultiSelect2Ajax($name, $link, $label, $configuration, $placeholder);
 	}
 
 	/**
