@@ -4,6 +4,18 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.20](https://github.com/liquiddesign/admin/compare/v2.1.19...v2.1.20) (2024-06-03)
+
+### Features
+
+
+##### Backend Presenter
+
+* Add new method createButton2, old methods createButton and createButtonWithClass are deprecated ([dab5db](https://github.com/liquiddesign/admin/commit/dab5db4c569c5fcf62af2be086e25b6bb263801c))
+
+
+---
+
 ## [2.1.19](https://github.com/liquiddesign/admin/compare/v2.1.18...v2.1.19) (2024-05-28)
 
 ### Features
