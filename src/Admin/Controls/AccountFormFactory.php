@@ -60,7 +60,7 @@ class AccountFormFactory
 
 	public function addContainer(AdminForm $form, bool $addRoles = false, bool $sendEmail = true, bool $fullname = false, bool $activeFromTo = false, Account|null $existingAccount = null): void
 	{
-		unset($addRoles);
+		unset($addRoles, $existingAccount);
 
 		/** @var \Forms\Container|array{'shop': \Nette\Forms\Controls\TextInput} $accountContainer */
 		$accountContainer = $form->addContainer('account');
