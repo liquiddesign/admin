@@ -104,10 +104,6 @@ class AccountFormFactory
 
 		$this->adminFormFactory->addShopsContainerToAdminForm($form, false, $accountContainer);
 
-		if ($existingAccount && isset($accountContainer['shop'])) {
-			$accountContainer['shop']->setDisabled();
-		}
-
 		$accountContainer->addHidden('email');
 
 		if (!$sendEmail) {
@@ -141,7 +137,7 @@ class AccountFormFactory
 			};
 		}
 
-		$form->onValidate[] = function (AdminForm $form): void {
+		$form->onValidate[] = function (AdminForm $form) use ($existingAccount): void {
 			if (!$form->isValid()) {
 				return;
 			}
@@ -158,7 +154,9 @@ class AccountFormFactory
 				$query->where('this.fk_shop', $values['shop']);
 			}
 
-			if (!$query->first()) {
+			$duplicateAccount = $query->first();
+
+			if (!$duplicateAccount || ($existingAccount && $duplicateAccount->getPK() === $existingAccount->getPK())) {
 				return;
 			}
 
