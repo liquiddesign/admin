@@ -4,6 +4,18 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.21](https://github.com/liquiddesign/admin/compare/v2.1.20...v2.1.21) (2024-06-21)
+
+### Bug Fixes
+
+
+##### Account Form
+
+* Don't disable shop input ([3768b5](https://github.com/liquiddesign/admin/commit/3768b514b6559aa0d9e4cd313ae7a6c4fe584dbd), [57be69](https://github.com/liquiddesign/admin/commit/57be692d0fb9840472980a3bb366bac07c6e6b3a))
+
+
+---
+
 ## [2.1.20](https://github.com/liquiddesign/admin/compare/v2.1.19...v2.1.20) (2024-06-03)
 
 ### Features
