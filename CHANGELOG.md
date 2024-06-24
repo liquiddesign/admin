@@ -4,6 +4,18 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.22](https://github.com/liquiddesign/admin/compare/v2.1.21...v2.1.22) (2024-06-24)
+
+### Bug Fixes
+
+
+##### Admin Form Factory
+
+* Associative array ([72f9bd](https://github.com/liquiddesign/admin/commit/72f9bd7d3bc35bceeab9c7fe953415065cecd9b0))
+
+
+---
+
 ## [2.1.21](https://github.com/liquiddesign/admin/compare/v2.1.20...v2.1.21) (2024-06-21)
 
 ### Bug Fixes
