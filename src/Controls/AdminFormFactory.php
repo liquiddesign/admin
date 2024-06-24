@@ -223,7 +223,7 @@ class AdminFormFactory
 		$form->onSuccess[] = function (AdminForm $form) use ($onProcess, $grid, $ids, $collection): void {
 			$values = $form->getValues('array');
 
-			$collection = $values['bulkType'] === 'selected' ? $collection->where('this.uuid', $ids) : $grid->getFilteredSource();
+			$collection = $values['bulkType'] === 'selected' ? $collection->where('this.uuid', \array_values($ids)) : $grid->getFilteredSource();
 
 			$onProcess($values, $collection, $form);
 		};
