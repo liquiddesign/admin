@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.23](https://github.com/liquiddesign/admin/compare/v2.1.22...v2.1.23) (2024-07-01)
+
+### Features
+
+* Add CSV reader methods to BackendPresenter ([50deaa](https://github.com/liquiddesign/admin/commit/50deaa75c8ff4a1cea7d6c79f8034c73efee9066))
+
+
+---
+
 ## [2.1.22](https://github.com/liquiddesign/admin/compare/v2.1.21...v2.1.22) (2024-06-24)
 
 ### Bug Fixes
