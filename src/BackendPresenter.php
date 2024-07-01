@@ -11,6 +11,7 @@ use Admin\Controls\Menu;
 use Admin\DB\IGeneralAjaxRepository;
 use Base\DB\Shop;
 use Base\ShopsConfig;
+use League\Csv\Reader;
 use Nette\Application\Attributes\Persistent;
 use Nette\Application\BadRequestException;
 use Nette\Application\UI\Presenter;
@@ -91,6 +92,22 @@ abstract class BackendPresenter extends Presenter
 	public array $ajaxInputs = [];
 
 	protected string|null $shopIcon = null;
+
+	public function getReaderFromString(string $content, string $delimiter = ';'): Reader
+	{
+		$reader = Reader::createFromString($content);
+		unset($content);
+
+		$reader->setDelimiter($delimiter);
+		$reader->setHeaderOffset(0);
+
+		return $reader;
+	}
+
+	public function getReader(string $filePath, string $delimiter = ';'): Reader
+	{
+		return $this->getReaderFromString(FileSystem::read($filePath), $delimiter);
+	}
 	
 	public function checkRequirements($element): void
 	{
