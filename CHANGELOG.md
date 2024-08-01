@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.24](https://github.com/liquiddesign/admin/compare/v2.1.23...v2.1.24) (2024-08-01)
+
+### Bug Fixes
+
+* Null entity handling in AdminGrid expression parsing ([245890](https://github.com/liquiddesign/admin/commit/24589062c7759510a68e6f94cf763898b656983a))
+
+
+---
+
 ## [2.1.23](https://github.com/liquiddesign/admin/compare/v2.1.22...v2.1.23) (2024-07-01)
 
 ### Features
