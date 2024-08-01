@@ -232,6 +232,10 @@ class AdminGrid extends \Grid\Datagrid
 			$baseUrl = $this->getPresenter()->getHttpRequest()->getUrl()->getBaseUrl();
 
 			foreach (\explode('.', $expression) as $property) {
+				if (!$entity) {
+					return null;
+				}
+
 				$entity = $entity->$property;
 			}
 
