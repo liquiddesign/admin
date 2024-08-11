@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.25](https://github.com/liquiddesign/admin/compare/v2.1.24...v2.1.25) (2024-08-11)
+
+### Features
+
+* Add HAVING support to AdminGrid and optimize item count query ([77c88d](https://github.com/liquiddesign/admin/commit/77c88d93e6fa70fc2ecaced1e5c8e3da908eec41))
+
+
+---
+
 ## [2.1.24](https://github.com/liquiddesign/admin/compare/v2.1.23...v2.1.24) (2024-08-01)
 
 ### Bug Fixes
