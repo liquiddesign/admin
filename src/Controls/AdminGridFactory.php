@@ -85,9 +85,11 @@ class AdminGridFactory
 
 		$grid->setItemCountCallback(function (Collection $collection): int {
 			$pkName = $collection->getRepository()->getStructure()->getPK()->getName();
-			$collection->setSelect([])->setGroupBy([])->setOrderBy([]);
+			$collection->setSelect([])->setOrderBy([]);
 			$subCollection = AdminGrid::processCollectionBaseFrom($collection, useOrder: false, join: false);
 			$subCollection->setSelect(['DISTINCT this.' . $pkName]);
+
+			$collection->setGroupBy([]);
 
 			return $this->connection->rows()
 				->setFrom(['agg' => "({$subCollection->getSql()})"], $collection->getVars())

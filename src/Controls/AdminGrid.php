@@ -1114,13 +1114,20 @@ class AdminGrid extends \Grid\Datagrid
 	{
 		$pkName = $source->getRepository()->getStructure()->getPK()->getName();
 
-		$subSelect = $source->getRepository()->many()->setSelect(['this.' . $pkName])->setGroupBy(['this.' . $pkName]);
+		$subSelect = $source->getRepository()->many()->setSelect(['this.' . $pkName]);
 
 		$whereStatements = $source->getModifiers()['WHERE'] ?? [];
+		$havingStatements = $source->getModifiers()['HAVING'] ?? [];
 		$joinStatements = $source->getModifiers()['JOIN'] ?? [];
 		$selectStatements = $source->getModifiers()['SELECT'] ?? [];
 		$aliases = $source->getAliases();
 		$subSelectJoinStatements = $subSelect->getModifiers()['JOIN'] ?? [];
+
+		foreach ($selectStatements as $alias => $select) {
+			self::joinSubSelectHelper($select, $source, $aliases, $subSelect, $joinStatements, $subSelectJoinStatements);
+
+			$subSelect->select([$alias => $select]);
+		}
 
 		if ($useOrder) {
 			$orderByStatements = $source->getModifiers()['ORDER BY'] ?? [];
@@ -1161,6 +1168,14 @@ class AdminGrid extends \Grid\Datagrid
 			$subSelect->where($value);
 		}
 
+		$having = null;
+
+		foreach ($havingStatements as $value) {
+			self::joinSubSelectHelper($value, $source, $aliases, $subSelect, $joinStatements, $subSelectJoinStatements);
+
+			$having .= "$value ";
+		}
+
 		if ($onPage) {
 			$subSelect->setPage($page, $onPage);
 		}
@@ -1168,6 +1183,8 @@ class AdminGrid extends \Grid\Datagrid
 		if ($join) {
 			$source->join(['sub' => $subSelect], "this.$pkName = sub.$pkName", type: 'INNER');
 		}
+
+		$subSelect->setGroupBy(['this.' . $pkName], $having);
 
 		return $subSelect;
 	}
