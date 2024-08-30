@@ -54,7 +54,13 @@
 			</div>
 
 			<div class="d-lg-flex align-items-lg ml-auto">
+				<ul class="pagination align-items-center mb-0" n:if="!$showPaginator">
+					<a n:href="this, showPaginator => true">Zobrazit stránkování</a>
+				</ul>
+
 				<ul class="pagination align-items-center mb-0" n:if="$showPaginator">
+					{var $paginator = $control->getPaginator(true)}
+
 					{if $showItemsPerPage}
 						<li class="page-item disabled"><a href="#" class="page-link" style="border: 0;">{_'admin.onPage', 'Na stránce'}:</a></li>
 						{foreach $itemsPerPage as $ipp}

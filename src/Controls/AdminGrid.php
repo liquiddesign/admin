@@ -11,6 +11,7 @@ use Forms\Form;
 use Grid\Column;
 use Grid\Datalist;
 use Nette\Application\ApplicationException;
+use Nette\Application\Attributes\Persistent;
 use Nette\Forms\Controls\BaseControl;
 use Nette\Forms\Controls\Checkbox;
 use Nette\Forms\Controls\MultiSelectBox;
@@ -46,6 +47,9 @@ class AdminGrid extends \Grid\Datagrid
 	public Translator $translator;
 
 	public ?string $entityName = null;
+
+	#[Persistent]
+	public bool $showPaginator = true;
 	
 	private ?string $bulkFormId = null;
 	
@@ -85,8 +89,6 @@ class AdminGrid extends \Grid\Datagrid
 
 	private bool $showItemsPerPage;
 
-	private bool $showPaginator = true;
-
 	private string $appendClass = '';
 
 	public function __construct(
@@ -125,7 +127,7 @@ class AdminGrid extends \Grid\Datagrid
 
 		$this->onAnchor[] = function (AdminGrid $grid) use ($defaultOnPage): void {
 			$grid->template->setFile(__DIR__ . '/adminGrid.latte');
-			$grid->template->paginator = $grid->getPaginator(true);
+//			$grid->template->paginator = $grid->getPaginator(true);
 			$grid->template->onpage = $grid->getName() . '-onpage';
 			$grid->template->page = $grid->getName() . '-page';
 			$grid->template->showItemsPerPage = $this->showItemsPerPage;
