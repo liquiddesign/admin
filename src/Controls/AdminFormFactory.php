@@ -253,7 +253,7 @@ class AdminFormFactory
 				->setPrompt('- Žádný obchod -')
 				->setDefaultValue($selectedShop?->getPK());
 		} else {
-			$container->addHidden('shop')->setDefaultValue($selectedShop?->getPK());
+			$container->addHidden('shop')->setNullable()->setDefaultValue($selectedShop?->getPK());
 		}
 	}
 
