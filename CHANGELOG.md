@@ -4,6 +4,23 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.26](https://github.com/liquiddesign/admin/compare/v2.1.25...v2.1.26) (2024-09-04)
+
+### Features
+
+* Add persistent paginator toggle and refactor template logic ([bd37eb](https://github.com/liquiddesign/admin/commit/bd37eb87fdf53cebf20155ae085994c2b2ef8e1d))
+
+### Bug Fixes
+
+* Allow nullable shop value in admin form ([f8e820](https://github.com/liquiddesign/admin/commit/f8e8208ad1a79e8dd8bc1867a252dde9d1000964))
+
+### Builds
+
+* Add release-patch script for PowerShell ([02c172](https://github.com/liquiddesign/admin/commit/02c1721817526c207bb09a2327cf7cc8489a67a6))
+
+
+---
+
 ## [2.1.25](https://github.com/liquiddesign/admin/compare/v2.1.24...v2.1.25) (2024-08-11)
 
 ### Features
