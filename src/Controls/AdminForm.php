@@ -7,6 +7,7 @@ namespace Admin\Controls;
 use Admin\Administrator;
 use Base\DB\Shop;
 use Forms\Container;
+use Forms\Controls\UploadImage;
 use Forms\LocaleContainer;
 use Nette\Application\UI\Presenter;
 use Nette\Forms\Controls\BaseControl;
@@ -305,9 +306,9 @@ class AdminForm extends \Forms\Form
 			});
 
 		if ($opengraph) {
-			$opengraphImage = $pageContainer->addImagePicker('opengraph', $this->translator->translate('admin.image', 'Obrázek'), [
+			$opengraphImage = $pageContainer->addImagePicker('opengraph', $this->translator->translate('admin.image', 'OG: Obrázek'), [
 				Page::IMAGE_DIR . '/opengraph' => static function (Image $image): void {
-					$image->resize(1200, 628, Image::EXACT);
+					$image->resize(1200, 628, Image::Cover);
 				}]);
 
 			$opengraphImage->setOption('description', Html::fromHtml($shopIcon . $this->translator->translate('admin.imageSizeInfo', 'Obrázek vkládejte o minimální velikosti %dx%d px', [1200, 628])));
@@ -352,6 +353,24 @@ class AdminForm extends \Forms\Form
 		}
 
 		return $pageContainer;
+	}
+
+	/**
+	 * @param array<mixed> $values
+	 */
+	public function uploadOpenGraphImage(AdminForm $adminForm, array &$values): void
+	{
+		if (!isset($adminForm['page']['opengraph']) || !$adminForm['page']['opengraph'] instanceof UploadImage) {
+			return;
+		}
+
+		$image = $adminForm['page']['opengraph'];
+
+		if ($image->isOk() && $image->isFilled()) {
+			$values['page']['opengraph'] = $image->upload();
+		} else {
+			unset($values['page']['opengraph']);
+		}
 	}
 
 	public function addIntegerNullable(string $name, $label = null): TextInput
