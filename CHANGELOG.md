@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.27](https://github.com/liquiddesign/admin/compare/v2.1.26...v2.1.27) (2024-09-10)
+
+### Features
+
+* Add OpenGraph image upload functionality and adjust image resize ([6ec4b0](https://github.com/liquiddesign/admin/commit/6ec4b0455569392f0af3049f8f88521e0ed56507))
+
+
+---
+
 ## [2.1.26](https://github.com/liquiddesign/admin/compare/v2.1.25...v2.1.26) (2024-09-04)
 
 ### Features
