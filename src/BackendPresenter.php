@@ -274,7 +274,7 @@ abstract class BackendPresenter extends Presenter
 		return '<a href="' . $this->link($link, ...$arguments) . "\"><button class='btn btn-sm btn-primary'>$label</button></a>";
 	}
 
-	protected function createButton2(string $link, string $label, string $class = 'btn btn-sm btn-primary', array $linkArgs = [], array $attributes = []): string
+	protected function createButton2(string|null $link, string $label, string $class = 'btn btn-sm btn-primary', array $linkArgs = [], array $attributes = []): string
 	{
 		$htmlAttributes = '';
 
@@ -282,7 +282,9 @@ abstract class BackendPresenter extends Presenter
 			$htmlAttributes .= $key . '="' . $value . '" ';
 		}
 
-		return "<a href=\"{$this->link($link, $linkArgs)}\" $htmlAttributes><button class='$class'>$label</button></a>";
+		$link = $link ? $this->link($link, $linkArgs) : '#';
+
+		return "<a href=\"$link\" $htmlAttributes><button class='$class'>$label</button></a>";
 	}
 	
 	protected function createFlag(string $mutation): string
