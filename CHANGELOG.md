@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.28](https://github.com/liquiddesign/admin/compare/v2.1.27...v2.1.28) (2024-10-07)
+
+### Features
+
+* Allow null for button link in createButton2 method ([ab4f6d](https://github.com/liquiddesign/admin/commit/ab4f6d42415fd691f4eac53d03489f19531026c4))
+
+
+---
+
 ## [2.1.27](https://github.com/liquiddesign/admin/compare/v2.1.26...v2.1.27) (2024-09-10)
 
 ### Features
