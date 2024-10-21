@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.30](https://github.com/liquiddesign/admin/compare/v2.1.29...v2.1.30) (2024-10-21)
+
+### Features
+
+* Add push tags to release script and enhance createButton2 method ([f24f60](https://github.com/liquiddesign/admin/commit/f24f60d02484693d96aed32489adedf1f47c5810))
+
+
+---
+
 ## [2.1.29](https://github.com/liquiddesign/admin/compare/v2.1.28...v2.1.29) (2024-10-21)
 
 
