@@ -274,17 +274,36 @@ abstract class BackendPresenter extends Presenter
 		return '<a href="' . $this->link($link, ...$arguments) . "\"><button class='btn btn-sm btn-primary'>$label</button></a>";
 	}
 
-	protected function createButton2(string|null $link, string $label, string $class = 'btn btn-sm btn-primary', array $linkArgs = [], array $attributes = []): string
-	{
+	protected function createButton2(
+		string|null $link,
+		string $label,
+		string $class = 'btn btn-sm btn-primary',
+		array $linkArgs = [],
+		array $attributes = [],
+		array $buttonAttributes = [],
+		bool $loading = false,
+	): string {
 		$htmlAttributes = '';
 
 		foreach ($attributes as $key => $value) {
 			$htmlAttributes .= $key . '="' . $value . '" ';
 		}
 
+		$buttonHtmlAttributes = '';
+
+		if ($loading) {
+			$buttonAttributes['disabled'] = '';
+		}
+
+		foreach ($buttonAttributes as $key => $value) {
+			$buttonHtmlAttributes .= $key . '="' . $value . '" ';
+		}
+
 		$link = $link ? $this->link($link, $linkArgs) : '#';
 
-		return "<a href=\"$link\" $htmlAttributes><button class='$class'>$label</button></a>";
+		$loadingHtml = $loading ? '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ' : null;
+
+		return "<a href=\"$link\" $htmlAttributes><button class='$class' $buttonHtmlAttributes>$loadingHtml$label</button></a>";
 	}
 	
 	protected function createFlag(string $mutation): string
