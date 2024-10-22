@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.31](https://github.com/liquiddesign/admin/compare/v2.1.30...v2.1.31) (2024-10-22)
+
+### Features
+
+* Add type template for Administrator in Repository class ([a4e67c](https://github.com/liquiddesign/admin/commit/a4e67c25ebdf6299e5b09122cc17ec295092aeb6))
+
+
+---
+
 ## [2.1.30](https://github.com/liquiddesign/admin/compare/v2.1.29...v2.1.30) (2024-10-21)
 
 ### Features
