@@ -9,7 +9,7 @@ use StORM\DIConnection;
 use StORM\SchemaManager;
 
 /**
- * @template T of \Admin\DB\Administrator
+ * @template T of \Admin\DB\Administrator = \Admin\DB\Administrator
  * @extends \StORM\Repository<T>
  */
 class AdministratorRepository extends \StORM\Repository implements IUserRepository
