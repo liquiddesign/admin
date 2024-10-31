@@ -533,7 +533,7 @@ class AdminForm extends \Forms\Form
 		 * @var string $key
 		 * @var array<mixed>|string $inputName
 		 */
-		foreach ($this->ajaxInputs[$this->getName()] as $key => $inputName) {
+		foreach ($this->ajaxInputs[$this->getName()] ?? [] as $key => $inputName) {
 			if (\is_array($inputName)) {
 				$this->getValuesWithAjaxItem($values, $data[$key], $inputName);
 			} elseif (isset($data[$inputName])) {
