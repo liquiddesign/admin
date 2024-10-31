@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.32](https://github.com/liquiddesign/admin/compare/v2.1.31...v2.1.32) (2024-10-31)
+
+### Bug Fixes
+
+* Non-existent key if no ajax inputs ([e049e7](https://github.com/liquiddesign/admin/commit/e049e715910b8b1393844d454bf5958ab414e5c2))
+
+
+---
+
 ## [2.1.31](https://github.com/liquiddesign/admin/compare/v2.1.30...v2.1.31) (2024-10-22)
 
 ### Features
