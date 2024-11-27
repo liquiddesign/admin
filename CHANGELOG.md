@@ -4,6 +4,18 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.33](https://github.com/liquiddesign/admin/compare/v2.1.32...v2.1.33) (2024-11-27)
+
+### Bug Fixes
+
+
+##### Admin Grid
+
+* Get vars before modifying original collection ([656e9a](https://github.com/liquiddesign/admin/commit/656e9a7e6973155115d3cf2762b9cc3b4fe82b46))
+
+
+---
+
 ## [2.1.32](https://github.com/liquiddesign/admin/compare/v2.1.31...v2.1.32) (2024-10-31)
 
 ### Bug Fixes
