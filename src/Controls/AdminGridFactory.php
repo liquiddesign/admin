@@ -84,6 +84,7 @@ class AdminGridFactory
 		$grid->setTranslator($this->translator);
 
 		$grid->setItemCountCallback(function (Collection $collection): int {
+			$vars = $collection->getVars();
 			$pkName = $collection->getRepository()->getStructure()->getPK()->getName();
 			$collection->setSelect([])->setOrderBy([]);
 			$subCollection = AdminGrid::processCollectionBaseFrom($collection, useOrder: false, join: false);
@@ -92,7 +93,7 @@ class AdminGridFactory
 			$collection->setGroupBy([]);
 
 			return $this->connection->rows()
-				->setFrom(['agg' => "({$subCollection->getSql()})"], $collection->getVars())
+				->setFrom(['agg' => "({$subCollection->getSql()})"], $vars)
 				->enum('agg.' . $pkName, unique: false);
 		});
 		
