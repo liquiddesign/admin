@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.34](https://github.com/liquiddesign/admin/compare/v2.1.33...v2.1.34) (2025-05-08)
+
+### Features
+
+* Implement AJAX support for form values and add AdminContainer ([d27397](https://github.com/liquiddesign/admin/commit/d2739762bbf56b7943dcb51c7e4838a26e925b0b))
+
+
+---
+
 ## [2.1.33](https://github.com/liquiddesign/admin/compare/v2.1.32...v2.1.33) (2024-11-27)
 
 ### Bug Fixes
