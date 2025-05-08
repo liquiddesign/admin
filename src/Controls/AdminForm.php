@@ -11,8 +11,6 @@ use Forms\Controls\UploadImage;
 use Forms\LocaleContainer;
 use Nette\Application\UI\Presenter;
 use Nette\Forms\Controls\BaseControl;
-use Nette\Forms\Controls\MultiSelectBox;
-use Nette\Forms\Controls\SelectBox;
 use Nette\Forms\Controls\TextArea;
 use Nette\Forms\Controls\TextBase;
 use Nette\Forms\Controls\TextInput;
@@ -30,10 +28,9 @@ use StORM\Meta\Structure;
 
 class AdminForm extends \Forms\Form
 {
-	public ?string $entityName = null;
+	use AjaxComponentsTrait;
 
-	/** @var array<array<string>> */
-	public array $ajaxInputs = [];
+	public ?string $entityName = null;
 
 	public Shop|null $selectedShop = null;
 
@@ -203,6 +200,16 @@ class AdminForm extends \Forms\Form
 		} elseif ($submitter->getName() === 'submitAndNext') {
 			$this->getPresenter()->redirect('this', $continueArguments);
 		}
+	}
+
+	public function addContainer($name): AdminContainer
+	{
+		$control = new AdminContainer();
+		$control->currentGroup = $this->currentGroup;
+
+		$this->currentGroup?->add($control);
+
+		return $this[$name] = $control;
 	}
 
 	/**
@@ -450,78 +457,6 @@ class AdminForm extends \Forms\Form
 	}
 
 	/**
-	 * @param mixed $name
-	 * @param string|null $label
-	 * @param string|null $placeholder
-	 * @param string|null $className Class name of entity to get items
-	 * @param array|null $configuration
-	 * @throws \Nette\Application\UI\InvalidLinkException
-	 * @throws \Exception
-	 */
-	public function addSelectAjax(
-		$name,
-		?string $label = null,
-		?string $placeholder = null,
-		?string $className = null,
-		?array $configuration = []
-	): SelectBox {
-		if (!$className) {
-			throw new \Exception('Missing DataSource');
-		}
-
-		$this->ajaxInputs[$this->getName()][] = $name;
-
-		/** @var \Admin\BackendPresenter|null $presenter */
-		$presenter = $this->getPresenterIfExists();
-
-		if (!$presenter) {
-			throw new \Exception('Missing Presenter');
-		}
-
-		$presenter->ajaxInputs[$this->getName()][] = $name;
-
-		$link = $presenter->link('getAjaxArrayForSelect!', ['name' => $className,]);
-
-		return $this->addSelect2Ajax($name, $link, $label, $configuration, $placeholder);
-	}
-
-	/**
-	 * @param mixed $name
-	 * @param string|null $label
-	 * @param string|null $placeholder
-	 * @param string|null $className Class name of entity to get items
-	 * @param array|null $configuration
-	 * @throws \Nette\Application\UI\InvalidLinkException
-	 * @throws \Exception
-	 */
-	public function addMultiSelectAjax(
-		$name,
-		?string $label = null,
-		?string $placeholder = null,
-		?string $className = null,
-		?array $configuration = []
-	): MultiSelectBox {
-		if (!$className) {
-			throw new \Exception('Missing DataSource');
-		}
-
-		$this->ajaxInputs[$this->getName()][] = $name;
-
-		/** @var \Admin\BackendPresenter|null $presenter */
-		$presenter = $this->getPresenterIfExists();
-
-		if (!$presenter) {
-			throw new \Exception('Missing Presenter');
-		}
-
-		$presenter->ajaxInputs[$this->getName()][] = $name;
-
-		$link = $presenter->link('getAjaxArrayForSelect!', ['name' => $className,]);
-
-		return $this->addMultiSelect2Ajax($name, $link, $label, $configuration, $placeholder);
-	}
-
-	/**
 	 * @return array<mixed>
 	 */
 	public function getValuesWithAjax(): array
@@ -541,6 +476,13 @@ class AdminForm extends \Forms\Form
 			}
 		}
 
+		foreach ($this->getComponents() as $component) {
+			if ($component instanceof AdminContainer) {
+				$values[$component->getName()] = [];
+				$this->getValuesWithAjaxContainer($values[$component->getName()], $data[$component->getName()] ?? [], $component);
+			}
+		}
+
 		return $values;
 	}
 
@@ -550,24 +492,5 @@ class AdminForm extends \Forms\Form
 		[$repository, $mutation, $uuid, $selectedShop] = $args;
 
 		return (bool ) $repository->isUrlAvailable((string) $input->getValue(), $mutation, $uuid, $selectedShop);
-	}
-
-	private function getValuesWithAjaxItem(&$values, $data, $inputName): void
-	{
-		if (\is_array($inputName)) {
-			/**
-			 * @var string $key
-			 * @var array<mixed>|string $inputName
-			 */
-			foreach ($this->ajaxInputs[$this->getName()] ?? [] as $key => $inputName) {
-				if (\is_array($inputName)) {
-					$this->getValuesWithAjaxItem($values, $data[$key], $inputName);
-				} else {
-					$values[$inputName] = $data[$inputName];
-				}
-			}
-		} else {
-			$values[$inputName] = $data[$inputName];
-		}
 	}
 }

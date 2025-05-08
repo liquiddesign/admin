@@ -8,6 +8,7 @@ use Admin\Controls\AdminForm;
 use Admin\Controls\AdminFormFactory;
 use Base\ShopsConfig;
 use Messages\DB\TemplateRepository;
+use Nette\Application\UI\Presenter;
 use Nette\Forms\Controls\Button;
 use Nette\Localization\Translator;
 use Nette\Mail\Mailer;
@@ -118,31 +119,46 @@ class AccountFormFactory
 	{
 		$form = $this->adminFormFactory->create();
 
-		$this->addContainer($form, false, true, $fullname, $activeFromTo, $existingAccount);
+		$form->monitor(Presenter::class, function () use ($form, $fullname, $activeFromTo, $existingAccount, $beforeSubmits, $delete): void {
+			$this->addContainer($form, false, true, $fullname, $activeFromTo, $existingAccount);
 
-		if ($beforeSubmits) {
-			\call_user_func_array($beforeSubmits, [$form]);
-		}
+			if ($beforeSubmits) {
+				\call_user_func_array($beforeSubmits, [$form]);
+			}
 
-		$form->addSubmits();
+			$form->addSubmits();
 
-		if ($delete) {
-			$submit = $form->addSubmit('delete');
-			$class = 'btn btn-outline-danger btn-sm ml-1 mt-1 mb-1 mr-1';
-			$submit->setHtmlAttribute('class', $class)->getControlPrototype()->setName('button')->setHtml('<i class="far fa-trash-alt"></i>');
-			$submit->onClick[] = function (Button $button): void {
-				$values = $button->getForm()->getValues('array')['account'];
-				$this->accountRepository->many()->where('uuid', $values['uuid'])->delete();
-				$this->onDeleteAccount();
-			};
-		}
+			if ($delete) {
+				$submit = $form->addSubmit('delete');
+				$class = 'btn btn-outline-danger btn-sm ml-1 mt-1 mb-1 mr-1';
+				$submit->setHtmlAttribute('class', $class)->getControlPrototype()->setName('button')->setHtml('<i class="far fa-trash-alt"></i>');
+				$submit->onClick[] = function (Button $button): void {
+					/** @var \Admin\Controls\AdminForm $form */
+					$form = $button->getForm();
+					$values = $form->getValuesWithAjax()['account'];
+					$this->accountRepository->many()->where('uuid', $values['uuid'])->delete();
+					$this->onDeleteAccount();
+				};
+			}
+
+			return;
+		});
 
 		$form->onValidate[] = function (AdminForm $form) use ($existingAccount): void {
 			if (!$form->isValid()) {
 				return;
 			}
 
-			$values = $form->getValues('array')['account'];
+			$values = $form->getValuesWithAjax()['account'];
+
+			/** @var \Nette\Forms\Controls\TextInput $loginInput */
+			$loginInput = $form['account']['login'];
+
+			if (!isset($values['login'])) {
+				$loginInput->addError($this->translator->translate('adminAdminAdministrator.required', 'Toto pole je povinné.'));
+
+				return;
+			}
 
 			$query = $this->accountRepository->many()->where('this.login', $values['login']);
 
@@ -176,7 +192,7 @@ class AccountFormFactory
 		$emailTemplate = 'lostPassword.changed';
 		$emailParams = [];
 
-		$values = $form->getValues('array')['account'];
+		$values = $form->getValuesWithAjax()['account'];
 
 		if ($values['password']) {
 			$password = $values['password'];
@@ -197,12 +213,12 @@ class AccountFormFactory
 		if (!$values['uuid']) {
 			/** @var \Security\DB\Account $account */
 			$account = $this->accountRepository->createOne($values, true);
-			$this->onCreateAccount($account, $form->getValues('array'));
+			$this->onCreateAccount($account, $form->getValuesWithAjax());
 		} else {
 			$account = $this->accountRepository->one($values['uuid'], true);
 			$oldData = $account->toArray();
 			$account->update($values);
-			$this->onUpdateAccount($account, $form->getValues('array'), $oldData);
+			$this->onUpdateAccount($account, $form->getValuesWithAjax(), $oldData);
 		}
 	}
 
