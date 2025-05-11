@@ -89,10 +89,6 @@ class AdminFormFactory
 		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->formFactory->create(AdminForm::class);
 
-		if ($useShops) {
-			$this->addShopsContainerToAdminForm($form);
-		}
-
 		if ($this->administrator->getIdentity() instanceof \Admin\DB\Administrator && $this->administrator->getIdentity()->role) {
 			$mutations = $this->administrator->getIdentity()->role->getMutations() === null ? $this->getMutations() : $this->administrator->getIdentity()->role->getMutations();
 			$form->setMutations($mutations);
@@ -119,6 +115,10 @@ class AdminFormFactory
 
 		if ($defaultGroup) {
 			$form->addGroup($this->translator->translate('admin.mainContainer', 'HLAVNÍ ÚDAJE'));
+		}
+
+		if ($useShops) {
+			$this->addShopsContainerToAdminForm($form);
 		}
 
 		if ($mutationSelector && \count($form->getMutations()) > 1) {
