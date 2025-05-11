@@ -75,11 +75,6 @@ abstract class BackendPresenter extends Presenter
 	 * @persistent
 	 */
 	public string $lang;
-
-	#[Persistent]
-	public string|null $shop = null;
-
-	public Shop|null $shopObject = null;
 	
 	/**
 	 * @var array<string>
@@ -356,16 +351,5 @@ abstract class BackendPresenter extends Presenter
 		$administrator = $this->admin->getIdentity();
 
 		return $administrator;
-	}
-
-	protected function startup(): void
-	{
-		parent::startup();
-
-		$shop = $this->shopsConfig->getSelectedShop();
-		$this->shopObject = $shop;
-		$this->shop = $shop?->getPK();
-		$this->template->shop = $shop;
-		$this->shopIcon = $this->shopsConfig->getAvailableShops() ? '<i class="fas fa-store-alt fa-sm mr-1" title="Specifické nastavení pro zvolený obchod"></i>' : null;
 	}
 }

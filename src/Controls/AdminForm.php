@@ -32,8 +32,6 @@ class AdminForm extends \Forms\Form
 
 	public ?string $entityName = null;
 
-	public Shop|null $selectedShop = null;
-
 	private IPageRepository $pageRepository;
 
 	private \StORM\DIConnection $storm;
