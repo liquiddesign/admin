@@ -61,6 +61,7 @@ class AdminGridFactory
 		bool $encodeId = false,
 		bool $useShops = true,
 		bool $filterShops = true,
+		bool $defaultShowPaginator = true
 	): AdminGrid {
 		if ($useShops) {
 			$shop = $this->shopsConfig->getSelectedShop();
@@ -71,7 +72,7 @@ class AdminGridFactory
 			}
 		}
 
-		$grid = new AdminGrid($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId, $this->session);
+		$grid = new AdminGrid($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId, $this->session, $defaultShowPaginator);
 		$grid->setFormsFactory($this->formFactory);
 		$grid->setItemsPerPage($this->itemsPerPage);
 		$grid->setShowItemsPerPage($this->showItemsPerPage);

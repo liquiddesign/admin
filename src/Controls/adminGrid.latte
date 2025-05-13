@@ -59,6 +59,8 @@
 				</ul>
 
 				<ul class="pagination align-items-center mb-0" n:if="$showPaginator">
+					<a n:if="!$defaultShowPaginator" n:href="this, showPaginator => false">Skrýt stránkování</a>
+
 					{var $paginator = $control->getPaginator(true)}
 
 					{if $showItemsPerPage}
