@@ -4,6 +4,18 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.35](https://github.com/liquiddesign/admin/compare/v2.1.34...v2.1.35) (2025-05-13)
+
+### Features
+
+
+##### Admin Grid
+
+* Add option to toggle paginator visibility ([3af552](https://github.com/liquiddesign/admin/commit/3af5521922d6ae92fcdd6869d3cbb8f51cd8b16a))
+
+
+---
+
 ## [2.1.34](https://github.com/liquiddesign/admin/compare/v2.1.33...v2.1.34) (2025-05-08)
 
 ### Features
