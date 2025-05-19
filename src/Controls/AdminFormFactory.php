@@ -101,6 +101,7 @@ class AdminFormFactory
 		$form->setPageRepository($this->pageRepository);
 		$form->setRenderer(new BootstrapRenderer());
 		$form->setConnection($this->connection);
+		$form->setShopsConfig($this->shopsConfig);
 		$form->addHidden('uuid')->setDefaultValue($generateUuid ? DIConnection::generateUuid() : null)->setNullable();
 
 		if ($defaultsField) {
