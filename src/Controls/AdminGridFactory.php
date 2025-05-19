@@ -64,8 +64,9 @@ class AdminGridFactory
 		bool $useShops = true,
 		#[Deprecated('')]
 		bool $filterShops = true,
+		bool $defaultShowPaginator = true
 	): AdminGrid {
-		$grid = new AdminGrid($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId, $this->session);
+		$grid = new AdminGrid($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId, $this->session, $defaultShowPaginator);
 		$grid->setFormsFactory($this->formFactory);
 		$grid->setItemsPerPage($this->itemsPerPage);
 		$grid->setShowItemsPerPage($this->showItemsPerPage);

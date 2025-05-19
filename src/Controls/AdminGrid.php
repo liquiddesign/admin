@@ -49,7 +49,7 @@ class AdminGrid extends \Grid\Datagrid
 	public ?string $entityName = null;
 
 	#[Persistent]
-	public bool $showPaginator = true;
+	public bool $showPaginator = false;
 	
 	private ?string $bulkFormId = null;
 	
@@ -97,7 +97,8 @@ class AdminGrid extends \Grid\Datagrid
 		?string $defaultOrderExpression = null,
 		?string $defaultOrderDir = null,
 		bool $encodeId = false,
-		?Session $session = null
+		?Session $session = null,
+		bool $defaultShowPaginator = true
 	) {
 		parent::__construct($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId);
 
@@ -125,16 +126,17 @@ class AdminGrid extends \Grid\Datagrid
 			Datalist::saveSession($datalist, $params, $session->getSection('admingrid-' . $datalist->getPresenter()->getName() . $datalist->getName()));
 		};
 
-		$this->onAnchor[] = function (AdminGrid $grid) use ($defaultOnPage): void {
+		$this->onAnchor[] = function (AdminGrid $grid) use ($defaultOnPage, $defaultShowPaginator): void {
 			$grid->template->setFile(__DIR__ . '/adminGrid.latte');
 //			$grid->template->paginator = $grid->getPaginator(true);
 			$grid->template->onpage = $grid->getName() . '-onpage';
 			$grid->template->page = $grid->getName() . '-page';
 			$grid->template->showItemsPerPage = $this->showItemsPerPage;
 			$grid->template->itemsPerPage = $this->itemsPerPage;
-			$grid->template->showPaginator = $this->showPaginator;
+			$grid->template->showPaginator = $defaultShowPaginator || $this->showPaginator;
 			$grid->template->appendClass = $this->appendClass;
 			$grid->template->itemCountMessage = $this->translator->translate('admin.itemCountMessage', 'Položek');
+			$grid->template->defaultShowPaginator = $defaultShowPaginator;
 
 			if (!$this->showItemsPerPage) {
 				if ($defaultOnPage) {
