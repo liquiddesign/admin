@@ -172,6 +172,9 @@ class AdminForm extends \Forms\Form
 		$this->addSubmit('submitAndNext', $this->translator->translate('admin.saveAndNext', 'Uložit a vložit další'));
 	}
 
+	/**
+	 * @param callable(array<mixed> $values, \Base\DB\Shop|null $shop): void $callback
+	 */
 	public function syncPages(callable $callback): void
 	{
 		if (!$this->prettyPages) {
@@ -186,8 +189,11 @@ class AdminForm extends \Forms\Form
 
 		$pages = $values['page'];
 
-		foreach ($pages as $pageValues) {
-			$callback($pageValues);
+		foreach ($pages as $index => $pageValues) {
+			$shop = \explode('_', $index)[1] ?? null;
+			$shopEntity = $this->shopsConfig->getAvailableShops()[$shop] ?? null;
+
+			$callback($pageValues, $shopEntity);
 		}
 	}
 
@@ -313,18 +319,24 @@ class AdminForm extends \Forms\Form
 	/**
 	 * @param array<mixed> $values
 	 */
-	public function uploadOpenGraphImage(AdminForm $adminForm, array &$values): void
+	public function uploadOpenGraphImage(AdminForm $adminForm, array &$values, Shop|null $shop = null): void
 	{
-		if (!isset($adminForm['page']['opengraph']) || !$adminForm['page']['opengraph'] instanceof UploadImage) {
+		if (!isset($adminForm['page'])) {
 			return;
 		}
 
-		$image = $adminForm['page']['opengraph'];
+		$shopIndex = 'page_' . $shop?->getPK();
+
+		if (!isset($adminForm['page'][$shopIndex]['opengraph']) || !$adminForm['page'][$shopIndex]['opengraph'] instanceof UploadImage) {
+			return;
+		}
+
+		$image = $adminForm['page'][$shopIndex]['opengraph'];
 
 		if ($image->isOk() && $image->isFilled()) {
-			$values['page']['opengraph'] = $image->upload();
+			$values['opengraph'] = $image->upload();
 		} else {
-			unset($values['page']['opengraph']);
+			unset($values['opengraph']);
 		}
 	}
 
