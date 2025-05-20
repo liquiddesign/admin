@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.39](https://github.com/liquiddesign/admin/compare/v2.1.38...v2.1.39) (2025-05-20)
+
+### Features
+
+* Add addContainer method to manage container instances ([4d7e98](https://github.com/liquiddesign/admin/commit/4d7e98bb5a6fc92727b60dbcbe170f39d9a139cf))
+
+
+---
+
 ## [2.1.38](https://github.com/liquiddesign/admin/compare/v2.1.37...v2.1.38) (2025-05-20)
 
 ### Bug Fixes
