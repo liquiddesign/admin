@@ -6,6 +6,7 @@ namespace Admin\Controls;
 
 use Admin\Administrator;
 use Base\DB\Shop;
+use Base\ShopsConfig;
 use Forms\Container;
 use Forms\Controls\UploadImage;
 use Forms\LocaleContainer;
@@ -32,8 +33,6 @@ class AdminForm extends \Forms\Form
 
 	public ?string $entityName = null;
 
-	public Shop|null $selectedShop = null;
-
 	private IPageRepository $pageRepository;
 
 	private \StORM\DIConnection $storm;
@@ -41,6 +40,8 @@ class AdminForm extends \Forms\Form
 	private Translator $translator;
 
 	private Administrator $administrator;
+
+	private ShopsConfig $shopsConfig;
 
 	private bool $prettyPages = false;
 
@@ -115,6 +116,11 @@ class AdminForm extends \Forms\Form
 		return $properties;
 	}
 
+	public function setShopsConfig(ShopsConfig $shopsConfig): void
+	{
+		$this->shopsConfig = $shopsConfig;
+	}
+
 	public function setAdministrator(Administrator $administrator): void
 	{
 		$this->administrator = $administrator;
@@ -166,10 +172,28 @@ class AdminForm extends \Forms\Form
 		$this->addSubmit('submitAndNext', $this->translator->translate('admin.saveAndNext', 'Uložit a vložit další'));
 	}
 
+	/**
+	 * @param callable(array<mixed> $values, \Base\DB\Shop|null $shop): void $callback
+	 */
 	public function syncPages(callable $callback): void
 	{
-		if ($this->prettyPages) {
-			$callback();
+		if (!$this->prettyPages) {
+			return;
+		}
+
+		$values = $this->getValues('array');
+
+		if (!isset($values['page'])) {
+			return;
+		}
+
+		$pages = $values['page'];
+
+		foreach ($pages as $index => $pageValues) {
+			$shop = \explode('_', $index)[1] ?? null;
+			$shopEntity = $this->shopsConfig->getAvailableShops()[$shop] ?? null;
+
+			$callback($pageValues, $shopEntity);
 		}
 	}
 
@@ -223,6 +247,7 @@ class AdminForm extends \Forms\Form
 	 * @param bool $opengraph
 	 * @param bool $linkToDetail
 	 * @param bool $richSnippet
+	 * @return array<string|int|null, \Nette\Forms\Container>
 	 */
 	public function addPageContainer(
 		?string $pageType = null,
@@ -235,148 +260,83 @@ class AdminForm extends \Forms\Form
 		bool $opengraph = false,
 		bool $linkToDetail = false,
 		bool $richSnippet = false,
-	): Container {
+	): array {
 		if (!$this->prettyPages) {
-			return $this->addContainer('page');
+			return [null => $this->addContainer('page')];
 		}
 
-		$shopIcon = $this->selectedShop ? '<i class="fas fa-store-alt fa-sm mr-1" title="Specifické nastavení pro zvolený obchod"></i>' : null;
+		$shops = $this->shopsConfig->getAvailableShops();
 
-		/** @var \Pages\DB\Page|null $page */
-		$page = $pageType ? $this->pageRepository->getPageByTypeAndParams($pageType, null, $params, true, selectedShop: $this->selectedShop) : null;
+		$containers = [];
 
-		/** @var \Forms\Container $pageContainer */
-		$pageContainer = $this->getComponent('page', false) ?: $this->addContainer('page');
+		$baseContainer = $this->addContainer('page');
 
-		$group = $this->addGroup($title, true);
-		$pageContainer->setCurrentGroup($group);
+		foreach ($shops as $shop) {
+			$shopIcon = $shop->icon ? "<img
+                        width=\"24\"
+                        height=\"24\"
+                        src=\"data:image/png;base64,$shop->icon\"
+                        alt=\"\"
+                        title=\"Specifické nastavení pro obchod: $shop->name\"
+                    />" : $shop->name . ': ';
 
-		$pageContainer->addHidden('uuid')->setNullable();
-		$pageContainer->addLocaleText('url', Html::fromHtml($shopIcon . 'URL'))->forAll(function (TextInput $text, $mutation) use ($page, $pageType): void {
-			$text->addRule(
-				[$this, 'validateUrl'],
-				$this->translator->translate('admin.urlError', 'URL již existuje'),
-				[$this->pageRepository, $mutation, $page?->getPK(), $this->selectedShop],
-			)->setNullable($pageType !== 'index');
-
-			if ($pageType === 'index') {
-				$text->setRequired(false);
-				$text->setHtmlAttribute('readonly', 'readonly');
-			}
-
-			if ($this->administrator->getIdentity() instanceof \Admin\DB\Administrator && !$this->administrator->getIdentity()->urlEditor && $page) {
-				$text->setHtmlAttribute('readonly', 'readonly');
-			}
-
-			$text->setHtmlAttribute('data-copy-url-targets', 'page[url]');
-			$text->setHtmlAttribute('data-copy-url-source', 'name');
-			$text->setHtmlAttribute('class', 'd-inline seo_url w-25');
-			$text->setHtmlAttribute('style', 'width:50%!important; min-width:400px!important;');
-		})->forAll(function (TextInput $text, $mutation) use ($linkToDetail, $page, $pageType, $required): void {
-			if (isset($this[self::MUTATION_TRANSLATOR_NAME]) && $pageType !== 'index' && $required) {
-				$text->addConditionOn($this[self::MUTATION_TRANSLATOR_NAME][$mutation], $this::EQUAL, true);
-			}
-			
-			if (!isset($this[self::MUTATION_TRANSLATOR_NAME]) && $pageType !== 'index' && $required && $mutation === $this->getPrimaryMutation()) {
-				$text->setRequired(true);
-			}
-			
-			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text, $mutation): void {
-				if ($linkToDetail && $page instanceof Entity && $page->getValue('url', $mutation)) {
-					$mutatedUrl = $page->getValue('url', $mutation);
-					$url = $presenter->getHttpRequest()->getUrl()->getBaseUrl() . ($mutation === $this->getPrimaryMutation() ? $mutatedUrl : "$mutation/" . $mutatedUrl);
-				
-					$text->setHtmlAttribute("data-url-link-$mutation", "
-						<a data-mutation='$mutation' class='ml-2' href='" . $url . "' target='_blank'>
-						<i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . '
-						</a>
-					');
-				}
-			});
-		});
-
-		if ($isOffline) {
-			$pageContainer->addCheckbox('isOffline', Html::fromHtml($shopIcon . $this->translator->translate('admin.isOffline', 'Nedostupná')))
-				->setHtmlAttribute('data-info', $this->translator->translate('admin.isOfflineDescription', 'Na daném URL bude stránka jako stránka 404'));
+			$containers[$shop->getPK()] = $this->addSubPageContainer(
+				$baseContainer,
+				$pageType,
+				$params,
+				$copyControls,
+				$isOffline,
+				false,
+				$content,
+				$title,
+				$opengraph,
+				$linkToDetail,
+				$richSnippet,
+				$shop,
+				$shopIcon
+			);
 		}
 
-		$pageContainer->addLocaleText('title', Html::fromHtml($shopIcon . $this->translator->translate('admin.title', 'Titulek')))
-			->forAll(function (TextInput $text): void {
-				$text->setHtmlAttribute('data-characters', 70)
-					->setHtmlAttribute('style', 'width: 450px !important');
-			});
-
-		$pageContainer->addLocaleTextArea('description', Html::fromHtml($shopIcon . $this->translator->translate('admin.description', 'Popisek')))
-			->forAll(function (TextArea $text): void {
-				$text->setHtmlAttribute('style', 'width: 862px !important;')
-					->setHtmlAttribute('data-characters', 150);
-			});
-
-		if ($opengraph) {
-			$opengraphImage = $pageContainer->addImagePicker('opengraph', $this->translator->translate('admin.image', 'OG: Obrázek'), [
-				Page::IMAGE_DIR . '/opengraph' => static function (Image $image): void {
-					$image->resize(1200, 628, Image::Cover);
-				}]);
-
-			$opengraphImage->setOption('description', Html::fromHtml($shopIcon . $this->translator->translate('admin.imageSizeInfo', 'Obrázek vkládejte o minimální velikosti %dx%d px', [1200, 628])));
-
-			$opengraphImage->onDelete[] = function () use ($page): void {
-				if ($page) {
-					$page->update(['opengraph' => null]);
-					$this->getPresenter()->redirect('this');
-				}
-			};
+		if (!$shops) {
+			$containers[null] = $this->addSubPageContainer(
+				$baseContainer,
+				$pageType,
+				$params,
+				$copyControls,
+				$isOffline,
+				$required,
+				$content,
+				$title,
+				$opengraph,
+				$linkToDetail,
+				$richSnippet,
+			);
 		}
 
-		if ($content) {
-			$pageContainer->addLocaleTextArea('content', Html::fromHtml($shopIcon . $this->translator->translate('admin.content', 'Obsah')))
-				->forAll(function (TextArea $text): void {
-					$text->setHtmlAttribute('style', 'width: 862px !important;');
-				});
-		}
-
-		if ($richSnippet) {
-			$pageContainer->addLocaleTextArea('richSnippet', Html::fromHtml($shopIcon . $this->translator->translate('admin.richSnippet', 'Rich snippet')))
-				->forAll(function (TextArea $text): void {
-					$text->setHtmlAttribute('style', 'width: 862px !important; min-height: 300px !important;');
-
-					$text->setHtmlAttribute('data-info', "<a href='https://search.google.com/test/rich-results' target='_blank'><i class='fas fa-external-link-alt'></i> &nbsp;" .
-						$this->translator->translate('admin.richSnippetValidator', 'Validátor') . '</a>');
-				});
-		}
-
-		$pageContainer->addHidden('type', $pageType);
-		$pageContainer->addHidden('params', $params ? \http_build_query($params) . '&' : '');
-		$pageContainer->addHidden('shop', $page?->getValue('shop') ?: $this->selectedShop?->getPK())->setNullable();
-
-		if ($page) {
-			$pageContainer->setDefaults($page->toArray());
-		}
-
-		if ($copyControls) {
-			$copyControls->forAll(function (TextInput $text): void {
-				$text->setHtmlAttribute('data-copy', 'page[title],page[url]');
-			});
-		}
-
-		return $pageContainer;
+		return $containers;
 	}
 
 	/**
 	 * @param array<mixed> $values
 	 */
-	public function uploadOpenGraphImage(AdminForm $adminForm, array &$values): void
+	public function uploadOpenGraphImage(AdminForm $adminForm, array &$values, Shop|null $shop = null): void
 	{
-		if (!isset($adminForm['page']['opengraph']) || !$adminForm['page']['opengraph'] instanceof UploadImage) {
+		if (!isset($adminForm['page'])) {
 			return;
 		}
 
-		$image = $adminForm['page']['opengraph'];
+		$shopIndex = 'page_' . $shop?->getPK();
+
+		if (!isset($adminForm['page'][$shopIndex]['opengraph']) || !$adminForm['page'][$shopIndex]['opengraph'] instanceof UploadImage) {
+			return;
+		}
+
+		$image = $adminForm['page'][$shopIndex]['opengraph'];
 
 		if ($image->isOk() && $image->isFilled()) {
-			$values['page']['opengraph'] = $image->upload();
+			$values['opengraph'] = $image->upload();
 		} else {
-			unset($values['page']['opengraph']);
+			unset($values['opengraph']);
 		}
 	}
 
@@ -461,7 +421,7 @@ class AdminForm extends \Forms\Form
 	 */
 	public function getValuesWithAjax(): array
 	{
-		$values = (array) $this->getValues();
+		$values = $this->getValues('array');
 		$data = $this->getHttpData();
 
 		/**
@@ -492,5 +452,139 @@ class AdminForm extends \Forms\Form
 		[$repository, $mutation, $uuid, $selectedShop] = $args;
 
 		return (bool ) $repository->isUrlAvailable((string) $input->getValue(), $mutation, $uuid, $selectedShop);
+	}
+
+	private function addSubPageContainer(
+		AdminContainer $baseContainer,
+		?string $pageType = null,
+		array $params = [],
+		?LocaleContainer $copyControls = null,
+		bool $isOffline = false,
+		bool $required = true,
+		bool $content = false,
+		string $title = 'URL a SEO',
+		bool $opengraph = false,
+		bool $linkToDetail = false,
+		bool $richSnippet = false,
+		Shop|null $shop = null,
+		string|null $shopIcon = null,
+	): Container {
+		/** @var \Pages\DB\Page|null $page */
+		$page = $pageType ? $this->pageRepository->getPageByTypeAndParams($pageType, null, $params, selectedShop: $shop, filterOnlySelectedShop: true) : null;
+
+		$pageContainer = $baseContainer->addContainer('page_' . $shop?->getPK());
+
+		$group = $this->addGroup($title . ($shop ? ': ' . $shop->name : ''));
+		$pageContainer->setCurrentGroup($group);
+
+		$pageContainer->addHidden('uuid')->setNullable();
+		$pageContainer->addLocaleText('url', Html::fromHtml($shopIcon . 'URL'))->forAll(function (TextInput $text, $mutation) use ($page, $pageType, $shop): void {
+			$text->addRule(
+				[$this, 'validateUrl'],
+				$this->translator->translate('admin.urlError', 'URL již existuje'),
+				[$this->pageRepository, $mutation, $page?->getPK(), $shop],
+			)->setNullable($pageType !== 'index');
+
+			if ($pageType === 'index') {
+				$text->setRequired(false);
+				$text->setHtmlAttribute('readonly', 'readonly');
+			}
+
+			if ($this->administrator->getIdentity() instanceof \Admin\DB\Administrator && !$this->administrator->getIdentity()->urlEditor && $page) {
+				$text->setHtmlAttribute('readonly', 'readonly');
+			}
+
+			$text->setHtmlAttribute('data-copy-url-targets', 'page[url]');
+			$text->setHtmlAttribute('data-copy-url-source', 'name');
+			$text->setHtmlAttribute('class', 'd-inline seo_url w-25');
+			$text->setHtmlAttribute('style', 'width:50%!important; min-width:400px!important;');
+		})->forAll(function (TextInput $text, $mutation) use ($linkToDetail, $page, $pageType, $required): void {
+			if (isset($this[self::MUTATION_TRANSLATOR_NAME]) && $pageType !== 'index' && $required) {
+				$text->addConditionOn($this[self::MUTATION_TRANSLATOR_NAME][$mutation], $this::EQUAL, true);
+			}
+
+			if (!isset($this[self::MUTATION_TRANSLATOR_NAME]) && $pageType !== 'index' && $required && $mutation === $this->getPrimaryMutation()) {
+				$text->setRequired(true);
+			}
+
+			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text, $mutation): void {
+				if ($linkToDetail && $page instanceof Entity && $page->getValue('url', $mutation)) {
+					$mutatedUrl = $page->getValue('url', $mutation);
+					$url = $presenter->getHttpRequest()->getUrl()->getBaseUrl() . ($mutation === $this->getPrimaryMutation() ? $mutatedUrl : "$mutation/" . $mutatedUrl);
+
+					$text->setHtmlAttribute("data-url-link-$mutation", "
+						<a data-mutation='$mutation' class='ml-2' href='" . $url . "' target='_blank'>
+						<i class='fas fa-external-link-alt'></i> " . $this->translator->translate('admin.showPage', 'Zobrazit stránku') . '
+						</a>
+					');
+				}
+			});
+		});
+
+		if ($isOffline) {
+			$pageContainer->addCheckbox('isOffline', Html::fromHtml($shopIcon . $this->translator->translate('admin.isOffline', 'Nedostupná')))
+				->setHtmlAttribute('data-info', $this->translator->translate('admin.isOfflineDescription', 'Na daném URL bude stránka jako stránka 404'));
+		}
+
+		$pageContainer->addLocaleText('title', Html::fromHtml($shopIcon . $this->translator->translate('admin.title', 'Titulek')))
+			->forAll(function (TextInput $text): void {
+				$text->setHtmlAttribute('data-characters', 70)
+					->setHtmlAttribute('style', 'width: 450px !important');
+			});
+
+		$pageContainer->addLocaleTextArea('description', Html::fromHtml($shopIcon . $this->translator->translate('admin.description', 'Popisek')))
+			->forAll(function (TextArea $text): void {
+				$text->setHtmlAttribute('style', 'width: 862px !important;')
+					->setHtmlAttribute('data-characters', 150);
+			});
+
+		if ($opengraph) {
+			$opengraphImage = $pageContainer->addImagePicker('opengraph', Html::fromHtml($shopIcon . $this->translator->translate('admin.image', 'OG: Obrázek')), [
+				Page::IMAGE_DIR . '/opengraph' => static function (Image $image): void {
+					$image->resize(1200, 628, Image::Cover);
+				}]);
+
+			$opengraphImage->setOption('description', Html::fromHtml($shopIcon . $this->translator->translate('admin.imageSizeInfo', 'Obrázek vkládejte o minimální velikosti %dx%d px', [1200, 628])));
+
+			$opengraphImage->onDelete[] = function () use ($page): void {
+				if ($page) {
+					$page->update(['opengraph' => null]);
+					$this->getPresenter()->redirect('this');
+				}
+			};
+		}
+
+		if ($content) {
+			$pageContainer->addLocaleTextArea('content', Html::fromHtml($shopIcon . $this->translator->translate('admin.content', 'Obsah')))
+				->forAll(function (TextArea $text): void {
+					$text->setHtmlAttribute('style', 'width: 862px !important;');
+				});
+		}
+
+		if ($richSnippet) {
+			$pageContainer->addLocaleTextArea('richSnippet', Html::fromHtml($shopIcon . $this->translator->translate('admin.richSnippet', 'Rich snippet')))
+				->forAll(function (TextArea $text): void {
+					$text->setHtmlAttribute('style', 'width: 862px !important; min-height: 300px !important;');
+
+					$text->setHtmlAttribute('data-info', "<a href='https://search.google.com/test/rich-results' target='_blank'><i class='fas fa-external-link-alt'></i> &nbsp;" .
+						$this->translator->translate('admin.richSnippetValidator', 'Validátor') . '</a>');
+				});
+		}
+
+		$pageContainer->addHidden('type', $pageType);
+		$pageContainer->addHidden('params', $params ? \http_build_query($params) . '&' : '');
+		$pageContainer->addHidden('shop', $page?->getValue('shop') ?: $shop?->getPK())->setNullable();
+
+		if ($page) {
+			$pageContainer->setDefaults($page->toArray());
+		}
+
+		if ($copyControls) {
+			$copyControls->forAll(function (TextInput $text): void {
+				$text->setHtmlAttribute('data-copy', 'page[title],page[url]');
+			});
+		}
+
+		return $pageContainer;
 	}
 }

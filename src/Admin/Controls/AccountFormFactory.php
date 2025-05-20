@@ -103,7 +103,7 @@ class AccountFormFactory
 			$accountContainer->addPolyfillDatetime('activeTo', 'Aktivní do')->setNullable();
 		}
 
-		$this->adminFormFactory->addShopsContainerToAdminForm($form, false, $accountContainer);
+		$this->adminFormFactory->addShopsContainerToAdminForm($form, $accountContainer);
 
 		$accountContainer->addHidden('email');
 

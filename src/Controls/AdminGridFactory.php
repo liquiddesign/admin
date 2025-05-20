@@ -7,7 +7,9 @@ namespace Admin\Controls;
 use Admin\Administrator;
 use Admin\DB\ChangelogRepository;
 use Base\BaseHelpers;
+use Base\Entity\ShopEntity;
 use Base\ShopsConfig;
+use JetBrains\PhpStorm\Deprecated;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
 use Security\DB\IUser;
@@ -60,17 +62,11 @@ class AdminGridFactory
 		?string $defaultOrderDir = null,
 		bool $encodeId = false,
 		bool $useShops = true,
+		#[Deprecated('Shops are filtered automatically if supported.')]
 		bool $filterShops = true,
 		bool $defaultShowPaginator = true
 	): AdminGrid {
-		if ($useShops) {
-			$shop = $this->shopsConfig->getSelectedShop();
-			$shopsAvailable = $shop && $source instanceof IEntityParent && $source->getRepository()->getStructure()->getRelation('shop');
-
-			if ($filterShops && $shopsAvailable) {
-				$source->where('this.fk_shop = :shopVar OR this.fk_shop IS NULL', [':shopVar' => $shop->getPK()]);
-			}
-		}
+		unset($filterShops);
 
 		$grid = new AdminGrid($source, $defaultOnPage, $defaultOrderExpression, $defaultOrderDir, $encodeId, $this->session, $defaultShowPaginator);
 		$grid->setFormsFactory($this->formFactory);
@@ -120,8 +116,23 @@ class AdminGridFactory
 			}
 		};
 
+		$shopsAvailable = $source instanceof IEntityParent && $source->getRepository()->getStructure()->getRelation('shop');
+
 		if ($useShops && $shopsAvailable) {
-			$grid->addColumnTextFit('<i class="fas fa-store-alt"></i>', 'shop', '%s');
+			$grid->addColumn('<i class="fas fa-store-alt"></i>', function (ShopEntity $shopEntity): string|null {
+				if ($shop = $shopEntity->shop) {
+					return $shop->icon ? "<img
+						width=\"24\"
+						height=\"24\"
+						src=\"data:image/png;base64,$shop->icon\"
+						alt=\"$shop->name\"
+					/>" : $shop->name;
+				}
+
+				return null;
+			}, '%s', 'shop', ['class' => 'fit']);
+
+			$this->addShopsFilterSelect($grid);
 		}
 		
 		return $grid;
@@ -132,7 +143,7 @@ class AdminGridFactory
 		if ($shops = $this->shopsConfig->getAvailableShopsArrayForSelect()) {
 			$grid->addFilterDataMultiSelect(function (Collection $source, $value): void {
 				$source->where('this.fk_shop', BaseHelpers::replaceArrayValue($value, '0', null));
-			}, '', 'shops', null, ['0' => 'Žádný'] + $shops, ['placeholder' => '- Obchody -']);
+			}, '', 'shops', null, ['0' => 'Bez obchodu'] + $shops, ['placeholder' => '- Obchody -']);
 		}
 	}
 }

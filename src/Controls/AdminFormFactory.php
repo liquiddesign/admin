@@ -83,12 +83,11 @@ class AdminFormFactory
 		bool $generateUuid = false,
 		bool $defaultsField = false,
 		bool $defaultGroup = true,
-		bool $forcePrimary = true
+		bool $forcePrimary = true,
+		bool $useShops = false,
 	): AdminForm {
 		/** @var \Admin\Controls\AdminForm $form */
 		$form = $this->formFactory->create(AdminForm::class);
-
-		$form->selectedShop = $this->shopsConfig->getSelectedShop();
 
 		if ($this->administrator->getIdentity() instanceof \Admin\DB\Administrator && $this->administrator->getIdentity()->role) {
 			$mutations = $this->administrator->getIdentity()->role->getMutations() === null ? $this->getMutations() : $this->administrator->getIdentity()->role->getMutations();
@@ -102,6 +101,7 @@ class AdminFormFactory
 		$form->setPageRepository($this->pageRepository);
 		$form->setRenderer(new BootstrapRenderer());
 		$form->setConnection($this->connection);
+		$form->setShopsConfig($this->shopsConfig);
 		$form->addHidden('uuid')->setDefaultValue($generateUuid ? DIConnection::generateUuid() : null)->setNullable();
 
 		if ($defaultsField) {
@@ -116,6 +116,10 @@ class AdminFormFactory
 
 		if ($defaultGroup) {
 			$form->addGroup($this->translator->translate('admin.mainContainer', 'HLAVNÍ ÚDAJE'));
+		}
+
+		if ($useShops) {
+			$this->addShopsContainerToAdminForm($form);
 		}
 
 		if ($mutationSelector && \count($form->getMutations()) > 1) {
@@ -231,11 +235,7 @@ class AdminFormFactory
 		return $form;
 	}
 
-	/**
-	 * @param \Admin\Controls\AdminForm $adminForm
-	 * @param bool $autoSelect true - shop input is auto selected based on selected shop in shop repository | false - shop input is not auto selected
-	 */
-	public function addShopsContainerToAdminForm(AdminForm $adminForm, bool $autoSelect = true, \Forms\Container|null $container = null): void
+	public function addShopsContainerToAdminForm(AdminForm $adminForm, \Forms\Container|null $container = null): void
 	{
 		$shopsAvailable = $this->shopRepository->getArrayForSelect();
 
@@ -243,18 +243,11 @@ class AdminFormFactory
 			return;
 		}
 
-		$selectedShop = $this->shopsConfig->getSelectedShop();
-
 		$container ??= $adminForm;
 
-		if (!$autoSelect) {
-			$adminForm->addGroup('Obchody');
-			$container->addSelect2('shop', 'Vybraný obchod', $shopsAvailable)
-				->setPrompt('- Žádný obchod -')
-				->setDefaultValue($selectedShop?->getPK());
-		} else {
-			$container->addHidden('shop')->setNullable()->setDefaultValue($selectedShop?->getPK());
-		}
+		$container->addSelect2('shop', 'Obchod', ['0' => 'Žádný obchod'] + $shopsAvailable)
+			->setRequired()
+			->setPrompt('- Vyberte -');
 	}
 
 	public static function addCodeValidationToInput(BaseControl $baseControl, Repository $repository, Entity|null $existingEntity): BaseControl

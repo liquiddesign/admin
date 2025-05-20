@@ -13,7 +13,7 @@ class AdminContainer extends Container
 	 */
 	public function getValuesWithAjax(array $data): array
 	{
-		$values = (array) $this->getValues();
+		$values = $this->getValues('array');
 
 		/**
 		 * @var string $key
