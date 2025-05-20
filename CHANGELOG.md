@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.36](https://github.com/liquiddesign/admin/compare/v2.1.35...v2.1.36) (2025-05-20)
+
+### Chores
+
+* Update GitHub Actions to use checkout@v4 and cache@v4 ([4d6871](https://github.com/liquiddesign/admin/commit/4d6871fc333f9ec2cf83444ebbc936e91ce3c0fe))
+
+
+---
+
 ## [2.1.35](https://github.com/liquiddesign/admin/compare/v2.1.34...v2.1.35) (2025-05-13)
 
 ### Features
