@@ -247,7 +247,7 @@ class AdminForm extends \Forms\Form
 	 * @param bool $opengraph
 	 * @param bool $linkToDetail
 	 * @param bool $richSnippet
-	 * @return array<string|int|null, \Nette\Forms\Container>
+	 * @return array<string|int|null, \Forms\Container>
 	 */
 	public function addPageContainer(
 		?string $pageType = null,
