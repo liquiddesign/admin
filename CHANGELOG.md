@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.38](https://github.com/liquiddesign/admin/compare/v2.1.37...v2.1.38) (2025-05-20)
+
+### Bug Fixes
+
+* Correct return type in addPageContainer method ([d34d07](https://github.com/liquiddesign/admin/commit/d34d07ea895db296192d6049b114ebde5033a018))
+
+
+---
+
 ## [2.1.37](https://github.com/liquiddesign/admin/compare/v2.1.36...v2.1.37) (2025-05-20)
 
 ### Chores
