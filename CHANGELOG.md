@@ -4,6 +4,16 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.37](https://github.com/liquiddesign/admin/compare/v2.1.36...v2.1.37) (2025-05-20)
+
+### Chores
+
+* Add jetbrains/phpstorm-attributes to composer.json ([4e22f1](https://github.com/liquiddesign/admin/commit/4e22f1fc5a16e66511ba8481fca0c778d0a08276))
+* Update GitHub Actions to use checkout@v4 and cache@v4 ([10dbb5](https://github.com/liquiddesign/admin/commit/10dbb5b2628fa7895df0cdcc46a96c59537dee31))
+
+
+---
+
 ## [2.1.36](https://github.com/liquiddesign/admin/compare/v2.1.35...v2.1.36) (2025-05-20)
 
 ### Chores
