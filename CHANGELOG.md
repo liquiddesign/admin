@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.40](https://github.com/liquiddesign/admin/compare/v2.1.39...v2.1.40) (2025-05-29)
+
+### Bug Fixes
+
+* Update URL generation to use shop-specific base URLs ([74c1d9](https://github.com/liquiddesign/admin/commit/74c1d96708289118522cd16f1969013b90309e16))
+
+
+---
+
 ## [2.1.39](https://github.com/liquiddesign/admin/compare/v2.1.38...v2.1.39) (2025-05-20)
 
 ### Features
