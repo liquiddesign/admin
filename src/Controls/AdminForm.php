@@ -6,6 +6,7 @@ namespace Admin\Controls;
 
 use Admin\Administrator;
 use Base\DB\Shop;
+use Base\Entity\ShopEntity;
 use Base\ShopsConfig;
 use Forms\Container;
 use Forms\Controls\UploadImage;
@@ -19,6 +20,7 @@ use Nette\Forms\Form;
 use Nette\Http\FileUpload;
 use Nette\Localization\Translator;
 use Nette\NotImplementedException;
+use Nette\Utils\Arrays;
 use Nette\Utils\Html;
 use Nette\Utils\Image;
 use Pages\DB\IPageRepository;
@@ -509,8 +511,14 @@ class AdminForm extends \Forms\Form
 
 			$this->monitor(Presenter::class, function (Presenter $presenter) use ($linkToDetail, $page, $text, $mutation): void {
 				if ($linkToDetail && $page instanceof Entity && $page->getValue('url', $mutation)) {
+					$baseUrl = $presenter->getHttpRequest()->getUrl();
+
+					if ($page instanceof ShopEntity && ($shopsBaseUrls = $page->shop?->getBaseUrls())) {
+						$baseUrl = $baseUrl->withHost(Arrays::first($shopsBaseUrls));
+					}
+
 					$mutatedUrl = $page->getValue('url', $mutation);
-					$url = $presenter->getHttpRequest()->getUrl()->getBaseUrl() . ($mutation === $this->getPrimaryMutation() ? $mutatedUrl : "$mutation/" . $mutatedUrl);
+					$url = $baseUrl->getBaseUrl() . ($mutation === $this->getPrimaryMutation() ? $mutatedUrl : "$mutation/" . $mutatedUrl);
 
 					$text->setHtmlAttribute("data-url-link-$mutation", "
 						<a data-mutation='$mutation' class='ml-2' href='" . $url . "' target='_blank'>
