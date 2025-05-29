@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.41](https://github.com/liquiddesign/admin/compare/v2.1.40...v2.1.41) (2025-05-29)
+
+### Bug Fixes
+
+* Correct typo in two-factor authentication email validation message ([e52b0a](https://github.com/liquiddesign/admin/commit/e52b0af2bf8159d848e64e32dc3a024f3d0501b0))
+
+
+---
+
 ## [2.1.40](https://github.com/liquiddesign/admin/compare/v2.1.39...v2.1.40) (2025-05-29)
 
 ### Bug Fixes
