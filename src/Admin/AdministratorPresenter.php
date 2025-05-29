@@ -120,9 +120,24 @@ class AdministratorPresenter extends BackendPresenter
 		$form->addSubmits(!$this->getParameter('administrator'));
 
 		$form->onValidate[] = function (AdminForm $form, $values): void {
+			if (!$form->isValid()) {
+				return;
+			}
+
 			if (isset($values['google2faSecret']) && $values['google2faSecret'] && !Validators::isEmail($values['account']['login'])) {
 				$form['account']['login']->addError($this->_('errorLoginMustBeEmail', 'Pro dvoufaktorové přihlášení je potřeba mít jako login Váš email.'));
 			}
+
+			$existingAccountQuery = $this->accountRepository->many()->where('this.login', $values['account']['login']);
+			$this->shopsConfig->filterShopsInShopEntityCollection($existingAccountQuery, $values['account']['shop']);
+
+			$existingAccount = $existingAccountQuery->first();
+
+			if (!$existingAccount || (isset($values['account']['uuid']) && $values['account']['uuid'] === $existingAccount->getPK())) {
+				return;
+			}
+
+			$form['account']['login']->addError($this->_('errorLoginAlreadyExists', 'Tento login již existuje.'));
 		};
 		
 		$form->onSuccess[] = function (AdminForm $form): void {
@@ -132,7 +147,7 @@ class AdministratorPresenter extends BackendPresenter
 			if (!isset($values['google2faSecret'])) {
 				$values['google2faSecret'] = false;
 			}
-			
+
 			$administrator = $this->getParameter('administrator');
 			$doNotRedirect = (!$administrator || !$administrator->google2faSecret) && $values['google2faSecret'];
 			

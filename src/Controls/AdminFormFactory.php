@@ -245,8 +245,9 @@ class AdminFormFactory
 
 		$container ??= $adminForm;
 
-		$container->addSelect2('shop', 'Obchod', ['0' => 'Žádný obchod'] + $shopsAvailable)
+		$container->addSelect2('shop', 'Obchod', [null => 'Žádný obchod'] + $shopsAvailable)
 			->setRequired()
+			->addFilter(fn(string $value): string|null => $value === '' ? null : $value)
 			->setPrompt('- Vyberte -');
 	}
 
