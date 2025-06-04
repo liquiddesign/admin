@@ -755,6 +755,9 @@ class AdminGrid extends \Grid\Datagrid
 		$input->setHtmlAttribute('class', 'form-control form-control-sm');
 	}
 
+	/**
+	 * @deprecated Use addFilterSelect2Input instead.
+	 */
 	public function addFilterSelectInput(
 		string $name,
 		string $query,
@@ -772,6 +775,54 @@ class AdminGrid extends \Grid\Datagrid
 
 		if ($placeholder) {
 			$input->setPrompt($placeholder);
+		}
+
+		$input->setHtmlAttribute('class', 'form-control form-control-sm');
+
+		return $input;
+	}
+
+	public function addFilterSelect2Input(
+		string $name,
+		string $query,
+		?string $label = null,
+		?string $placeholder = null,
+		?string $defaultValue = null,
+		?array $items = null,
+		string $variableName = 'q'
+	): SelectBox {
+		$input = $this->addFilterSelect2(function (ICollection $source, $value) use ($query, $variableName): void {
+			if ($value !== '') {
+				$source->where($query, [$variableName => "$value"]);
+			}
+		}, $defaultValue, $name, $label, $items);
+
+		if ($placeholder) {
+			$input->setPrompt($placeholder);
+		}
+
+		$input->setHtmlAttribute('class', 'form-control form-control-sm');
+
+		return $input;
+	}
+
+	public function addFilterMultiSelect2Input(
+		string $name,
+		string $query,
+		?string $label = null,
+		?string $placeholder = null,
+		?string $defaultValue = null,
+		?array $items = null,
+		string $variableName = 'q'
+	): MultiSelectBox {
+		$input = $this->addFilterMultiSelect2(function (ICollection $source, $value) use ($query, $variableName): void {
+			if ($value !== '') {
+				$source->where($query, [$variableName => "$value"]);
+			}
+		}, $defaultValue, $name, $label, $items);
+
+		if ($placeholder) {
+			$input->setHtmlAttribute('placeholder', $placeholder);
 		}
 
 		$input->setHtmlAttribute('class', 'form-control form-control-sm');
