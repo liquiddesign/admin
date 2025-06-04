@@ -4,6 +4,19 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.42](https://github.com/liquiddesign/admin/compare/v2.1.41...v2.1.42) (2025-06-04)
+
+### Features
+
+* Add new filter input methods and deprecate old filter input method ([08f3b4](https://github.com/liquiddesign/admin/commit/08f3b487621cf7192bdfa56c0f31950620adbb2b))
+
+### Bug Fixes
+
+* Improve shop selection and account login validation in admin forms ([591645](https://github.com/liquiddesign/admin/commit/591645a01aa7163f0de8d536f4aa0c0673046afc))
+
+
+---
+
 ## [2.1.41](https://github.com/liquiddesign/admin/compare/v2.1.40...v2.1.41) (2025-05-29)
 
 ### Bug Fixes
