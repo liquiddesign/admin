@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.43](https://github.com/liquiddesign/admin/compare/v2.1.42...v2.1.43) (2025-06-09)
+
+### Code Refactoring
+
+* Remove unused shopIcon property from BackendPresenter ([bfc45e](https://github.com/liquiddesign/admin/commit/bfc45e49e27127ffdf42bdd54933c590016926d0))
+
+
+---
+
 ## [2.1.42](https://github.com/liquiddesign/admin/compare/v2.1.41...v2.1.42) (2025-06-04)
 
 ### Features
