@@ -4,6 +4,16 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.44](https://github.com/liquiddesign/admin/compare/v2.1.43...v2.1.44) (2025-06-09)
+
+### Bug Fixes
+
+* Update data-copy-url-targets attribute for dynamic shop URLs in admin form ([bad5bb](https://github.com/liquiddesign/admin/commit/bad5bbde7ef563489a4945d5b1ab5b5c337b421e))
+* Update data-copy-url-targets attribute to data-copy in AdminForm ([0847c2](https://github.com/liquiddesign/admin/commit/0847c209235d8a106c369f9f312c26e2e2b514dc))
+
+
+---
+
 ## [2.1.43](https://github.com/liquiddesign/admin/compare/v2.1.42...v2.1.43) (2025-06-09)
 
 ### Code Refactoring
