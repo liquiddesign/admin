@@ -84,8 +84,6 @@ abstract class BackendPresenter extends Presenter
 	 */
 	public array $ajaxInputs = [];
 
-	protected string|null $shopIcon = null;
-
 	public function getReaderFromString(string $content, string $delimiter = ';'): Reader
 	{
 		$reader = Reader::createFromString($content);
