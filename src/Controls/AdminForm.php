@@ -604,7 +604,7 @@ class AdminForm extends \Forms\Form
 
 			$attribute = \rtrim($attribute, ',');
 
-			$text->setHtmlAttribute('data-copy-url-targets', $attribute);
+			$text->setHtmlAttribute('data-copy', $attribute);
 		});
 
 		return $pageContainer;
