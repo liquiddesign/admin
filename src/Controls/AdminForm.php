@@ -496,7 +496,7 @@ class AdminForm extends \Forms\Form
 				$text->setHtmlAttribute('readonly', 'readonly');
 			}
 
-			$text->setHtmlAttribute('data-copy-url-targets', 'page[url]');
+			$text->setHtmlAttribute('data-copy-url-targets', "page[page_{$shop?->getPK()}][url]");
 			$text->setHtmlAttribute('data-copy-url-source', 'name');
 			$text->setHtmlAttribute('class', 'd-inline seo_url w-25');
 			$text->setHtmlAttribute('style', 'width:50%!important; min-width:400px!important;');
@@ -587,11 +587,25 @@ class AdminForm extends \Forms\Form
 			$pageContainer->setDefaults($page->toArray());
 		}
 
-		if ($copyControls) {
-			$copyControls->forAll(function (TextInput $text): void {
-				$text->setHtmlAttribute('data-copy', 'page[title],page[url]');
-			});
-		}
+		$copyControls?->forAll(function (TextInput $text): void {
+			$shops = $this->shopsConfig->getAvailableShops();
+
+			if (!$shops) {
+				$shops[] = '';
+			}
+
+			$attribute = '';
+
+			foreach ($shops as $shop) {
+				foreach (['title', 'url'] as $field) {
+					$attribute .= "page[page_{$shop->getPK()}][$field],";
+				}
+			}
+
+			$attribute = \rtrim($attribute, ',');
+
+			$text->setHtmlAttribute('data-copy-url-targets', $attribute);
+		});
 
 		return $pageContainer;
 	}
