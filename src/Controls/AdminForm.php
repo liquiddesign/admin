@@ -591,14 +591,14 @@ class AdminForm extends \Forms\Form
 			$shops = $this->shopsConfig->getAvailableShops();
 
 			if (!$shops) {
-				$shops[] = '';
+				$shops[] = null;
 			}
 
 			$attribute = '';
 
 			foreach ($shops as $shop) {
 				foreach (['title', 'url'] as $field) {
-					$attribute .= "page[page_{$shop->getPK()}][$field],";
+					$attribute .= "page[page_{$shop?->getPK()}][$field],";
 				}
 			}
 
