@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.45](https://github.com/liquiddesign/admin/compare/v2.1.44...v2.1.45) (2025-07-02)
+
+### Bug Fixes
+
+* Handle null check for shop primary key in AdminForm dynamic attributes ([2ddc9c](https://github.com/liquiddesign/admin/commit/2ddc9c3b8a2debc0820f19e1a80659554daa784f))
+
+
+---
+
 ## [2.1.44](https://github.com/liquiddesign/admin/compare/v2.1.43...v2.1.44) (2025-06-09)
 
 ### Bug Fixes
