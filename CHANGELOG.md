@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.47](https://github.com/liquiddesign/admin/compare/v2.1.46...v2.1.47) (2025-07-07)
+
+### Bug Fixes
+
+* Adjust shop selection handling and update default value/filter logic in AdminForm ([03f9f6](https://github.com/liquiddesign/admin/commit/03f9f6a4767694b99f8979e8495c2923af0b8b9e))
+
+
+---
+
 ## [2.1.46](https://github.com/liquiddesign/admin/compare/v2.1.45...v2.1.46) (2025-07-07)
 
 ### Bug Fixes
