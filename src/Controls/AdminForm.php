@@ -249,6 +249,7 @@ class AdminForm extends \Forms\Form
 	 * @param bool $opengraph
 	 * @param bool $linkToDetail
 	 * @param bool $richSnippet
+	 * @param array<\Base\DB\Shop>|null $shops
 	 * @return array<string|int|null, \Forms\Container>
 	 */
 	public function addPageContainer(
@@ -262,12 +263,13 @@ class AdminForm extends \Forms\Form
 		bool $opengraph = false,
 		bool $linkToDetail = false,
 		bool $richSnippet = false,
+		array|null $shops = null,
 	): array {
 		if (!$this->prettyPages) {
 			return [null => $this->addContainer('page')];
 		}
 
-		$shops = $this->shopsConfig->getAvailableShops();
+		$shops ??= $this->shopsConfig->getAvailableShops();
 
 		$containers = [];
 
