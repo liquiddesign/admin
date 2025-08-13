@@ -12,9 +12,12 @@ use Base\ShopsConfig;
 use Forms\Form;
 use Forms\FormFactory;
 use Grid\Datagrid;
+use Nette\Caching\Cache;
+use Nette\Caching\Storage;
 use Nette\Forms\Controls\BaseControl;
 use Nette\Localization\Translator;
 use Pages\DB\IPageRepository;
+use Pages\Router;
 use StORM\Collection;
 use StORM\DIConnection;
 use StORM\Entity;
@@ -31,6 +34,8 @@ class AdminFormFactory
 
 	private ?string $defaultMutation = null;
 
+	private Cache $cache;
+
 	public function __construct(
 		private readonly Administrator $administrator,
 		public FormFactory $formFactory,
@@ -40,8 +45,15 @@ class AdminFormFactory
 		private readonly ChangelogRepository $changelogRepository,
 		private readonly ShopRepository $shopRepository,
 		private readonly ShopsConfig $shopsConfig,
+		Storage $storage,
 	) {
 		$this->mutations = $formFactory->getDefaultMutations();
+		$this->cache = new Cache($storage);
+	}
+
+	public function cleanPagesCache(): void
+	{
+		$this->cache->clean([Cache::Tags => [Router::CACHE_INDEX]]);
 	}
 
 	public function setPrettyPages(bool $prettyPages): void
@@ -102,6 +114,7 @@ class AdminFormFactory
 		$form->setRenderer(new BootstrapRenderer());
 		$form->setConnection($this->connection);
 		$form->setShopsConfig($this->shopsConfig);
+		$form->setCache($this->cache);
 		$form->addHidden('uuid')->setDefaultValue($generateUuid ? DIConnection::generateUuid() : null)->setNullable();
 
 		if ($defaultsField) {

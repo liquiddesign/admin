@@ -12,6 +12,7 @@ use Forms\Container;
 use Forms\Controls\UploadImage;
 use Forms\LocaleContainer;
 use Nette\Application\UI\Presenter;
+use Nette\Caching\Cache;
 use Nette\Forms\Controls\BaseControl;
 use Nette\Forms\Controls\TextArea;
 use Nette\Forms\Controls\TextBase;
@@ -25,6 +26,7 @@ use Nette\Utils\Html;
 use Nette\Utils\Image;
 use Pages\DB\IPageRepository;
 use Pages\DB\Page;
+use Pages\Router;
 use StORM\DIConnection;
 use StORM\Entity;
 use StORM\Meta\Structure;
@@ -44,6 +46,8 @@ class AdminForm extends \Forms\Form
 	private Administrator $administrator;
 
 	private ShopsConfig $shopsConfig;
+
+	private Cache $cache;
 
 	private bool $prettyPages = false;
 
@@ -116,6 +120,11 @@ class AdminForm extends \Forms\Form
 		}
 
 		return $properties;
+	}
+
+	public function setCache(Cache $cache): void
+	{
+		$this->cache = $cache;
 	}
 
 	public function setShopsConfig(ShopsConfig $shopsConfig): void
@@ -197,6 +206,8 @@ class AdminForm extends \Forms\Form
 
 			$callback($pageValues, $shopEntity);
 		}
+
+		$this->cache->clean([Cache::Tags => [Router::CACHE_INDEX]]);
 	}
 
 	public function processRedirect(
