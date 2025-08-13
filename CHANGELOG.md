@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.48](https://github.com/liquiddesign/admin/compare/v2.1.47...v2.1.48) (2025-08-13)
+
+### Features
+
+* Add caching support to AdminFormFactory and AdminForm with page cache cleaning logic ([061dcd](https://github.com/liquiddesign/admin/commit/061dcd9d06a75f4031a9661e35749d444dab8cf1))
+
+
+---
+
 ## [2.1.47](https://github.com/liquiddesign/admin/compare/v2.1.46...v2.1.47) (2025-07-07)
 
 ### Bug Fixes
