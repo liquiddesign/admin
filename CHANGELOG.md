@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.49](https://github.com/liquiddesign/admin/compare/v2.1.48...v2.1.49) (2025-09-04)
+
+### Features
+
+* Extend syncPages callback with containerIndex, enhance opengraph image handling, and add directory creation logic ([064f5f](https://github.com/liquiddesign/admin/commit/064f5fd1fd7058c849150149647cf3add669e534))
+
+
+---
+
 ## [2.1.48](https://github.com/liquiddesign/admin/compare/v2.1.47...v2.1.48) (2025-08-13)
 
 ### Features
