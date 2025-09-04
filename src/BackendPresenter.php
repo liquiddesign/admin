@@ -318,7 +318,7 @@ abstract class BackendPresenter extends Presenter
 	
 	protected function onDeleteImage(Entity $object, string $propertyName = 'imageFileName'): void
 	{
-		if ($object->$propertyName && \defined($object::class . '::IMAGE_DIR')) {
+		if (isset($object->$propertyName) && $object->$propertyName && \defined($object::class . '::IMAGE_DIR')) {
 			$subDirs = ['origin', 'detail', 'thumb'];
 			/* @phpstan-ignore-next-line */
 			$dir = $object::IMAGE_DIR;

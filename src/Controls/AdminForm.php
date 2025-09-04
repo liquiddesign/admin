@@ -22,6 +22,7 @@ use Nette\Http\FileUpload;
 use Nette\Localization\Translator;
 use Nette\NotImplementedException;
 use Nette\Utils\Arrays;
+use Nette\Utils\FileSystem;
 use Nette\Utils\Html;
 use Nette\Utils\Image;
 use Pages\DB\IPageRepository;
@@ -184,7 +185,7 @@ class AdminForm extends \Forms\Form
 	}
 
 	/**
-	 * @param callable(array<mixed> $values, \Base\DB\Shop|null $shop): void $callback
+	 * @param callable(array<mixed> $values, \Base\DB\Shop|null $shop, string $containerIndex): void $callback
 	 */
 	public function syncPages(callable $callback): void
 	{
@@ -204,7 +205,7 @@ class AdminForm extends \Forms\Form
 			$shop = \explode('_', $index)[1] ?? null;
 			$shopEntity = $this->shopsConfig->getAvailableShops()[$shop] ?? null;
 
-			$callback($pageValues, $shopEntity);
+			$callback($pageValues, $shopEntity, $index);
 		}
 
 		$this->cache->clean([Cache::Tags => [Router::CACHE_INDEX]]);
@@ -349,7 +350,7 @@ class AdminForm extends \Forms\Form
 		$image = $adminForm['page'][$shopIndex]['opengraph'];
 
 		if ($image->isOk() && $image->isFilled()) {
-			$values['opengraph'] = $image->upload();
+			$values['opengraph'] = $image->upload($values['uuid'] . '.%2$s');
 		} else {
 			unset($values['opengraph']);
 		}
@@ -560,6 +561,8 @@ class AdminForm extends \Forms\Form
 			});
 
 		if ($opengraph) {
+			FileSystem::createDir($this->getUserDir() . '/' . Page::IMAGE_DIR . '/opengraph');
+
 			$opengraphImage = $pageContainer->addImagePicker('opengraph', Html::fromHtml($shopIcon . $this->translator->translate('admin.image', 'OG: Obrázek')), [
 				Page::IMAGE_DIR . '/opengraph' => static function (Image $image): void {
 					$image->resize(1200, 628, Image::Cover);
