@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.50](https://github.com/liquiddesign/admin/compare/v2.1.49...v2.1.50) (2025-09-08)
+
+### Features
+
+* Add getPageUrl method ([4ec700](https://github.com/liquiddesign/admin/commit/4ec700eb8a3974cc0eb95679585abe0920e263bd))
+
+
+---
+
 ## [2.1.49](https://github.com/liquiddesign/admin/compare/v2.1.48...v2.1.49) (2025-09-04)
 
 ### Features
