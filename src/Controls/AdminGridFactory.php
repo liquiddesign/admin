@@ -12,9 +12,11 @@ use Base\ShopsConfig;
 use JetBrains\PhpStorm\Deprecated;
 use Nette\Http\Session;
 use Nette\Localization\Translator;
+use Nette\Utils\Arrays;
+use Pages\DB\Page;
 use Security\DB\IUser;
 use StORM\Collection;
-use StORM\Connection;
+use StORM\DIConnection;
 use StORM\ICollection;
 use StORM\IEntityParent;
 
@@ -36,7 +38,7 @@ class AdminGridFactory
 		protected readonly Translator $translator,
 		protected readonly ChangelogRepository $changelogRepository,
 		protected readonly ShopsConfig $shopsConfig,
-		protected readonly Connection $connection,
+		protected readonly DIConnection $connection,
 	) {
 	}
 
@@ -145,5 +147,23 @@ class AdminGridFactory
 				$source->where('this.fk_shop', BaseHelpers::replaceArrayValue($value, '0', null));
 			}, '', 'shops', null, ['0' => 'Bez obchodu'] + $shops, ['placeholder' => '- Obchody -']);
 		}
+	}
+
+	public function getPageUrl(AdminGrid $grid, Page $page, string|null $mutation = null): string|null
+	{
+		/** @var \Admin\DB\Administrator $admin */
+		$admin = $this->administrator->getIdentity();
+		$mutations = $admin->role->getMutations() ?? $this->connection->getAvailableMutations();
+		$primaryMutation = Arrays::first(\array_keys($mutations));
+
+		$baseUrl = $grid->getPresenter()->getHttpRequest()->getUrl();
+
+		if ($page instanceof ShopEntity && ($shopsBaseUrls = $page->shop?->getBaseUrls())) {
+			$baseUrl = $baseUrl->withHost(Arrays::first($shopsBaseUrls));
+		}
+
+		$mutatedUrl = $page->getValue('url', $mutation);
+
+		return $baseUrl->getBaseUrl() . ($mutation === $primaryMutation ? $mutatedUrl : ($mutation ? "$mutation/" . $mutatedUrl : $mutatedUrl));
 	}
 }
