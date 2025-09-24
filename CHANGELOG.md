@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.51](https://github.com/liquiddesign/admin/compare/v2.1.50...v2.1.51) (2025-09-24)
+
+### Features
+
+* Rename callback and extend `getItemsOnPage` with post-processing logic ([f62554](https://github.com/liquiddesign/admin/commit/f62554c3999d21e6464860b25f5b104529ee79b6))
+
+
+---
+
 ## [2.1.50](https://github.com/liquiddesign/admin/compare/v2.1.49...v2.1.50) (2025-09-08)
 
 ### Features
