@@ -8,6 +8,7 @@ use Admin\Controls\AdminFormFactory;
 use Admin\Controls\AdminGridFactory;
 use Admin\Controls\IMenuFactory;
 use Admin\Controls\Menu;
+use Admin\DB\AdministratorRepository;
 use Admin\DB\IGeneralAjaxRepository;
 use Base\ShopsConfig;
 use League\Csv\Reader;
@@ -68,6 +69,9 @@ abstract class BackendPresenter extends Presenter
 
 	/** @inject */
 	public ShopsConfig $shopsConfig;
+
+	/** @inject */
+	public AdministratorRepository $administratorRepositoryBackendPresenter;
 	
 	/**
 	 * @persistent
@@ -138,6 +142,7 @@ abstract class BackendPresenter extends Presenter
 		}
 		
 		$this->template->admin = $this->admin;
+		$this->template->adminIdentity = $this->administratorRepositoryBackendPresenter->oneOrFail($this->admin->getIdentity()->getId());
 		$this->template->isManager = $this->isManager;
 		$this->template->shops = $this->shopsConfig->getAvailableShops();
 	}
