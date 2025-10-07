@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.52](https://github.com/liquiddesign/admin/compare/v2.1.51...v2.1.52) (2025-10-07)
+
+### Features
+
+* Inject AdministratorRepository and fetch admin data ([5608b8](https://github.com/liquiddesign/admin/commit/5608b80fcca910194a540c65375ed3242e52b712))
+
+
+---
+
 ## [2.1.51](https://github.com/liquiddesign/admin/compare/v2.1.50...v2.1.51) (2025-09-24)
 
 ### Features
