@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.53](https://github.com/liquiddesign/admin/compare/v2.1.52...v2.1.53) (2025-10-20)
+
+### Features
+
+* Improve error flash messages in admin forms ([cc7814](https://github.com/liquiddesign/admin/commit/cc7814792b7f643a86ca84ea39a39fa6d16c91cc))
+
+
+---
+
 ## [2.1.52](https://github.com/liquiddesign/admin/compare/v2.1.51...v2.1.52) (2025-10-07)
 
 ### Features
