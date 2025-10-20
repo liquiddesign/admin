@@ -146,7 +146,13 @@ class AdminFormFactory
 		}
 
 		$form->onError[] = function (AdminForm $form): void {
+			$errors = $form->getControlsErrors();
+
 			$form->getPresenter()->flashMessage($this->translator->translate('admin.formError', 'Chybně vyplněný formulář!'), 'error');
+
+			foreach ($errors as $error) {
+				$form->getPresenter()->flashMessage($error['label'] . ':<br>' . \implode('<br>', $error['errors']), 'error');
+			}
 		};
 
 		$form->onSuccess[] = function (AdminForm $form): void {
