@@ -37,7 +37,7 @@ class Route extends Routers\Route
 				},
 			],
 			'action' => [\Nette\Routing\Route::VALUE => 'default'],
-			null => [
+			'' => [
 				\Nette\Routing\Route::FILTER_OUT => [$pages, 'unmapParameters'],
 				\Nette\Routing\Route::FILTER_IN => [$pages, 'mapParameters'],
 			],
