@@ -4,6 +4,16 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.54](https://github.com/liquiddesign/admin/compare/v2.1.53...v2.1.54) (2026-01-12)
+
+### Bug Fixes
+
+* Permission matching for similar presenter names ([e2cfc4](https://github.com/liquiddesign/admin/commit/e2cfc47c1923f476f5238b6e53d113902636e787))
+* Use empty string key for global route filters per Nette convention ([a62651](https://github.com/liquiddesign/admin/commit/a626510d6034eadfaab21f005f2d14e79e16e475))
+
+
+---
+
 ## [2.1.53](https://github.com/liquiddesign/admin/compare/v2.1.52...v2.1.53) (2025-10-20)
 
 ### Features
