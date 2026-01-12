@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.56](https://github.com/liquiddesign/admin/compare/v2.1.55...v2.1.56) (2026-01-12)
+
+### Bug Fixes
+
+* Use empty string key for shop select default option ([f591af](https://github.com/liquiddesign/admin/commit/f591af16373edbf4f0787c0e737b033e19635311))
+
+
+---
+
 ## [2.1.55](https://github.com/liquiddesign/admin/compare/v2.1.54...v2.1.55) (2026-01-12)
 
 
