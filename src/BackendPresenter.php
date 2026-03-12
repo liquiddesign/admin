@@ -90,7 +90,7 @@ abstract class BackendPresenter extends Presenter
 
 	public function getReaderFromString(string $content, string $delimiter = ';'): Reader
 	{
-		$reader = Reader::createFromString($content);
+		$reader = Reader::fromString($content);
 		unset($content);
 
 		$reader->setDelimiter($delimiter);
