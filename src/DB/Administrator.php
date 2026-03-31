@@ -32,7 +32,13 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	 * @column
 	 */
 	public bool $urlEditor = false;
-	
+
+	/**
+	 * Přihlášení přes Google OAuth
+	 * @column
+	 */
+	public bool $googleOAuth = false;
+
 	/**
 	 * @relationNxN
 	 * @var \StORM\RelationCollection<\Security\DB\Account>
@@ -93,7 +99,12 @@ class Administrator extends \StORM\Entity implements IIdentity, IUser
 	{
 		$this->account = $account;
 	}
-	
+
+	public function isGoogleOAuth(): bool
+	{
+		return $this->googleOAuth;
+	}
+
 	public function has2FAEnabled(): bool
 	{
 		return !!$this->google2faSecret;

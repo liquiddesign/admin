@@ -14,6 +14,7 @@ use Admin\Controls\IMenuFactory;
 use Admin\DB\AdministratorRepository;
 use Admin\Google2FA;
 use Admin\Route;
+use Admin\Services\GoogleOAuthService;
 use Nette\DI\Definitions\ServiceDefinition;
 use Nette\DI\Definitions\Statement;
 use Nette\Schema\Expect;
@@ -43,6 +44,14 @@ class AdminDI extends \Nette\DI\CompilerExtension
 			'google2FA' => Expect::structure([
 				'enabled' => Expect::bool(false),
 				'company' => Expect::string('Admin'),
+			]),
+			'googleOAuth' => Expect::structure([
+				'enabled' => Expect::bool(false),
+				'clientId' => Expect::string(''),
+				'clientSecret' => Expect::string(''),
+				'allowedDomains' => Expect::listOf(Expect::string()),
+				'autoCreateRole' => Expect::string(null)->nullable(),
+				'sessionExpiration' => Expect::string('12 hours'),
 			]),
 		]);
 	}
@@ -95,6 +104,17 @@ class AdminDI extends \Nette\DI\CompilerExtension
 		$gridDef->addSetup('setShowItemsPerPage', [$config->adminGrid['showItemsPerPage'] ?? true]);
 		$gridDef->addSetup('setDefaultOnPage', [$config->adminGrid['defaulOnPage'] ?? null]);
 		
+		$builder->addDefinition($this->prefix('googleOAuthService'), new ServiceDefinition())
+			->setType(GoogleOAuthService::class)
+			->setArguments([
+				$config->googleOAuth->enabled,
+				$config->googleOAuth->clientId,
+				$config->googleOAuth->clientSecret,
+				$config->googleOAuth->allowedDomains,
+				$config->googleOAuth->autoCreateRole ?? $config->superRole ?? 'servis',
+				$config->googleOAuth->sessionExpiration,
+			]);
+
 		/** @var \Nette\DI\Definitions\FactoryDefinition $definition */
 		$definition = $builder->getDefinition('latte.latteFactory');
 		$definition->getResultDefinition()->addSetup('addExtension', [new \Latte\Essential\RawPhpExtension()]);

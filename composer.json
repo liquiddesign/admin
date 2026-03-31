@@ -29,6 +29,7 @@
         "liquiddesign/grid": "~1.0",
         "liquiddesign/common": "~2.0",
         "pragmarx/google2fa": "~8.0",
+        "league/oauth2-google": "^4.0",
         "ext-pdo": "*",
         "ext-json": "*"
     },

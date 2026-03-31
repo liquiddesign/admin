@@ -94,6 +94,15 @@
                     <!-- /.col -->
                 </div>
             {/form}
+			{if $googleOAuthEnabled ?? false}
+			<div class="text-center mb-3 mt-3">
+				<hr>
+				<p>— nebo —</p>
+				<a href="{plink default, googleLogin: 1}" class="btn btn-block btn-danger">
+					<i class="fab fa-google mr-2"></i> Přihlásit přes Google
+				</a>
+			</div>
+			{/if}
         </div>
         <!-- /.login-card-body -->
     </div>

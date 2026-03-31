@@ -49,11 +49,17 @@ class ProfilePresenter extends BackendPresenter
 		$account = $form->addContainer('account');
 		$account->addText('login', 'Login')->setDisabled();
 		$form->addText('role', 'Role')->setDisabled();
-		$account->addPassword('oldPassword', $this->_('oldPassword', 'Staré heslo'))
-			->addRule([FormValidators::class, 'checkOldPassword'], $this->_('oldPasswordCheck', 'Staré heslo není správné!'), $this->admin->getIdentity()->getAccount());
-		$account->addPassword('newPassword', $this->_('newPassword', 'Nové heslo'));
-		$account->addPassword('newPasswordCheck', $this->_('passwordCheck', 'Kontrola nového hesla'))
-			->addRule($form::EQUAL, $this->_('passCheckError', 'Hesla nejsou shodná!'), $form['account']['newPassword']);
+
+		/** @var \Admin\DB\Administrator $administrator */
+		$administrator = $this->admin->getIdentity();
+
+		if (!$administrator->isGoogleOAuth()) {
+			$account->addPassword('oldPassword', $this->_('oldPassword', 'Staré heslo'))
+				->addRule([FormValidators::class, 'checkOldPassword'], $this->_('oldPasswordCheck', 'Staré heslo není správné!'), $this->admin->getIdentity()->getAccount());
+			$account->addPassword('newPassword', $this->_('newPassword', 'Nové heslo'));
+			$account->addPassword('newPasswordCheck', $this->_('passwordCheck', 'Kontrola nového hesla'))
+				->addRule($form::EQUAL, $this->_('passCheckError', 'Hesla nejsou shodná!'), $form['account']['newPassword']);
+		}
 		
 		$form->addSubmit('submit', $this->_('.save', 'Uložit'));
 		
@@ -118,8 +124,8 @@ class ProfilePresenter extends BackendPresenter
 		
 		$form->onSuccess[] = function (AdminForm $form) use ($administrator): void {
 			$values = $form->getValues();
-			
-			if ($values['account']->newPassword && $values['account']->oldPassword) {
+
+			if (!$administrator->isGoogleOAuth() && ($values['account']->newPassword ?? null) && ($values['account']->oldPassword ?? null)) {
 				$administrator->getAccount()->changePassword($values['account']->newPassword);
 			}
 			

@@ -54,7 +54,11 @@ class LoginForm extends \Nette\Application\UI\Form
 			
 			/** @var \Admin\DB\Administrator $identity */
 			$identity = $this->authenticator->authenticate($values['login'], $values['password'], \Admin\DB\Administrator::class);
-			
+
+			if ($identity->isGoogleOAuth()) {
+				throw new Nette\Security\AuthenticationException('This account uses Google OAuth login.', Nette\Security\Authenticator::NOT_APPROVED);
+			}
+
 			if ($identity->has2FAEnabled()) {
 				$this->admin->setRequired2FA($identity);
 				$this->onRequired2FA($this);

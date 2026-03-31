@@ -107,19 +107,21 @@ abstract class BackendPresenter extends Presenter
 	public function checkRequirements($element): void
 	{
 		unset($element);
-		
+
 		if (!$this->admin->isLoggedIn()) {
 			if ($this->admin->logoutReason === \Nette\Security\UserStorage::LOGOUT_INACTIVITY) {
 				$this->flashMessage('You have been signed out due to inactivity. Please sign in again.');
 			}
-			
+
 			$this->redirect(':Admin:Login:default', ['backlink' => $this->storeRequest()]);
 		}
-		
+
+		$this->verifyAccountActive();
+
 		if (!$this->admin->isAllowed($this->getAction(true))) {
 			throw new BadRequestException('Not allowed action');
 		}
-		
+
 		$this->isManager = $this->admin->isAllowed($this->getAction(true), '777');
 	}
 	
@@ -352,5 +354,34 @@ abstract class BackendPresenter extends Presenter
 		$administrator = $this->admin->getIdentity();
 
 		return $administrator;
+	}
+
+	private function verifyAccountActive(): void
+	{
+		/** @var \Admin\DB\Administrator|null $identity */
+		$identity = $this->admin->getIdentity();
+
+		if (!$identity instanceof \Admin\DB\Administrator) {
+			return;
+		}
+
+		/** @var \Admin\DB\Administrator|null $fresh */
+		$fresh = $this->administratorRepositoryBackendPresenter->one($identity->getId());
+
+		if ($fresh === null) {
+			$this->admin->logout(true);
+			$this->flashMessage('Váš účet byl odstraněn.', 'error');
+			$this->redirect(':Admin:Login:default');
+		}
+
+		$account = $fresh->accounts->first();
+
+		if (!($account instanceof \Security\DB\Account) || $account->isActive()) {
+			return;
+		}
+
+		$this->admin->logout(true);
+		$this->flashMessage('Váš účet byl deaktivován.', 'error');
+		$this->redirect(':Admin:Login:default');
 	}
 }
