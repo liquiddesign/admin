@@ -68,10 +68,12 @@ trait GoogleOAuthLoginTrait
 			return true;
 		}
 
-		$redirectUri = $this->link('//default');
+		$redirectUri = $this->link('//default', ['backlink' => '']);
 		$authUrl = $this->googleOAuthService->getAuthorizationUrl($redirectUri);
 
-		$this->getSession('googleOAuth')->set('state', $this->googleOAuthService->getState());
+		$session = $this->getSession('googleOAuth');
+		$session->set('state', $this->googleOAuthService->getState());
+		$session->set('backlink', $this->backlink);
 
 		$this->redirectUrl($authUrl);
 
@@ -90,7 +92,10 @@ trait GoogleOAuthLoginTrait
 		$session = $this->getSession('googleOAuth');
 		/** @var string|null $sessionState */
 		$sessionState = $session->get('state');
+		/** @var string $savedBacklink */
+		$savedBacklink = (string) ($session->get('backlink') ?? '');
 		$session->remove('state');
+		$session->remove('backlink');
 
 		if ($error !== null || $state === null || $code === null || $state !== $sessionState) {
 			$this->flashMessage('Přihlášení přes Google selhalo', 'error');
@@ -100,7 +105,7 @@ trait GoogleOAuthLoginTrait
 		}
 
 		try {
-			$redirectUri = $this->link('//default');
+			$redirectUri = $this->link('//default', ['backlink' => '']);
 			$googleUser = $this->googleOAuthService->handleCallback($code, $redirectUri);
 		} catch (\Throwable $e) {
 			Debugger::log($e);
@@ -115,7 +120,7 @@ trait GoogleOAuthLoginTrait
 		$this->admin->login($administrator);
 		$this->admin->setExpiration($this->googleOAuthService->getSessionExpiration());
 
-		$this->restoreRequest($this->backlink);
+		$this->restoreRequest($savedBacklink);
 
 		if ($this->admin->isAllowed($this->admin->getDefaultLink())) {
 			$this->redirect($this->admin->getDefaultLink());
