@@ -70,6 +70,14 @@ class AdminGrid extends \Grid\Datagrid
 	 */
 	private array $bulkFormCopyRawValues = [];
 
+	/** @var array<string, string> group name => label */
+	private array $filterGroups = [];
+
+	/** @var array<string, string> filter name => group name */
+	private array $filterGroupMap = [];
+
+	private string|null $currentFilterGroup = null;
+
 	/**
 	 * @var callable|null
 	 */
@@ -137,6 +145,8 @@ class AdminGrid extends \Grid\Datagrid
 			$grid->template->appendClass = $this->appendClass;
 			$grid->template->itemCountMessage = $this->translator->translate('admin.itemCountMessage', 'Položek');
 			$grid->template->defaultShowPaginator = $defaultShowPaginator;
+			$grid->template->filterGroups = $this->filterGroups;
+			$grid->template->filterGroupMap = $this->filterGroupMap;
 
 			if (!$this->showItemsPerPage) {
 				if ($defaultOnPage) {
@@ -698,6 +708,29 @@ class AdminGrid extends \Grid\Datagrid
 		unset($object);
 		
 		$td->addAttributes(['style' => 'white-space: nowrap; text-align: right;']);
+	}
+
+	public function setFilterGroup(string|null $name, string|null $label = null): void
+	{
+		if ($name === null) {
+			$this->currentFilterGroup = null;
+			return;
+		}
+
+		$this->currentFilterGroup = $name;
+
+		if (!isset($this->filterGroups[$name])) {
+			$this->filterGroups[$name] = $label ?? $name;
+		}
+	}
+
+	public function addFilterExpression($name, callable $callback, $defaultValue = null): void
+	{
+		parent::addFilterExpression($name, $callback, $defaultValue);
+
+		if ($this->currentFilterGroup !== null) {
+			$this->filterGroupMap[$name] = $this->currentFilterGroup;
+		}
 	}
 
 	/**

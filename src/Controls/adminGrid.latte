@@ -4,36 +4,125 @@
     }
 </style>
 {form filterForm}
+{define filterInput, $component}
+	{php
+		$filterLabel = null;
+		if ($component instanceof Nette\Forms\Controls\HiddenField) {
+			$filterLabel = null;
+		} elseif ($component->caption !== null && $component->caption !== '') {
+			$filterLabel = (string) $component->caption;
+		} elseif ($component instanceof Nette\Forms\Controls\TextInput) {
+			$filterLabel = $component->control->getAttribute('placeholder');
+		} elseif ($component instanceof Nette\Forms\Controls\SelectBox && $component->getPrompt() !== false) {
+			$filterLabel = trim((string) $component->getPrompt(), '- ');
+		} elseif ($component instanceof Nette\Forms\Controls\MultiSelectBox) {
+			$filterLabel = $component->control->getAttribute('data-placeholder') ?? $component->control->getAttribute('placeholder');
+			if ($filterLabel !== null) {
+				$filterLabel = trim($filterLabel, '- ');
+			}
+		}
+		if ($filterLabel === null && !$component instanceof Nette\Forms\Controls\HiddenField) {
+			$filterLabel = $component->control->getAttribute('placeholder') ?? $component->control->getAttribute('data-placeholder');
+			if ($filterLabel !== null) {
+				$filterLabel = trim($filterLabel, '- ');
+			}
+		}
+	}
+	<div n:tag-if="!$component instanceof Nette\Forms\Controls\HiddenField" class="col-auto p-1 inline-style">
+		<small class="text-muted d-block" style="line-height: 1.2;">{if $filterLabel}{$filterLabel}{else}&nbsp;{/if}</small>
+		{$component->getControl()}
+		{if $component instanceOf Nette\Forms\Controls\MultiSelectBox}
+			<input type="hidden" name="{$component->getHtmlName()}" value="__none__">
+		{/if}
+	</div>
+{/define}
 	{do $components = $form->getComponents()}
 	{do $submit = $components['submit'] ?? null}
 	{do $reset = $components['reset'] ?? null}
 	{ifset $submit}{php unset($components['submit'])}{/ifset}
 	{ifset $reset}{php unset($components['reset'])}{/ifset}
 	{if count($components) > 1}
-		<div class="row align-items-end ">
-			<div class="col-12">
-				<div class="form-group row">
-					{foreach $components as $component}
-						<div n:tag-if="!$component instanceof Nette\Forms\Controls\HiddenField" class="col-auto p-1 inline-style">
-							{$component->getControl()}
-							{if $component instanceOf Nette\Forms\Controls\MultiSelectBox}
-								<input type="hidden" name="{$component->getHtmlName()}" value="__none__">
-							{/if}
+		{if count($filterGroups) > 0}
+			{php
+				$ungrouped = [];
+				$grouped = [];
+				foreach ($components as $component) {
+					$name = $component->getName();
+					if (isset($filterGroupMap[$name])) {
+						$groupName = $filterGroupMap[$name];
+						$grouped[$groupName][] = $component;
+					} else {
+						$ungrouped[] = $component;
+					}
+				}
+			}
+			{if count($ungrouped) > 0}
+				<div class="row align-items-end">
+					<div class="col-12">
+						<div class="form-group row mb-0">
+							{foreach $ungrouped as $component}
+								{include filterInput, $component}
+							{/foreach}
 						</div>
-					{/foreach}
-				{ifset $submit}
-						<div class="col-auto p-1">
-							{$submit->getControl()}
+					</div>
+				</div>
+			{/if}
+			{foreach $filterGroups as $groupName => $groupLabel}
+				{if isset($grouped[$groupName])}
+					<div class="row align-items-end">
+						<div class="col-12">
+							<div class="d-flex align-items-center">
+								<span class="text-muted" style="font-size: .85rem; font-weight: 600; white-space: nowrap;">{$groupLabel}</span>
+								<hr class="flex-grow-1 ml-2 my-0">
+							</div>
+							<div class="form-group row mb-0">
+								{foreach $grouped[$groupName] as $component}
+									{include filterInput, $component}
+								{/foreach}
+							</div>
 						</div>
-					{/ifset}
-				{ifset $reset}
-						<div class="col-auto p-1">
-							{$reset->getControl()}
-						</div>
-					{/ifset}
+					</div>
+				{/if}
+			{/foreach}
+			<div class="row align-items-end mb-2">
+				<div class="col-12">
+					<div class="form-group row mb-0">
+						{ifset $submit}
+							<div class="col-auto p-1">
+								{$submit->getControl()}
+							</div>
+						{/ifset}
+						{ifset $reset}
+							<div class="col-auto p-1">
+								{$reset->getControl()}
+							</div>
+						{/ifset}
+					</div>
 				</div>
 			</div>
-		</div>
+		{else}
+			<div class="row align-items-end ">
+				<div class="col-12">
+					<div class="form-group row mb-0">
+						{foreach $components as $component}
+							{include filterInput, $component}
+						{/foreach}
+					{ifset $submit}
+							<div class="col-auto p-1">
+								<small class="text-muted d-block" style="line-height: 1.2;">&nbsp;</small>
+								{$submit->getControl()}
+							</div>
+						{/ifset}
+					{ifset $reset}
+							<div class="col-auto p-1">
+								<small class="text-muted d-block" style="line-height: 1.2;">&nbsp;</small>
+								{$reset->getControl()}
+							</div>
+						{/ifset}
+					</div>
+				</div>
+			</div>
+		{/if}
 	{/if}
 {/form}
 <div class="table-responsive table-striped">
