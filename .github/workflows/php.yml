@@ -16,14 +16,14 @@ jobs:
         run: |
           git config --global core.autocrlf true
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
 
       - name: Validate composer.json and composer.lock
         run: composer validate
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v5
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -45,10 +45,10 @@ jobs:
       - name: Run lattelint
         run: composer lattelint
 
-      - uses: 8398a7/action-slack@v3
+      - uses: slackapi/slack-github-action@v3
         with:
-          status: ${{ job.status }}
-          fields: repo,message,author
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          webhook: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "Build failed: ${{ github.repository }} — ${{ github.event.head_commit.message }} (${{ github.actor }})"
         if: failure()

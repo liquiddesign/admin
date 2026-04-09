@@ -16,7 +16,7 @@ jobs:
         run: |
           git config --global core.autocrlf true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -27,7 +27,7 @@ jobs:
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -52,10 +52,10 @@ jobs:
       - name: Run commit check
         run: composer check-commit
 
-      - uses: 8398a7/action-slack@v3
+      - uses: slackapi/slack-github-action@v3
         with:
-          status: ${{ job.status }}
-          fields: repo,message,author
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          webhook: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "Build failed: ${{ github.repository }} — ${{ github.event.head_commit.message }} (${{ github.actor }})"
         if: failure()
