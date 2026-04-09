@@ -714,23 +714,28 @@ class AdminGrid extends \Grid\Datagrid
 	{
 		if ($name === null) {
 			$this->currentFilterGroup = null;
+
 			return;
 		}
 
 		$this->currentFilterGroup = $name;
 
-		if (!isset($this->filterGroups[$name])) {
-			$this->filterGroups[$name] = $label ?? $name;
+		if (isset($this->filterGroups[$name])) {
+			return;
 		}
+
+		$this->filterGroups[$name] = $label ?? $name;
 	}
 
 	public function addFilterExpression($name, callable $callback, $defaultValue = null): void
 	{
 		parent::addFilterExpression($name, $callback, $defaultValue);
 
-		if ($this->currentFilterGroup !== null) {
-			$this->filterGroupMap[$name] = $this->currentFilterGroup;
+		if ($this->currentFilterGroup === null) {
+			return;
 		}
+
+		$this->filterGroupMap[$name] = $this->currentFilterGroup;
 	}
 
 	/**
