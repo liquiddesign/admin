@@ -264,10 +264,19 @@ class AdminFormFactory
 
 		$container ??= $adminForm;
 
-		$container->addSelect2('shop', 'Obchod', ['' => 'Společné pro všechny obchody'] + $shopsAvailable)
+		$shopControl = $container->addSelect2('shop', 'Obchod', ['' => 'Společné pro všechny obchody'] + $shopsAvailable)
 			->setRequired()
 			->addFilter(fn(string $value): string|null => $value === '' ? null : $value)
 			->setPrompt('- Vyberte -');
+
+		$adminForm->onRender[] = function (AdminForm $form) use ($shopControl): void {
+			$uuidControl = $form->getComponent('uuid', false);
+			$isEditMode = $uuidControl instanceof BaseControl && $uuidControl->getValue() !== null;
+
+			if ($isEditMode && $shopControl->getValue() === null) {
+				$shopControl->setValue('');
+			}
+		};
 	}
 
 	public static function addCodeValidationToInput(BaseControl $baseControl, Repository $repository, Entity|null $existingEntity): BaseControl
