@@ -229,20 +229,40 @@ class RolePresenter extends BackendPresenter
 		$button = $grid->getForm()->addSubmit('submit', 'Uložit');
 		$button->setHtmlAttribute('class', 'btn btn-sm btn-primary');
 		$button->onClick[] = function ($button) use ($grid, $resources, $role): void {
+			$deniedResources = [];
+
 			foreach ($grid->getInputData() as $id => $data) {
-				if (!$resources[$id] || !$this->admin->isAllowed($resources[$id])) {
+				if (!$resources[$id]) {
 					continue;
 				}
-				
+
+				if (!$this->admin->isAllowed($resources[$id])) {
+					if ($data['allow']) {
+						$deniedResources[] = $resources[$id];
+					}
+
+					continue;
+				}
+
 				$this->permissionRepository->many()->where('resource', $resources[$id])->where('fk_role', $role)->delete();
-				
+
 				if (!$data['allow']) {
 					continue;
 				}
 
 				$this->permissionRepository->syncOne(['resource' => $resources[$id], 'privilege' => $data['admin'] ? '777' : '555', 'role' => $role,]);
 			}
-			
+
+			if ($deniedResources !== []) {
+				$grid->getPresenter()->flashMessage(
+					$this->_(
+						'.permissionElevationDenied',
+						'Některá oprávnění nebyla uložena, protože je sami nemáte. Požádejte uživatele s rolí servis.',
+					) . ' (' . \implode(', ', $deniedResources) . ')',
+					'warning',
+				);
+			}
+
 			$grid->getPresenter()->flashMessage($this->_('.saved', 'Uloženo'), 'success');
 			$grid->getPresenter()->redirect('this');
 		};
