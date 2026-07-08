@@ -262,7 +262,7 @@ class AdminForm extends \Forms\Form
 	 * @param bool $linkToDetail
 	 * @param bool $richSnippet
 	 * @param array<\Base\DB\Shop>|null $shops
-	 * @return array<string|int|null, \Forms\Container>
+	 * @return array<string, \Forms\Container>
 	 */
 	public function addPageContainer(
 		?string $pageType = null,
@@ -278,7 +278,7 @@ class AdminForm extends \Forms\Form
 		array|null $shops = null,
 	): array {
 		if (!$this->prettyPages) {
-			return [null => $this->addContainer('page')];
+			return ['' => $this->addContainer('page')];
 		}
 
 		$shops ??= $this->shopsConfig->getAvailableShops();
@@ -314,7 +314,7 @@ class AdminForm extends \Forms\Form
 		}
 
 		if (!$shops) {
-			$containers[null] = $this->addSubPageContainer(
+			$containers[''] = $this->addSubPageContainer(
 				$baseContainer,
 				$pageType,
 				$params,
