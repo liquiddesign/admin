@@ -262,6 +262,7 @@ class AdminForm extends \Forms\Form
 	 * @param bool $linkToDetail
 	 * @param bool $richSnippet
 	 * @param array<\Base\DB\Shop>|null $shops
+	 * @param \Base\DB\Shop|null $contextShop Shop, ke kterému stránka patří, když se nerozpadá na per-shop kontejnery
 	 * @return array<string, \Forms\Container>
 	 */
 	public function addPageContainer(
@@ -276,6 +277,7 @@ class AdminForm extends \Forms\Form
 		bool $linkToDetail = false,
 		bool $richSnippet = false,
 		array|null $shops = null,
+		Shop|null $contextShop = null,
 	): array {
 		if (!$this->prettyPages) {
 			return ['' => $this->addContainer('page')];
@@ -326,6 +328,7 @@ class AdminForm extends \Forms\Form
 				$opengraph,
 				$linkToDetail,
 				$richSnippet,
+				contextShop: $contextShop,
 			);
 		}
 
@@ -467,7 +470,102 @@ class AdminForm extends \Forms\Form
 		/** @var \Pages\DB\IPageRepository $repository */
 		[$repository, $mutation, $uuid, $selectedShop] = $args;
 
+		$selectedShop ??= self::resolveShopFromForm($input);
+
 		return (bool ) $repository->isUrlAvailable((string) $input->getValue(), $mutation, $uuid, $selectedShop);
+	}
+
+	/**
+	 * Vyhodí z hodnot mutace, které mutation translator ve formuláři zakázal.
+	 *
+	 * Zakázaná mutace má pole `disabled`, takže je prohlížeč neodešle a `getValues()` je vrátí jako null —
+	 * bez tohohle by se do entity zapsal null a existující obsah té mutace by se ztratil.
+	 *
+	 * @param array<mixed> $values
+	 */
+	public function stripInactiveMutations(array &$values): void
+	{
+		$translator = $this->getComponent(self::MUTATION_TRANSLATOR_NAME, false);
+
+		if (!$translator instanceof LocaleContainer) {
+			return;
+		}
+
+		$inactiveMutations = [];
+
+		foreach ($this->getMutations() as $mutation) {
+			$checkbox = $translator->getComponent($mutation, false);
+
+			if (!$checkbox instanceof BaseControl || (bool) $checkbox->getValue()) {
+				continue;
+			}
+
+			$inactiveMutations[] = $mutation;
+		}
+
+		if ($inactiveMutations === []) {
+			return;
+		}
+
+		self::removeMutationsFromValues($this, $values, $inactiveMutations);
+	}
+
+	/**
+	 * Shop kontejneru není znám (formulář nemá per-shop kontejnery) — vezmi obchod vybraný ve formuláři,
+	 * ať se URL kontroluje jen v rámci obchodu, do kterého stránka poputuje.
+	 */
+	private static function resolveShopFromForm(\Nette\Forms\Controls\TextInput $input): Shop|null
+	{
+		$form = $input->getForm(false);
+
+		if (!$form instanceof self) {
+			return null;
+		}
+
+		$shopControl = $form->getComponent('shop', false);
+
+		if (!$shopControl instanceof BaseControl) {
+			return null;
+		}
+
+		$shopPk = $shopControl->getValue();
+
+		if (!\is_string($shopPk) || $shopPk === '') {
+			return null;
+		}
+
+		return $form->shopsConfig->getAvailableShops()[$shopPk] ?? null;
+	}
+
+	/**
+	 * @param array<mixed> $values
+	 * @param array<string> $mutations
+	 */
+	private static function removeMutationsFromValues(\Nette\Forms\Container $container, array &$values, array $mutations): void
+	{
+		foreach ($container->getComponents() as $name => $component) {
+			if (!isset($values[$name]) || !\is_array($values[$name])) {
+				continue;
+			}
+
+			if ($component instanceof LocaleContainer) {
+				if ($component->getName() === self::MUTATION_TRANSLATOR_NAME) {
+					continue;
+				}
+
+				foreach ($mutations as $mutation) {
+					unset($values[$name][$mutation]);
+				}
+
+				continue;
+			}
+
+			if (!$component instanceof \Nette\Forms\Container) {
+				continue;
+			}
+
+			self::removeMutationsFromValues($component, $values[$name], $mutations);
+		}
 	}
 
 	private function addSubPageContainer(
@@ -484,9 +582,14 @@ class AdminForm extends \Forms\Form
 		bool $richSnippet = false,
 		Shop|null $shop = null,
 		string|null $shopIcon = null,
+		Shop|null $contextShop = null,
 	): Container {
+		// Bez per-shop kontejnerů ($shop === null) se stránka i tak musí dohledat a validovat v rámci svého obchodu,
+		// jinak lookup i kontrola unikátnosti URL prolezou napříč všemi obchody.
+		$lookupShop = $shop ?? $contextShop;
+
 		/** @var \Pages\DB\Page|null $page */
-		$page = $pageType ? $this->pageRepository->getPageByTypeAndParams($pageType, null, $params, selectedShop: $shop, filterOnlySelectedShop: true) : null;
+		$page = $pageType ? $this->pageRepository->getPageByTypeAndParams($pageType, null, $params, selectedShop: $lookupShop, filterOnlySelectedShop: true) : null;
 
 		$pageContainer = $baseContainer->addContainer('page_' . $shop?->getPK());
 
@@ -494,11 +597,11 @@ class AdminForm extends \Forms\Form
 		$pageContainer->setCurrentGroup($group);
 
 		$pageContainer->addHidden('uuid')->setNullable();
-		$pageContainer->addLocaleText('url', Html::fromHtml($shopIcon . 'URL'))->forAll(function (TextInput $text, $mutation) use ($page, $pageType, $shop): void {
+		$pageContainer->addLocaleText('url', Html::fromHtml($shopIcon . 'URL'))->forAll(function (TextInput $text, $mutation) use ($page, $pageType, $lookupShop): void {
 			$text->addRule(
 				[$this, 'validateUrl'],
 				$this->translator->translate('admin.urlError', 'URL již existuje'),
-				[$this->pageRepository, $mutation, $page?->getPK(), $shop],
+				[$this->pageRepository, $mutation, $page?->getPK(), $lookupShop],
 			)->setNullable($pageType !== 'index');
 
 			if ($pageType === 'index') {
@@ -597,7 +700,7 @@ class AdminForm extends \Forms\Form
 
 		$pageContainer->addHidden('type', $pageType);
 		$pageContainer->addHidden('params', $params ? \http_build_query($params) . '&' : '');
-		$pageContainer->addHidden('shop', $page?->getValue('shop') ?: $shop?->getPK())->setNullable();
+		$pageContainer->addHidden('shop', $page?->getValue('shop') ?: $lookupShop?->getPK())->setNullable();
 
 		if ($page) {
 			$pageContainer->setDefaults($page->toArray());
