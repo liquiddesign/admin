@@ -597,7 +597,7 @@ class AdminForm extends \Forms\Form
 		$pageContainer->setCurrentGroup($group);
 
 		$pageContainer->addHidden('uuid')->setNullable();
-		$pageContainer->addLocaleText('url', Html::fromHtml($shopIcon . 'URL'))->forAll(function (TextInput $text, $mutation) use ($page, $pageType, $lookupShop): void {
+		$pageContainer->addLocaleText('url', Html::fromHtml($shopIcon . 'URL'))->forAll(function (TextInput $text, $mutation) use ($page, $pageType, $lookupShop, $shop): void {
 			$text->addRule(
 				[$this, 'validateUrl'],
 				$this->translator->translate('admin.urlError', 'URL již existuje'),
