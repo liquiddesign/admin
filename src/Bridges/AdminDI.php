@@ -138,7 +138,7 @@ class AdminDI extends \Nette\DI\CompilerExtension
 	
 	/**
 	 * @param string $type
-	 * @return array<\Nette\DI\Definitions\Definition>
+	 * @return array<string, \Nette\DI\Definition>
 	 */
 	private function findByType(string $type): array
 	{

@@ -273,9 +273,11 @@ class AdminFormFactory
 			$uuidControl = $form->getComponent('uuid', false);
 			$isEditMode = $uuidControl instanceof BaseControl && $uuidControl->getValue() !== null;
 
-			if ($isEditMode && $shopControl->getValue() === null) {
-				$shopControl->setValue('');
+			if (!$isEditMode || $shopControl->getValue() !== null) {
+				return;
 			}
+
+			$shopControl->setValue('');
 		};
 	}
 

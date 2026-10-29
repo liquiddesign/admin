@@ -979,6 +979,10 @@ class AdminGrid extends \Grid\Datagrid
 					$values->addComponent($component, $nameParsed);
 				} elseif ($component instanceof Container) {
 					foreach ($component->getControls() as $input) {
+						if (!$input instanceof BaseControl) {
+							continue;
+						}
+
 						if ($input instanceof MultiSelectBox) {
 							$keep->addSelect($nameParsed . '_' . $input->getName(), null, $keepOptions)->setDefaultValue('none');
 						} else {

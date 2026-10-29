@@ -26,7 +26,7 @@ class Administrator extends \Nette\Security\User
 	{
 		parent::__construct(clone $legacyStorage, $authenticator, $authorizator);
 		
-		/** @var \Nette\Http\UserStorage $legacyStorage */
+		/** @var \Nette\Bridges\SecurityHttp\SessionStorage $legacyStorage */
 		$legacyStorage = $this->getStorage();
 		$legacyStorage->setNamespace('admin');
 		

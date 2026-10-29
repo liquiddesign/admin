@@ -465,22 +465,11 @@ class AdminForm extends \Forms\Form
 		return $values;
 	}
 
-	public static function validateUrl(\Nette\Forms\Controls\TextInput $input, array $args): bool
-	{
-		/** @var \Pages\DB\IPageRepository $repository */
-		[$repository, $mutation, $uuid, $selectedShop] = $args;
-
-		$selectedShop ??= self::resolveShopFromForm($input);
-
-		return (bool ) $repository->isUrlAvailable((string) $input->getValue(), $mutation, $uuid, $selectedShop);
-	}
-
 	/**
 	 * Vyhodí z hodnot mutace, které mutation translator ve formuláři zakázal.
 	 *
 	 * Zakázaná mutace má pole `disabled`, takže je prohlížeč neodešle a `getValues()` je vrátí jako null —
 	 * bez tohohle by se do entity zapsal null a existující obsah té mutace by se ztratil.
-	 *
 	 * @param array<mixed> $values
 	 */
 	public function stripInactiveMutations(array &$values): void
@@ -510,62 +499,14 @@ class AdminForm extends \Forms\Form
 		self::removeMutationsFromValues($this, $values, $inactiveMutations);
 	}
 
-	/**
-	 * Shop kontejneru není znám (formulář nemá per-shop kontejnery) — vezmi obchod vybraný ve formuláři,
-	 * ať se URL kontroluje jen v rámci obchodu, do kterého stránka poputuje.
-	 */
-	private static function resolveShopFromForm(\Nette\Forms\Controls\TextInput $input): Shop|null
+	public static function validateUrl(\Nette\Forms\Controls\TextInput $input, array $args): bool
 	{
-		$form = $input->getForm(false);
+		/** @var \Pages\DB\IPageRepository $repository */
+		[$repository, $mutation, $uuid, $selectedShop] = $args;
 
-		if (!$form instanceof self) {
-			return null;
-		}
+		$selectedShop ??= self::resolveShopFromForm($input);
 
-		$shopControl = $form->getComponent('shop', false);
-
-		if (!$shopControl instanceof BaseControl) {
-			return null;
-		}
-
-		$shopPk = $shopControl->getValue();
-
-		if (!\is_string($shopPk) || $shopPk === '') {
-			return null;
-		}
-
-		return $form->shopsConfig->getAvailableShops()[$shopPk] ?? null;
-	}
-
-	/**
-	 * @param array<mixed> $values
-	 * @param array<string> $mutations
-	 */
-	private static function removeMutationsFromValues(\Nette\Forms\Container $container, array &$values, array $mutations): void
-	{
-		foreach ($container->getComponents() as $name => $component) {
-			if (!isset($values[$name]) || !\is_array($values[$name])) {
-				continue;
-			}
-
-			if ($component instanceof LocaleContainer) {
-				if ($component->getName() === self::MUTATION_TRANSLATOR_NAME) {
-					continue;
-				}
-
-				foreach ($mutations as $mutation) {
-					unset($values[$name][$mutation]);
-				}
-
-				continue;
-			}
-
-			if (!$component instanceof \Nette\Forms\Container) {
-				continue;
-			}
-
-			self::removeMutationsFromValues($component, $values[$name], $mutations);
-		}
+		return (bool ) $repository->isUrlAvailable((string) $input->getValue(), $mutation, $uuid, $selectedShop);
 	}
 
 	private function addSubPageContainer(
@@ -727,5 +668,63 @@ class AdminForm extends \Forms\Form
 		});
 
 		return $pageContainer;
+	}
+
+	/**
+	 * Shop kontejneru není znám (formulář nemá per-shop kontejnery) — vezmi obchod vybraný ve formuláři,
+	 * ať se URL kontroluje jen v rámci obchodu, do kterého stránka poputuje.
+	 */
+	private static function resolveShopFromForm(\Nette\Forms\Controls\TextInput $input): Shop|null
+	{
+		$form = $input->getForm(false);
+
+		if (!$form instanceof self) {
+			return null;
+		}
+
+		$shopControl = $form->getComponent('shop', false);
+
+		if (!$shopControl instanceof BaseControl) {
+			return null;
+		}
+
+		$shopPk = $shopControl->getValue();
+
+		if (!\is_string($shopPk) || $shopPk === '') {
+			return null;
+		}
+
+		return $form->shopsConfig->getAvailableShops()[$shopPk] ?? null;
+	}
+
+	/**
+	 * @param array<mixed> $values
+	 * @param array<string> $mutations
+	 */
+	private static function removeMutationsFromValues(\Nette\Forms\Container $container, array &$values, array $mutations): void
+	{
+		foreach ($container->getComponents() as $name => $component) {
+			if (!isset($values[$name]) || !\is_array($values[$name])) {
+				continue;
+			}
+
+			if ($component instanceof LocaleContainer) {
+				if ($component->getName() === self::MUTATION_TRANSLATOR_NAME) {
+					continue;
+				}
+
+				foreach ($mutations as $mutation) {
+					unset($values[$name][$mutation]);
+				}
+
+				continue;
+			}
+
+			if (!$component instanceof \Nette\Forms\Container) {
+				continue;
+			}
+
+			self::removeMutationsFromValues($component, $values[$name], $mutations);
+		}
 	}
 }
