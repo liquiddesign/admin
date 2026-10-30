@@ -375,8 +375,11 @@ class AdminForm extends \Forms\Form
 		array $containerStructures = [],
 		bool $setDefaultValues = true
 	): void {
-		/** @var \Nette\Forms\Controls\BaseControl $control */
-		foreach ($this->getComponents(true, BaseControl::class) as $control) {
+		foreach ($this->getComponentTree() as $control) {
+			if (!$control instanceof BaseControl) {
+				continue;
+			}
+
 			$structure = $mainStructure;
 			$name = $control->getName();
 

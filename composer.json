@@ -20,7 +20,7 @@
         "nette/security": "~3.0",
         "nette/utils": "~3.0 || ~4.0",
         "nette/di": "~3.0",
-        "nette/component-model": "~3.0",
+        "nette/component-model": "^3.1 || ^4.0",
         "latte/latte": "~3.0",
         "liquiddesign/security": "~2.0",
         "liquiddesign/messages": "~2.1",

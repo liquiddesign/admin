@@ -137,8 +137,8 @@
 		</table>
 		<div class="table-footer-components d-lg-flex align-items-lg-center">
 			<div class="table-footer-buttons d-lg-flex align-items-lg-center">
-				{foreach $form->getComponents(false, Nette\Forms\Controls\Button::class) as $component}
-					{$component->getControl()}
+				{foreach $form->getComponents() as $component}
+					{if $component instanceof Nette\Forms\Controls\Button}{$component->getControl()}{/if}
 				{/foreach}
 			</div>
 

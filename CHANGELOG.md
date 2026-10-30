@@ -4,6 +4,14 @@
 All notable changes to this project will be documented in this file.
 <!--- END HEADER -->
 
+## [2.1.70](https://github.com/liquiddesign/admin/compare/v2.1.69...v2.1.70) (2026-10-30)
+
+### Compatibility
+
+* Allow `nette/component-model` `^3.1 || ^4.0`. `AdminForm` walks controls through `getComponentTree()` and the grid footer filters buttons with `instanceof` — `getComponents()` with the recursive flag or a type filter throws `DeprecatedException` in component-model 4 (no behaviour change on 3.x)
+
+---
+
 ## [2.1.56](https://github.com/liquiddesign/admin/compare/v2.1.55...v2.1.56) (2026-01-12)
 
 ### Bug Fixes
