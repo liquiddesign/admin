@@ -12,6 +12,7 @@ use Admin\DB\AdministratorRepository;
 use Admin\DB\IGeneralAjaxRepository;
 use Base\ShopsConfig;
 use League\Csv\Reader;
+use Nette\Application\Attributes\Persistent;
 use Nette\Application\BadRequestException;
 use Nette\Application\UI\Presenter;
 use Nette\DI\Container;
@@ -73,9 +74,7 @@ abstract class BackendPresenter extends Presenter
 	/** @inject */
 	public AdministratorRepository $administratorRepositoryBackendPresenter;
 	
-	/**
-	 * @persistent
-	 */
+	#[Persistent]
 	public string $lang;
 	
 	/**

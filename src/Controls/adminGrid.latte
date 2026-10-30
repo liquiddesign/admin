@@ -9,8 +9,8 @@
 		$filterLabel = null;
 		if ($component instanceof Nette\Forms\Controls\HiddenField) {
 			$filterLabel = null;
-		} elseif ($component->caption !== null && $component->caption !== '') {
-			$filterLabel = (string) $component->caption;
+		} elseif ($component->getCaption() !== null && $component->getCaption() !== '') {
+			$filterLabel = (string) $component->getCaption();
 		} elseif ($component instanceof Nette\Forms\Controls\TextInput) {
 			$filterLabel = $component->control->getAttribute('placeholder');
 		} elseif ($component instanceof Nette\Forms\Controls\SelectBox && $component->getPrompt() !== false) {
